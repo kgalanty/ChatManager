@@ -1,0 +1,32 @@
+<?php
+
+use WHMCS\Module\Addon\ChatManager\Dispatcher;
+use WHMCS\Module\Addon\ChatManager\app\Addon;
+if (!defined("WHMCS")) {
+    die("This file cannot be accessed directly");
+}
+function ChatManager_config()
+{
+    return Addon::config();
+}
+function ChatManager_output($vars)
+{
+    $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+    $ctrl = isset($_REQUEST['c']) ? $_REQUEST['c'] : 'home';
+    $dispatcher = new Dispatcher();
+    $response = $dispatcher->dispatch($ctrl, $action, $vars);
+    echo $response;
+}
+
+function ChatManager_activate()
+{
+    return Addon::activate();
+}
+function ChatManager_deactivate()
+{
+    return Addon::deactivate();
+}
+function ChatManager_upgrade()
+{
+    return Addon::upgrade();
+}
