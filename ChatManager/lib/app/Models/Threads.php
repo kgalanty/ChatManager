@@ -3,11 +3,11 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
-class Request extends Model
+class Threads extends Model
 {
     public $timestamps = false;
-    protected $table = 'tblcancelrequests';
-    //protected $fillable = ['id', 'statsjson', 'created_at'];
+    protected $table = 'chat_threads';
+    protected $fillable = ['chatid', 'threadid', 'users', 'domain','agent', 'date'];
     public function service()
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Service', 'relid', 'id');

@@ -20,6 +20,7 @@ class Agents extends API
 {
     public function get()
     {
+        
         if($_GET['self'])
         {
             return ['data' => $_SESSION['adminid']];

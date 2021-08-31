@@ -1,0 +1,2 @@
+45 days backwards,
+of checking if there's connected account with chat

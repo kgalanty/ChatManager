@@ -5,6 +5,10 @@ use WHMCS\Module\Addon\ChatManager\app\Addon;
 if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
+if(file_exists(__DIR__.'/vendor/autoload.php') === true)
+{
+    require_once(__DIR__.'/vendor/autoload.php');
+}
 function ChatManager_config()
 {
     return Addon::config();
