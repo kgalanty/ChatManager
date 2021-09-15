@@ -1,21 +1,21 @@
 <template>
   <div id="app">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css">
     <div id="nav" class="hover">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
+      <!-- <router-link to="/">Home</router-link> -->
+      <!-- <router-link to="/about">About</router-link> -->
     </div>
     <router-view/>
   </div>
 </template>
 
 <style scoped>
-
-.hover a {
+#app .hover a {
   text-decoration: none;
   position: relative;
   margin:0 10px;
 }
-.hover a::after {
+#app .hover a::after {
   position: absolute;
   content: "";
   height: .05em;
@@ -28,7 +28,7 @@
   transition: transform .3s cubic-bezier(.95, .05, .795, .035);
 }
 
-.hover a:hover::after {
+#app .hover a:hover::after {
   transition-timing-function: cubic-bezier(.19, 1, .22, 1);  
   transform: scaleX(1);
 }
@@ -40,11 +40,11 @@
   color: #2c3e50;
 }
 
-#nav {
+#app #nav {
   padding: 30px;
 }
 
-#nav a {
+#app #nav a {
   font-weight: bold;
   color: #2c3e50;
 }

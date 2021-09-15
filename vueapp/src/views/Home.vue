@@ -1,18 +1,77 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/> 
+  <div class="panel-block loading-container">
+    <article
+      class="panel is-primary column is-full"
+      style="width: 100% !important"
+    >
+      <p class="panel-heading" style="padding-left: 20px !important">Filters</p>
+      <ChatFilters />
+      <p
+        class="panel-heading"
+        style="padding-left: 20px !important; margin-bottom: 20px"
+      >
+        Chats list
+      </p>
+
+     <ChatListTable />
+    </article>
   </div>
 </template>
-
+<style scoped>
+.btable {
+  font-size: 13px;
+}
+article > .panel-heading {
+  background: rgb(165, 197, 255);
+  background: linear-gradient(
+    180deg,
+    rgba(165, 197, 255, 1) 0%,
+    rgba(40, 127, 207, 1) 100%
+  );
+}
+</style>
 <script>
 // @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
-
+//import HelloWorld from '@/components/HelloWorld.vue'
+//import { mapActions, mapState } from "vuex";
+import ChatListTable from '../components/ChatListTable.vue'
+import ChatFilters from '../components/ChatFilters.vue'
+import "buefy/dist/buefy.css";
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
-    HelloWorld
-  }
-}
+    ChatListTable, ChatFilters
+  },
+  methods: {
+   // ...mapActions([""]),
+    clearDateTime() {
+      this.datetimeFilter = null;
+    },
+   
+    constructParams() {
+      const params = {
+        perPage: this.perPage,
+        Datefrom: this.datetimeFromFilter,
+        Dateto: this.datetimeToFilter,
+      };
+      return params;
+    },
+    parseDateTime(dateTime) {
+      return this.moment(dateTime).format("YYYY-MM-DD HH:DD:SS");
+    },
+  },
+  mounted() {
+  },
+  computed: {
+  },
+  data() {
+    return {
+      perPage: 25,
+      datetimeFromFilter: null,
+      datetimeToFilter: null,
+      total: 5,
+     
+    };
+  },
+};
 </script>

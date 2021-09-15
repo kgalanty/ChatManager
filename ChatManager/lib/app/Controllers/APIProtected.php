@@ -16,9 +16,9 @@ abstract class APIProtected
         //Entire php input variables
         $this->input = $input;
        
-        if(!$this->checkPermission(StatsRoleHelper::getPermID()))
-        {
-            exit;
-        }
+        // if(!$this->checkPermission(StatsRoleHelper::getPermID()))
+        // {
+        //     exit;
+        // }
     }
 }

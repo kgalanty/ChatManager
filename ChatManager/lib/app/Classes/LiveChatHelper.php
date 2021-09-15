@@ -5,7 +5,9 @@ namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatConsts;
 use WHMCS\Module\Addon\ChatManager\app\Classes\DateTimeHelper;
 use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatParsers;
+use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use LiveChat\Api\Client as LiveChat;
+use WHMCS\Database\Capsule as DB;
 
 class LiveChatHelper
 {
@@ -14,7 +16,8 @@ class LiveChatHelper
     //$timezone moment().format('Z')
     //Intl.DateTimeFormat().resolvedOptions().timeZone
     public $results;
-    public function __construct($timezone = '')
+    public $dateFrom;
+    public function __construct(string $datefrom = null, string $timezone = '')
     {
         $this->api = new LiveChat(LiveChatConsts::LIVECHAT_LOGIN, LiveChatConsts::LIVECHAT_PASS);
 
@@ -23,16 +26,19 @@ class LiveChatHelper
         } else {
             $this->timezone = $timezone;
         }
-
+        $this->datefrom = $datefrom;
         //$agents = $LiveChatAPI->agents->getArchives(['filters' => []]);
     }
-    public function readRecentChats($date = null, array $filtersSet = [], string $pageid = null)
+    public function readRecentChats(array $filtersSet = [], string $pageid = null)
     {
-        if ($date) {
-            $filters['from'] = $date;
+        //DB::enableQueryLog();
+        //$t = Threads::with(['tags', 'customer'])->get(['id', 'chatid', 'threadid', 'users', 'domain', 'agent', 'date', 'created_at']);
+        //echo('<pre>'); var_dump(json_decode(json_encode($t))); die;
+        if ($this->datefrom !== null) {
+            $filters['from'] = $this->datefrom;
         } else {
             //2021-08-30T00:00:00.000000-02:00
-            $filters['from'] = (DateTimeHelper::subDate($this->timezone))->format('Y-m-d\TH:i:s.000000P');
+            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT24H'))->format('Y-m-d\TH:i:s.000000P');
         }
         if ($pageid !== null) {
             $filters['pageid'] = $pageid;
@@ -45,10 +51,10 @@ class LiveChatHelper
         }
 
         $this->results = $this->api->agents->getArchives($params);
-       
+     
         $this->runParseStore();
         if ($this->results->next_page_id) {
-            $this->readRecentChats(null, [], $this->results->next_page_id);
+            $this->readRecentChats([], $this->results->next_page_id);
         }
     }
     public function runParseStore()

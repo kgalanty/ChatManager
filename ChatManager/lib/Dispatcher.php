@@ -52,6 +52,7 @@ class Dispatcher {
             
             exit;
         }
+        
         $controllerParam = $controller;
         $controller = 'WHMCS\\Module\\Addon\\ChatManager\\app\\Controllers\\'.ucfirst($controller);
         $smarty = new \Smarty;
@@ -85,13 +86,14 @@ class Dispatcher {
                 $smarty->assign($k, $v);
             }
             try {
-                
+                ob_clean();
                 $smarty->assign('vueComponents', $vueComponents);
                 $smarty->assign('addonPath', '/modules/addons/ChatManager/lib/app');
                 
                 return $smarty->fetch('header.tpl').
                 $smarty->fetch($controllerParam.'@'.$action.'.tpl').
                 $smarty->fetch('footer.tpl');
+                exit;
             }
             catch (\Exception $e)
             {

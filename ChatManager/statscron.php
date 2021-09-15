@@ -10,4 +10,4 @@ use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatHelper;
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 $livechat = new LiveChatHelper();
-$livechat->readRecentChats();
+$livechat->readRecentChats(['tags' => ['values'=> ['sales']]]);

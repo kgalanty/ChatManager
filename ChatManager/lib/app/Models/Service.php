@@ -3,11 +3,11 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
-class Service extends Model
+class Service extends \WHMCS\Service\Service
 {
     public $timestamps = false;
     protected $table = 'tblhosting';
-    protected $visible = ['id','userid', 'orderid', 'packageid', 'server', 'regdate', 'domain'];
+    protected $visible = ['id','userid', 'orderid', 'packageid', 'server', 'regdate', 'domain', 'product'];
     public function client()
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Client', 'userid', 'id');
