@@ -10,7 +10,7 @@ class ReviewThread extends Model
     protected $fillable = ['threadid', 'sender', 'comment', 'created_at'];
     public function doer()
     {
-        return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'doer', 'id');
+        return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'sender', 'id');
     }
     public function scopeThread($query, $threadid)
     {
@@ -19,5 +19,13 @@ class ReviewThread extends Model
     public function scopeBy($query, $doer)
     {
         return $query->where('sender', $doer);
+    }
+    public function scopeIsPending($query)
+    {
+        return $query->where('pending', '1');
+    }
+    public function scopeId($query, $id)
+    {
+        return $query->where('id', $id);
     }
 }

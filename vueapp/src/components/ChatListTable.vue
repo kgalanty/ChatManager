@@ -195,6 +195,7 @@ export default {
         hasModalCard: true,
         props: {item},
         trapFocus: true,
+        width:1200
       });
     },
     onPageChange(page) {

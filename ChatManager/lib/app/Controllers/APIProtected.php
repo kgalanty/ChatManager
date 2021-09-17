@@ -2,7 +2,7 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Controllers;
 use WHMCS\Module\Addon\ChatManager\app\Middlewares\AuthMid;
-use WHMCS\Module\Addon\ChatManager\app\Classes\StatsRoleHelper; 
+use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl; 
 abstract class APIProtected
 {
     use AuthMid;
@@ -16,9 +16,9 @@ abstract class APIProtected
         //Entire php input variables
         $this->input = $input;
        
-        // if(!$this->checkPermission(StatsRoleHelper::getPermID()))
-        // {
-        //     exit;
-        // }
+        if(!$this->checkPermission())
+        {
+            exit;
+        }
     }
 }

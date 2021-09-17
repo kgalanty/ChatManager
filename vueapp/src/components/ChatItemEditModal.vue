@@ -1,6 +1,6 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width: 1280px">
+    <div class="modal-card">
       <header class="modal-card-head">
         <p class="modal-card-title">Edit chat {{ item.threadid }}</p>
         <button type="button" class="delete" @click="$emit('close')" />
@@ -114,6 +114,23 @@
                 expanded
               ></b-input>
             </b-field>
+             <b-field label="Agent">
+            <b-autocomplete
+                v-model="agent"
+                ref="autocomplete"
+                :data="filteredAgentArray"
+                @select="option => selectedAgent = option.email"
+                field="email"
+                @typing="getAgents"
+                >
+                <template slot-scope="props">
+                    <div class="media">
+                       {{ props.option.firstname }} {{ props.option.lastname }} ({{ props.option.email }})
+                    </div>
+                </template>
+                <template #empty>No results for {{agent}}</template>
+            </b-autocomplete>
+        </b-field>
             <b-field label="Notes">
               <b-input type="textarea" v-model="notes"></b-input>
             </b-field>
@@ -229,25 +246,81 @@
               </b-field>
             </b-collapse>
           </b-tab-item>
-           <b-tab-item label="Review" icon="google-photos">
-              <div class="notification is-primary">
-               <div class="buttons">
-                Here you can send this chat to review by supervisors. Enter comment and use the button to proceed.
-                </div>
-                <b-field label="Comment">
-                                <b-input
-                v-model="commmentReview"
-                type="textarea"
-                placeholder="Comment (required)"
-              ></b-input>
-                </b-field>
-                <div class="buttons">
-                    <b-button type="is-primary" inverted outlined>Send to review</b-button>
-                </div>
+          <b-tab-item label="Review" icon="google-photos">
+         <b-notification
+            type="is-warning"
+            has-icon
+            v-if="reviewStatus==1"
+            :closable="false"
+            role="alert">
+            This thread has pending reviews.
+        </b-notification>
+            <div class="notification is-primary">
+              <div class="buttons">
+                Here you can send this chat to review by supervisors. Enter
+                comment and use the button to proceed.
+              </div>
+              <b-field label="Comment">
+                <b-input
+                  v-model="commmentReview"
+                  type="textarea"
+                  placeholder="Comment (required)"
+                ></b-input>
+              </b-field>
+              <div class="buttons">
+                <b-button
+                  type="is-primary"
+                  inverted
+                  outlined
+                  @click="sendToReview"
+                  :loading="sendReviewLoadingBtn"
+                  >Send to review</b-button
+                >
+              </div>
             </div>
 
+                <b-table
+                  class="modaltable"
+                  :data="reviewRequests"
+                  narrowed
+                  :per-page="5"
+                  v-if="groupMember == 2"
+                >
+                  <template #empty>
+                    <div class="has-text-centered">No entries</div>
+                  </template>
+                 <b-table-column
+                    field="pending"
+                    label="Seen"
+                    v-slot="props"
+                  >
+                    <b-icon icon="close" v-if="props.row.pending==1" size="is-small" type="is-danger"></b-icon>
+                    <b-icon icon="check" v-if="props.row.pending==0" size="is-small" type="is-success"></b-icon>
+                  </b-table-column>
+                  <b-table-column
+                    field="date"
+                    label="Performed by"
+                    v-slot="props"
+                  >
+                    <b-tag type="is-primary">
+                      {{ props.row.doer.firstname }}
+                      {{ props.row.doer.lastname }}</b-tag
+                    >
+                  </b-table-column>
+                  <b-table-column field="comment" label="Comment" v-slot="props">
+                    {{ props.row.comment }}
+                  </b-table-column>
+                  <b-table-column field="date" label="Date" v-slot="props">
+                    {{
+                      parseDateTimeFromUTCtoLocal(props.row.created_at)
+                    }}
+                  </b-table-column>
+                   <b-table-column field="date" label="Actions" v-slot="props">
+                     <b-button type="is-success" size="is-small" icon-right="check" v-if="props.row.pending==1" @click="MarkReviewComment(props.row.id)" ></b-button>
+                  </b-table-column>
+                </b-table>
 
-           </b-tab-item>
+          </b-tab-item>
         </b-tabs>
       </section>
       <footer class="modal-card-foot">
@@ -263,11 +336,13 @@
   </form>
 </template>
 <script>
-//import debounce from "lodash/debounce";
+import debounce from "lodash/debounce";
 import { mapActions, mapState } from "vuex";
+import { dateMixin } from '../mixins/dateMixin.js'
 export default {
   name: "ChatItemEditModal",
   props: ["item"],
+  mixins: [dateMixin],
   components: {},
   computed: {
     ...mapState(["groupMember"]),
@@ -277,6 +352,88 @@ export default {
       loadChats: "chat/loadChats",
       getPermissions: "getPermissions",
     }),
+    getAgents: debounce(function (name) {
+      console.log(name)
+      this.$api
+        .get(
+          `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=${name}`
+        )
+        .then(({ data }) => {
+          this.filteredAgentArray = data.data;
+        });
+    },500),
+    MarkReviewComment(commentid)
+    {
+      const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join("&");
+      this.$api
+        .post(`addonmodules.php?${params}`, {
+          entry: commentid,
+          action: "ReviewComment",
+        })
+        .then((response) => {
+          if (response.data.data == "success") {
+           
+            this.$buefy.toast.open({
+              container: ".modal-card",
+              message: 'Entry marked as seen',
+              type: "is-success",
+            });
+            this.loadReviews()
+            this.loadReviewStatus()
+          } else {
+            this.$buefy.toast.open({
+              container: ".modal-card",
+              message: response.data,
+              type: "is-warning",
+            });
+          }
+        });
+    },
+    sendToReview() {
+      if (this.commmentReview.length == 0) {
+        this.$buefy.toast.open({
+          container: ".modal-card",
+          message: "Comment cannot be empty",
+          type: "is-danger",
+        });
+        return;
+      }
+      this.sendReviewLoadingBtn = true;
+      const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join(
+        "&"
+      );
+      this.$api
+        .post(`addonmodules.php?${params}`, {
+          threadid: this.item.id,
+          comment: this.commmentReview,
+          action: "SaveReview",
+        })
+        .then((response) => {
+          if (response.data == "success") {
+            // this.$emit("close")
+            //this.loadChats()
+      if(this.groupMember == 2)
+      {
+        this.loadReviews()
+      }
+      this.loadReviewStatus()
+            this.$buefy.toast.open({
+              container: ".modal-card",
+              message: "Chat sent to review successfuly",
+              type: "is-success",
+            });
+            //this.getTags();
+            //this.loadTagsHistory()
+          } else {
+            this.$buefy.toast.open({
+              container: ".modal-card",
+              message: response.data,
+              type: "is-warning",
+            });
+          }
+          this.sendReviewLoadingBtn = false;
+        });
+    },
     deleteTag(tag) {
       const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
       this.$api
@@ -297,7 +454,7 @@ export default {
               type: "is-success",
             });
             this.getTags();
-            this.loadTagsHistory()
+            this.loadTagsHistory();
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -369,6 +526,7 @@ export default {
     save() {
       const params = [`module=ChatManager`, `c=Threads`, `json=1`].join("&");
       this.loadingSaveBtn = true;
+
       var cannotofferReason = this.cannotofferCustom
         ? this.cannotofferCustom
         : this.cannotoffer;
@@ -382,6 +540,7 @@ export default {
           order: this.selectedOrder,
           notes: this.notes,
           customoffer: cannotofferReason,
+          agent: this.agent
         })
         .then((response) => {
           if (response.data == "success") {
@@ -464,6 +623,48 @@ export default {
         }
       });
     },
+    loadReviewStatus()
+    {
+      this.$api
+        .get(
+          `addonmodules.php?module=ChatManager&c=ReviewThread&json=1&action=GetReviewStatus&threadid=${this.item.id}`
+        )
+        .then(({ data }) => {
+          if(data.result == 'success')
+          {
+            this.reviewStatus = data.data
+          }
+          else
+          {
+             this.$buefy.toast.open({
+              container: ".modal-card",
+              message: data.msg,
+              type: "is-warning",
+            });
+          }
+        });
+    },
+    loadReviews()
+    {
+       this.$api
+        .get(
+          `addonmodules.php?module=ChatManager&c=ReviewThread&json=1&action=GetReviews&threadid=${this.item.id}`
+        )
+        .then(({ data }) => {
+          if(data.result == 'success')
+          {
+            this.reviewRequests = data.data
+          }
+          else
+          {
+             this.$buefy.toast.open({
+              container: ".modal-card",
+              message: data.msg,
+              type: "is-warning",
+            });
+          }
+        });
+    }
     // getAsyncData: debounce(function (name) {
     //   if (!name.length) {
     //     this.clients = [];
@@ -491,17 +692,21 @@ export default {
     this.domain = this.item.domain;
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
-    this.getPermissions()
-    .then(() =>
-    {
-      console.log(this.groupMember)
-    if (this.groupMember == 2) {
-      this.loadTagsHistory();
-    }
-    })
+    this.agent = this.item.agent
+    this.loadReviewStatus()
+    this.getPermissions().then(() => {
+      if (this.groupMember == 2) {
+        this.loadTagsHistory()
+        this.loadReviews()
+      }
+      else
+      {
+        this.loadReviewStatus()
+      }
+    });
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
-    
+
     this.HasCustomOfferCheck();
   },
   watch: {
@@ -539,9 +744,15 @@ export default {
   },
   data() {
     return {
-      commmentReview:'',
+      selectedAgent: '',
+      filteredAgentArray: [],
+      agent: '',
+      reviewStatus: 0,
+      reviewRequests: [],
+      commmentReview: "",
       tagsLogLoading: false,
       saveLoadingBtn: false,
+      sendReviewLoadingBtn: false,
       tags: [],
       order: "",
       clients: [],
@@ -639,12 +850,12 @@ export default {
             border-radius: 5px;
             padding: 10px;
 } */
-section.tab-content
-{
-  border-radius: .25rem;
-    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
-    color: #4a4a4a;
-    max-width: 100%;
-    position: relative;
+section.tab-content {
+  border-radius: 0.25rem;
+  box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%),
+    0 0 0 1px rgb(10 10 10 / 2%);
+  color: #4a4a4a;
+  max-width: 100%;
+  position: relative;
 }
 </style>
