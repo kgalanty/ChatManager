@@ -12,7 +12,8 @@
       >
         Chats list
       </p>
-
+      
+      <PendingChatListTable />
      <ChatListTable />
     </article>
   </div>
@@ -35,12 +36,13 @@ article > .panel-heading {
 //import HelloWorld from '@/components/HelloWorld.vue'
 //import { mapActions, mapState } from "vuex";
 import ChatListTable from '../components/ChatListTable.vue'
+import PendingChatListTable from '../components/PendingChatListTable.vue'
 import ChatFilters from '../components/ChatFilters.vue'
 import "buefy/dist/buefy.css";
 export default {
   name: "Home",
   components: {
-    ChatListTable, ChatFilters
+    ChatListTable, ChatFilters, PendingChatListTable
   },
   methods: {
    // ...mapActions([""]),

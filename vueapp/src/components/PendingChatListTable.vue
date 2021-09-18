@@ -1,20 +1,18 @@
 <template>
-      <article style="background:rgb(152 212 255);padding: 5px;
+<article style="background:#ff7373;padding: 5px;
 ">
-  <strong style="float:left; margin-top:20px;font-size:20px">Chats:</strong>
+  <strong style="float:left; margin-top:20px;font-size:20px">Pending for Review:</strong>
+      <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
       <b-table
         class="btable"
-        :data="chats.data"
+        :data="pendingchats.data"
         bordered
         striped
         narrowed
-        :total="chats.total"
+        :total="pendingchats.total"
         paginated
-        backend-pagination
-        backend-sorting
-        @page-change="onPageChange"
         :per-page="25"
-        :loading="this.chatsLoading"
+        :loading="this.pendingChatsLoading"
         pagination-position="top"
       >
         <b-table-column
@@ -150,7 +148,8 @@
             >Edit</b-button
           >
         </b-table-column>
-      </b-table></article>
+      </b-table>
+</article>
 </template>
 <style >
 .btable {
@@ -180,32 +179,25 @@ import { mapActions, mapState } from "vuex";
 import "buefy/dist/buefy.css";
 import ChatItemEditModal from './ChatItemEditModal.vue'
 export default {
-  name: "ChatListTable",
+  name: "PendingChatListTable",
   components: {
   },
   methods: {
-    ...mapActions('chat', ["loadChats","loadPendingChats"]),
+    ...mapActions('chat', ["loadPendingChats"]),
     showAllChats(customerid) {
       window.open("https://my.livechatinc.com/archives/?query=" + customerid);
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
     },
     editModal(item)
     {
-      const modal = this.$buefy.modal.open({
+      this.$buefy.modal.open({
         parent: this,
         component: ChatItemEditModal,
         hasModalCard: true,
         props: {item},
         trapFocus: true,
-        width:1200,
-       
+        width:1200
       });
-      modal.$on('close', () => 
-      {
-        this.loadChats()
-        this.loadPendingChats()
-      }
-      )
     },
     onPageChange(page) {
       this.$store.commit("chat/setChatsPage", page);
@@ -216,10 +208,10 @@ export default {
     },
   },
   mounted() {
-    this.loadChats()
+    this.loadPendingChats()
   },
   computed: {
-    ...mapState('chat', ["chats", "chatsPage", "chatsLoading"]),
+    ...mapState('chat', ["pendingchats", "pendingChatsLoading"]),
   },
   data() {
     return {

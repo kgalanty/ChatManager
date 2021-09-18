@@ -119,9 +119,10 @@
                 v-model="agent"
                 ref="autocomplete"
                 :data="filteredAgentArray"
-                @select="option => selectedAgent = option.email"
+                @select="option => selectedAgent = option"
                 field="email"
                 @typing="getAgents"
+                :loading="isFetchingAgents"
                 >
                 <template slot-scope="props">
                     <div class="media">
@@ -246,7 +247,14 @@
               </b-field>
             </b-collapse>
           </b-tab-item>
-          <b-tab-item label="Review" icon="google-photos">
+          <b-tab-item :headerClass="reviewTabHeader">
+            <template #header >
+                <b-icon icon="source-pull"></b-icon>
+                <span> Review 
+                  <b-tag rounded type="is-primary"> {{ reviewRequests.length }} </b-tag>
+                
+                 </span>
+            </template>
          <b-notification
             type="is-warning"
             has-icon
@@ -346,6 +354,14 @@ export default {
   components: {},
   computed: {
     ...mapState(["groupMember"]),
+    reviewTabHeader()
+    {
+      if(this.reviewStatus == 1)
+      {
+        return 'reviewTabHeader';
+      }
+      return ''
+    }
   },
   methods: {
     ...mapActions({
@@ -353,14 +369,22 @@ export default {
       getPermissions: "getPermissions",
     }),
     getAgents: debounce(function (name) {
-      console.log(name)
+      this.isFetchingAgents = true
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=${name}`
         )
         .then(({ data }) => {
           this.filteredAgentArray = data.data;
-        });
+        })
+      .catch((error) => {
+                  this.filteredAgentArray = []
+                  throw error
+      })
+      .finally(() => {
+          this.isFetchingAgents = false
+      })
+        ;
     },500),
     MarkReviewComment(commentid)
     {
@@ -693,7 +717,6 @@ export default {
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
     this.agent = this.item.agent
-    this.loadReviewStatus()
     this.getPermissions().then(() => {
       if (this.groupMember == 2) {
         this.loadTagsHistory()
@@ -744,6 +767,7 @@ export default {
   },
   data() {
     return {
+      isFetchingAgents: false,
       selectedAgent: '',
       filteredAgentArray: [],
       agent: '',
@@ -831,6 +855,10 @@ export default {
 };
 </script>
 <style >
+.reviewTabHeader
+{
+     background: #ffcf76;
+}
 .modaltable {
   border: 1px solid black;
 }

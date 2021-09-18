@@ -5,6 +5,7 @@ namespace WHMCS\Module\Addon\ChatManager\app\Models;
 use Illuminate\Database\Eloquent\Model;
 use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 use WHMCS\Module\Addon\ChatManager\app\Models\Customers;
+use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread;
 class Threads extends Model
 {
     public $timestamps = false;
@@ -17,6 +18,10 @@ class Threads extends Model
     public function customer()
     {
         return $this->belongsTo(Customers::class, 'users', 'client_id');
+    }
+    public function pendingReviews()
+    {
+        return $this->hasMany(ReviewThread::class, 'threadid', 'id');
     }
     // public function scopeID($query, $serverid)
     // {
