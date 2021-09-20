@@ -1,7 +1,7 @@
 <template>
       <article style="background:rgb(152 212 255);padding: 5px;
 ">
-  <strong style="float:left; margin-top:20px;font-size:20px">Chats:</strong>
+  <span class="is-family-sans-serif" style="float:left; margin-top:20px;font-size:20px">Chats:</span>
       <b-table
         class="btable"
         :data="chats.data"

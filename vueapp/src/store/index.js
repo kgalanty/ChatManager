@@ -2,6 +2,59 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
 Vue.use(Vuex)
+const chatsLogStore = 
+{
+  namespaced: true,
+  state: () => ({
+    logs: [],
+    loading: false
+  }),
+  mutations:
+  {
+    setLogs(state,logs)
+    {
+      state.logs = logs
+    },
+    setLoading(state, loading)
+    {
+      state.loading = loading
+    }
+  },
+  actions:
+  {
+    loadLogs(context, payload)
+    {
+      context.commit('setLoading', true)
+      const params = [
+        `module=ChatManager`,
+        `c=LogsHistory`,
+        `json=1`,
+        `itemid=${payload.itemid}`
+      ].join("&");
+
+      //context.commit('setChatsPage', payload.chatsPage)
+      axios
+        .get('addonmodules.php?' + params)
+        .then((response) => {
+          if (response) {
+
+            context.commit('setLogs', response.data)
+           
+
+          }
+        })
+        .catch((e) => {
+          console.log(e)
+          //window.location = 'login.php'
+        })
+        .finally(() => 
+        {
+          context.commit('setLoading', false)
+        })
+    }
+  }
+}
+
 const chatsStore = {
   namespaced: true,
   state: () => ({
@@ -183,6 +236,7 @@ export default new Vuex.Store({
     //}
   },
   modules: {
-    chat: chatsStore
+    chat: chatsStore,
+    chatlogs: chatsLogStore
   }
 })

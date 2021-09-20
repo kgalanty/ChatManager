@@ -1,0 +1,101 @@
+<template>
+      <article style="">
+      <b-table
+        class="btable"
+        :data="logs.data"
+        bordered
+        striped
+        narrowed
+        :total="logs.total"
+        paginated
+
+        :per-page="25"
+        :loading="this.loading"
+        pagination-position="bottom"
+      ><template #empty>
+        <div class="has-text-centered">No entries</div>
+      </template>
+        <b-table-column
+          field="date"
+          label="Date"
+          v-slot="props"
+          width="160"
+          
+        >
+          {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
+        </b-table-column>
+        <b-table-column
+          field="date"
+          label="Performed by"
+          v-slot="props"
+          width="160"
+          
+        >
+          <b-tag type="is-info">{{ props.row.doer.firstname }} {{ props.row.doer.lastname }}</b-tag>
+        </b-table-column>
+        <b-table-column
+          field="threadid"
+          label="Item type"
+          v-slot="props"
+          width="160"
+          
+        >
+          {{ props.row.itemclass }}
+        </b-table-column>
+       
+        <b-table-column
+          field="date"
+          label="Log"
+          v-slot="props"
+          width="160"
+          
+        >
+          {{ props.row.desc}}
+        </b-table-column>
+       
+      </b-table></article>
+</template>
+<style >
+.btable {
+  font-size: 13px;
+}
+.btable th
+{
+  background: rgb(77, 144, 245);
+  font-size:14px;
+  color:white !important;
+  text-transform: uppercase;
+  text-align:center !important;
+}
+
+</style>
+<script>
+// @ is an alias to /src
+//import HelloWorld from '@/components/HelloWorld.vue'
+import { mapActions, mapState } from "vuex";
+import { dateMixin } from '../mixins/dateMixin.js'
+import "buefy/dist/buefy.css";
+export default {
+  name: "ChatItemLogs",
+  props: ['threadid'],
+  mixins: [dateMixin],
+  components: {
+  },
+  methods: {
+    ...mapActions('chatlogs', ["loadLogs"]),
+  },
+  mounted() {
+    this.loadLogs({ itemid: this.threadid})
+  },
+  computed: {
+    ...mapState('chatlogs', ["logs", "loading"]),
+  },
+  data() {
+    return {
+      perPage: 25,
+      datetimeFromFilter: null,
+      datetimeToFilter: null,
+    };
+  },
+};
+</script>

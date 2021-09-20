@@ -7,6 +7,7 @@ use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Models\Tags as Tag;
 use WHMCS\Module\Addon\ChatManager\app\Models\TagHistory;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
+use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 use WHMCS\Module\Addon\ChatManager\app\Classes\TagsLog;
 class Tags extends API
 {
@@ -58,6 +59,14 @@ class Tags extends API
                     ]);
                     if ($tag) {
                         TagsLog::Add($id, $tag->tag);
+                        if(AuthControl::isAdmin())
+                        {
+                            Logs::AddTag($id, $_SESSION['adminid'], $tag->tag);
+                        }
+                        else
+                        {
+                           Logs::ProposeNewTag($id, $_SESSION['adminid'], $tag->tag);
+                        }
                         return 'success';
                     }
                 } else {
@@ -75,6 +84,7 @@ class Tags extends API
                     Tag::where('id', $tag_id)->update(['approved' => 1]);
                     $tag = Tag::where('id', $tag_id)->first();
                     TagsLog::Approve($tag->t_id, $tag->tag);
+                    Logs::AddTag($tag_id, $_SESSION['adminid'], $tag->tag);
                     return ['data'=> 'success'];
                 }
                 return ['data' => 'Invalid Tag ID'];
@@ -91,7 +101,7 @@ class Tags extends API
                 {
                     TagsLog::Delete($tag->t_id, $tag->tag);
                     Tag::where('id', $tag_id)->delete();
-                    
+                    Logs::DelTag($tag_id, $_SESSION['adminid'], $tag->tag);
                     return ['data'=> 'success'];
                 }
                 return ['data' => 'Invalid Tag ID'];
@@ -101,6 +111,7 @@ class Tags extends API
                 if($tag_id)
                 {
                     TagsLog::ProposeDeletion($tag->t_id, $tag->tag);
+                    Logs::ProposeDelTag($tag_id, $_SESSION['adminid'], $tag->tag);
                     Tag::where('id', $tag_id)->update(['proposed_deletion' => 1]);
                     return ['data'=> 'success'];
                 }

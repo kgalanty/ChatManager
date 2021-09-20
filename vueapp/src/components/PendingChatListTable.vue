@@ -1,7 +1,7 @@
 <template>
 <article style="background:#ff7373;padding: 5px;
-">
-  <strong style="float:left; margin-top:20px;font-size:20px">Pending for Review:</strong>
+" v-if="pendingchats.data != []">
+  <span class="is-family-sans-serif" style="float:left; margin-top:20px;font-size:20px">Pending for Review:</span>
       <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
       <b-table
         class="btable"
@@ -183,14 +183,15 @@ export default {
   components: {
   },
   methods: {
-    ...mapActions('chat', ["loadPendingChats"]),
+    ...mapActions('chat', ["loadPendingChats", 'loadChats']),
     showAllChats(customerid) {
       window.open("https://my.livechatinc.com/archives/?query=" + customerid);
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
     },
     editModal(item)
-    {
-      this.$buefy.modal.open({
+    { 
+      
+       const modal = this.$buefy.modal.open({
         parent: this,
         component: ChatItemEditModal,
         hasModalCard: true,
@@ -198,6 +199,12 @@ export default {
         trapFocus: true,
         width:1200
       });
+      modal.$on('close', () => 
+      {
+        this.loadChats()
+        this.loadPendingChats()
+      }
+      )
     },
     onPageChange(page) {
       this.$store.commit("chat/setChatsPage", page);

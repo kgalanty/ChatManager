@@ -8,8 +8,18 @@
     <router-view/>
   </div>
 </template>
-
+<style>
+.pagination-list a
+{
+  background: white;
+}
+.pagination-link
+{
+  background: white;
+}
+</style>
 <style scoped>
+
 #app .hover a {
   text-decoration: none;
   position: relative;

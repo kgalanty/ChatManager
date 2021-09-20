@@ -1,6 +1,6 @@
 <template>
   <form action="">
-    <div class="modal-card">
+    <div class="modal-card" style="width:1200px">
       <header class="modal-card-head">
         <p class="modal-card-title">Edit chat {{ item.threadid }}</p>
         <button type="button" class="delete" @click="$emit('close')" />
@@ -17,7 +17,7 @@
           Currently set order: {{ currentOrder ? currentOrder : 'none'}}
         </div> -->
 
-        <b-tabs type="is-toggle" expanded>
+        <b-tabs type="is-toggle" expanded v-model="activeTab">
           <b-tab-item label="Customer" icon="google-photos">
             <b-field label="Client Name">
               <b-input v-model="name" placeholder="Fill client name"></b-input>
@@ -149,7 +149,6 @@
                   field="date"
                   label="Tag"
                   v-slot="props"
-                  sortable
                 >
                   <b-tag
                     :type="props.row.approved == 1 ? 'is-warning' : 'is-light'"
@@ -329,6 +328,16 @@
                 </b-table>
 
           </b-tab-item>
+            <b-tab-item>
+            <template #header >
+                <b-icon icon="source-pull"></b-icon>
+                <span> Logs 
+                
+                
+                 </span>
+            </template>
+<ChatItemLogs :threadid="item.id" />
+            </b-tab-item>
         </b-tabs>
       </section>
       <footer class="modal-card-foot">
@@ -344,6 +353,7 @@
   </form>
 </template>
 <script>
+import ChatItemLogs from './ChatItemLogs.vue'
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from "vuex";
 import { dateMixin } from '../mixins/dateMixin.js'
@@ -351,7 +361,7 @@ export default {
   name: "ChatItemEditModal",
   props: ["item"],
   mixins: [dateMixin],
-  components: {},
+  components: {ChatItemLogs},
   computed: {
     ...mapState(["groupMember"]),
     reviewTabHeader()
@@ -367,6 +377,7 @@ export default {
     ...mapActions({
       loadChats: "chat/loadChats",
       getPermissions: "getPermissions",
+      loadLogs: 'chatlogs/loadLogs'
     }),
     getAgents: debounce(function (name) {
       this.isFetchingAgents = true
@@ -393,6 +404,7 @@ export default {
         .post(`addonmodules.php?${params}`, {
           entry: commentid,
           action: "ReviewComment",
+          threadid: this.item.id
         })
         .then((response) => {
           if (response.data.data == "success") {
@@ -404,6 +416,7 @@ export default {
             });
             this.loadReviews()
             this.loadReviewStatus()
+            
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -688,7 +701,7 @@ export default {
             });
           }
         });
-    }
+    },
     // getAsyncData: debounce(function (name) {
     //   if (!name.length) {
     //     this.clients = [];
@@ -736,6 +749,14 @@ export default {
     cannotoffer() {
       //this.cannotofferCustom = ''
     },
+    activeTab(val)
+    {
+      if(val === 3)
+      {
+        //if tab is switched to Logs...
+        this.loadLogs({itemid: this.item.id})
+      }
+    }
     //watch selection of client and read service when client is selected
     // selectedClient(val) {
     //   if (val) {
@@ -767,6 +788,7 @@ export default {
   },
   data() {
     return {
+      activeTab: 0,
       isFetchingAgents: false,
       selectedAgent: '',
       filteredAgentArray: [],

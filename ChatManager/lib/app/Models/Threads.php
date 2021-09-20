@@ -21,7 +21,7 @@ class Threads extends Model
     }
     public function pendingReviews()
     {
-        return $this->hasMany(ReviewThread::class, 'threadid', 'id');
+        return $this->hasMany(ReviewThread::class, 'threadid', 'id')->where('pending', '1');
     }
     // public function scopeID($query, $serverid)
     // {

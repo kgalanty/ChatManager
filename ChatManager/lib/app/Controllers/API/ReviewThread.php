@@ -6,7 +6,7 @@ use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread as ReviewThreadModel;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
-
+use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 class ReviewThread extends API
 {
     public function get()
@@ -61,6 +61,7 @@ class ReviewThread extends API
 
         if ($action == 'SaveReview') {
             if ($threadid) {
+                Logs::SendToReview($threadid, $_SESSION['adminid']);
                 ReviewThreadModel::create([
                     'threadid' => $threadid,
                     'sender' => $_SESSION['adminid'],
@@ -75,6 +76,7 @@ class ReviewThread extends API
         elseif($action == 'ReviewComment')
         {
             $id = (int)$this->input['entry'];
+            Logs::MarkAsReviewed($threadid, $_SESSION['adminid'], $id);
             ReviewThreadModel::id($id)->update(['pending' => 0]);
             return ['data'=>'success'];
         }

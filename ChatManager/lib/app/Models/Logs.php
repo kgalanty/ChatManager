@@ -1,0 +1,23 @@
+<?php
+
+namespace WHMCS\Module\Addon\ChatManager\app\Models;
+
+use Illuminate\Database\Eloquent\Model;
+class Logs extends Model
+{
+    public $timestamps = false;
+    protected $table = 'chat_logs';
+    protected $fillable = ['itemid', 'itemclass', 'doer', 'desc', 'created_at'];
+    // public function service()
+    // {
+    //     return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Service', 'relid', 'id');
+    // }
+    // public function scopeID($query, $serverid)
+    // {
+    //     return $query->where('id', $serverid);
+    // }
+    public function doer()
+    {
+        return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'doer', 'id');
+    }
+}
