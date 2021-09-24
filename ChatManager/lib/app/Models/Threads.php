@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 use WHMCS\Module\Addon\ChatManager\app\Models\Customers;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread;
+use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
+use WHMCS\Module\Addon\ChatManager\app\Models\Followup as FollowupModel;
 class Threads extends Model
 {
     public $timestamps = false;
@@ -22,6 +24,14 @@ class Threads extends Model
     public function pendingReviews()
     {
         return $this->hasMany(ReviewThread::class, 'threadid', 'id')->where('pending', '1');
+    }
+    public function scopeAgent()
+    {
+        return $this->belongsTo(Admin::class, 'agent', 'email');
+    }
+    public function followup()
+    {
+        return $this->hasMany(FollowupModel::class, 'threadid', 'id');
     }
     // public function scopeID($query, $serverid)
     // {

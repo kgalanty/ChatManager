@@ -1,6 +1,6 @@
 <template>
 <article style="background:#ff7373;padding: 5px;
-" v-if="pendingchats.data != []">
+" v-if="pendingchats && pendingchats.data && pendingchats.data.length > 0">
   <span class="is-family-sans-serif" style="float:left; margin-top:20px;font-size:20px">Pending for Review:</span>
       <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
       <b-table
@@ -14,6 +14,7 @@
         :per-page="25"
         :loading="this.pendingChatsLoading"
         pagination-position="top"
+        :row-class="colorRows"
       >
         <b-table-column
           field="date"
@@ -178,8 +179,10 @@ article > .panel-heading {
 import { mapActions, mapState } from "vuex";
 import "buefy/dist/buefy.css";
 import ChatItemEditModal from './ChatItemEditModal.vue'
+import tablecolorrowsMixin from '../mixins/tablecolorrowsMixin'
 export default {
   name: "PendingChatListTable",
+  mixins: [tablecolorrowsMixin],
   components: {
   },
   methods: {
@@ -187,6 +190,14 @@ export default {
     showAllChats(customerid) {
       window.open("https://my.livechatinc.com/archives/?query=" + customerid);
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
+    },
+    isEditActive(row)
+    {
+      row.tags.find((e) => {
+              if (e.tag == "duplicate" && e.approved == 1) {
+                return false;
+              }})
+              return true
     },
     editModal(item)
     { 

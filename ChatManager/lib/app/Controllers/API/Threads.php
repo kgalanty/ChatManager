@@ -4,7 +4,10 @@ namespace WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 
 use WHMCS\Module\Addon\ChatManager\app\Controllers\APIProtected;
 use WHMCS\Database\Capsule as DB;
+use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
+use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
+
 class Threads extends APIProtected
 {
     public function get()
@@ -37,33 +40,46 @@ class Threads extends APIProtected
         $name = $this->input['name'];
         $email = trim($this->input['email']);
         $domain = trim($this->input['domain']);
-        $order = (int)trim($this->input['order']);
+        $order = trim($this->input['order']);
         $itemid = (int)$this->input['id'];
         $notes = trim($this->input['notes']);
         $customoffer = trim($this->input['customoffer']);
         $agent = trim($this->input['agent']);
-        if($itemid)
-        {
+        if ($itemid) {
             $thread = ThreadsModel::where('id', $itemid);
-        }
-        else
-        {
+        } else {
             return 'No thread id was given.';
         }
+        $threaddata = $thread->first();
         $update = [];
-        if($name) {             $update['name'] = $name;     }
-        if($email) {            $update['email'] = $email;     }
-        if($domain) {           $update['domain'] = $domain;     }
-        if($order) {            $update['orderid'] = $order;     }
-        if($notes) {            $update['notes'] = $notes;     }
-        if($customoffer) {      $update['customoffer'] = $customoffer;     }
-        if($agent) {      $update['agent'] = $agent;     }
+        if ($name && $name != $threaddata->customer->name && $threaddata->name == null) {
+            $update['name'] = $name;
+        }
+        if ($email && $email != $threaddata->customer->email && $threaddata->email == null) {
+            $update['email'] = $email;
+        }
+        //if ($domain) {
+            $update['domain'] = $domain;
+       // }
+        //if ($order) {
+            $update['orderid'] = $order!='' ? $order : null;
+       // }
+        //if ($notes) {
+            $update['notes'] = $notes;
+       // }
+        if ($customoffer) {
+            $update['customoffer'] = $customoffer;
+        }
+        if ($agent && AuthControl::isAdmin()) {
+            $update['agent'] = $agent;
+        }
+
+        Logs::updateThread($itemid, $_SESSION['adminid'], $update, $threaddata);
 
         // order: this.selectedOrder,
         // notes: this.notes,
         // customoffer: this.customoffer,
-        if(count($update) > 0)
-        {
+        if (count($update) > 0) {
             $thread->update($update);
             return 'success';
         }

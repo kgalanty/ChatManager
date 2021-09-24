@@ -7,7 +7,7 @@ use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Models\Logs as LogsModel;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread as ReviewThreadModel;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
-use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
+use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
 
 class Logs
 {
@@ -62,6 +62,32 @@ class Logs
         $thread = Threads::find($itemid)->chatid;
         $desc = $admin->firstname.' '.$admin->lastname.' deleted tag '.$tag.' in chat '.$thread;
         self::log($itemid, 'Tag', $doer, $desc);
+    }
+    public static function updateThread($itemid, $doer, $update, $threaddata)
+    {
+        
+        foreach($update as $k=>$updateitem)
+        {
+            if(
+                ($k == 'name' && $updateitem != $threaddata->customer->name && $threaddata->name == null) ||
+                ($k == 'email' && $updateitem != $threaddata->customer->email && $threaddata->email == null)
+            )
+            {
+                $oldvalue = $threaddata->customer->$k;
+            }
+            else
+            {
+                $oldvalue = $threaddata->$k;
+            }
+            
+            if($updateitem != $threaddata->$k) $logChanges[] = $oldvalue??'""'.' -> '.$updateitem;
+        }
+        if(count($logChanges) > 0) {
+            $admin = Admin::find($doer);
+            $desc = $admin->firstname.' '.$admin->lastname.' has updated chat '.$threaddata->threadid.': '.implode(',',$logChanges);
+            self::log($itemid, 'Thread', $doer, $desc);
+        }
+        
     }
     // public static function ProposeDeletion($threadid, $tag)
     // {

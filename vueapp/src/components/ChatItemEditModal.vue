@@ -1,22 +1,11 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width:1200px">
+    <div class="modal-card" style="width: 1200px">
       <header class="modal-card-head">
         <p class="modal-card-title">Edit chat {{ item.threadid }}</p>
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
       <section class="modal-card-body">
-        <!-- <div
-        class="current"
-        >
-          Currently selected client:
-          {{ currentClient ? currentClient : "none" }}
-          <br />
-          Currently selected service: {{ currentService ? currentService : 'none'}}
-          <br />
-          Currently set order: {{ currentOrder ? currentOrder : 'none'}}
-        </div> -->
-
         <b-tabs type="is-toggle" expanded v-model="activeTab">
           <b-tab-item label="Customer" icon="google-photos">
             <b-field label="Client Name">
@@ -31,53 +20,7 @@
             <b-field label="Domain">
               <b-input v-model="domain" placeholder="Fill domain"></b-input>
             </b-field>
-
-            <!-- <b-autocomplete
-            :data="clients"
-            placeholder="Search for a client"
-            field="email"
-            :loading="isFetchingClients"
-            @typing="getAsyncData"
-            @select="(option) => (selectedClient = option)"
-          >
-            <template slot-scope="props">
-              <div class="media">
-                <div class="media-content">
-                  #{{ props.option.id }}
-                  <strong>{{
-                    props.option.firstname + " " + props.option.lastname
-                  }}</strong>
-                  <br />{{ props.option.email }} <br /><i>{{
-                    props.option.companyname
-                  }}</i>
-                </div>
-              </div>
-            </template>
-          </b-autocomplete>
-        
-        
-        <b-field label="Service">
-          <b-select
-            :placeholder="
-              services.length > 0 ? 'Select a service' : 'Select a client first'
-            "
-            expanded
-            v-model="selectedService"
-            @change="selectedOrder = option.orderid"
-          >
-            <option value="" v-if="services.length == 0"><i>Empty</i></option> 
-            <option
-              :value="option.id"
-              :key="option.id"
-              v-for="option in services"
-            >
-              #{{ option.id }} {{ option.product.name }}
-              <span v-if="option.domain">({{ option.domain }})</span>
-            </option>
-          </b-select>
-        </b-field>
-         -->
-            <b-field label="Order" :type="OrderStatusField">
+            <b-field label="Order">
               <b-input
                 v-model="selectedOrder"
                 placeholder="Fill order number"
@@ -114,24 +57,26 @@
                 expanded
               ></b-input>
             </b-field>
-             <b-field label="Agent">
-            <b-autocomplete
+            <b-field label="Agent" v-if="groupMember === 2">
+              <b-autocomplete
                 v-model="agent"
                 ref="autocomplete"
                 :data="filteredAgentArray"
-                @select="option => selectedAgent = option"
+                @select="(option) => (selectedAgent = option)"
                 field="email"
                 @typing="getAgents"
                 :loading="isFetchingAgents"
-                >
+              >
                 <template slot-scope="props">
-                    <div class="media">
-                       {{ props.option.firstname }} {{ props.option.lastname }} ({{ props.option.email }})
-                    </div>
+                  <div class="media">
+                    {{ props.option.firstname }} {{ props.option.lastname }} ({{
+                      props.option.email
+                    }})
+                  </div>
                 </template>
-                <template #empty>No results for {{agent}}</template>
-            </b-autocomplete>
-        </b-field>
+                <template #empty>No results for {{ agent }}</template>
+              </b-autocomplete>
+            </b-field>
             <b-field label="Notes">
               <b-input type="textarea" v-model="notes"></b-input>
             </b-field>
@@ -145,13 +90,13 @@
                 striped
                 narrowed
               >
-                <b-table-column
-                  field="date"
-                  label="Tag"
-                  v-slot="props"
-                >
+                <b-table-column field="date" label="Tag" v-slot="props">
                   <b-tag
-                    :type="props.row.approved == 1 ? 'is-warning' : 'is-light'"
+                    :type="
+                      props.row.approved == 1
+                        ? 'is-warning'
+                        : 'is-warning is-light'
+                    "
                     >{{ props.row.tag }}</b-tag
                   >
                   <b-tooltip
@@ -195,7 +140,12 @@
               />
             </b-field>
 
-            <b-collapse :open="false" position="is-top" animation="slide">
+            <b-collapse
+              :open="false"
+              position="is-top"
+              animation="slide"
+              v-if="groupMember == 2"
+            >
               <template #trigger="props">
                 <a aria-controls="contentIdForA11y1">
                   <h2 class="label">
@@ -207,7 +157,7 @@
                 </a>
               </template>
 
-              <b-field label="" v-if="groupMember == 2">
+              <b-field label="">
                 <b-table
                   class="modaltable"
                   :data="tagslog"
@@ -247,21 +197,24 @@
             </b-collapse>
           </b-tab-item>
           <b-tab-item :headerClass="reviewTabHeader">
-            <template #header >
-                <b-icon icon="source-pull"></b-icon>
-                <span> Review 
-                  <b-tag rounded type="is-primary"> {{ reviewRequests.length }} </b-tag>
-                
-                 </span>
+            <template #header>
+              <b-icon icon="source-pull"></b-icon>
+              <span>
+                Review
+                <b-tag rounded type="is-primary">
+                  {{ reviewRequests.length }}
+                </b-tag>
+              </span>
             </template>
-         <b-notification
-            type="is-warning"
-            has-icon
-            v-if="reviewStatus==1"
-            :closable="false"
-            role="alert">
-            This thread has pending reviews.
-        </b-notification>
+            <b-notification
+              type="is-warning"
+              has-icon
+              v-if="reviewStatus == 1"
+              :closable="false"
+              role="alert"
+            >
+              This thread has pending reviews.
+            </b-notification>
             <div class="notification is-primary">
               <div class="buttons">
                 Here you can send this chat to review by supervisors. Enter
@@ -286,58 +239,60 @@
               </div>
             </div>
 
-                <b-table
-                  class="modaltable"
-                  :data="reviewRequests"
-                  narrowed
-                  :per-page="5"
-                  v-if="groupMember == 2"
+            <b-table
+              class="modaltable"
+              :data="reviewRequests"
+              narrowed
+              :per-page="5"
+              v-if="groupMember == 2"
+            >
+              <template #empty>
+                <div class="has-text-centered">No entries</div>
+              </template>
+              <b-table-column field="pending" label="Seen" v-slot="props">
+                <b-icon
+                  icon="close"
+                  v-if="props.row.pending == 1"
+                  size="is-small"
+                  type="is-danger"
+                ></b-icon>
+                <b-icon
+                  icon="check"
+                  v-if="props.row.pending == 0"
+                  size="is-small"
+                  type="is-success"
+                ></b-icon>
+              </b-table-column>
+              <b-table-column field="date" label="Performed by" v-slot="props">
+                <b-tag type="is-primary">
+                  {{ props.row.doer.firstname }}
+                  {{ props.row.doer.lastname }}</b-tag
                 >
-                  <template #empty>
-                    <div class="has-text-centered">No entries</div>
-                  </template>
-                 <b-table-column
-                    field="pending"
-                    label="Seen"
-                    v-slot="props"
-                  >
-                    <b-icon icon="close" v-if="props.row.pending==1" size="is-small" type="is-danger"></b-icon>
-                    <b-icon icon="check" v-if="props.row.pending==0" size="is-small" type="is-success"></b-icon>
-                  </b-table-column>
-                  <b-table-column
-                    field="date"
-                    label="Performed by"
-                    v-slot="props"
-                  >
-                    <b-tag type="is-primary">
-                      {{ props.row.doer.firstname }}
-                      {{ props.row.doer.lastname }}</b-tag
-                    >
-                  </b-table-column>
-                  <b-table-column field="comment" label="Comment" v-slot="props">
-                    {{ props.row.comment }}
-                  </b-table-column>
-                  <b-table-column field="date" label="Date" v-slot="props">
-                    {{
-                      parseDateTimeFromUTCtoLocal(props.row.created_at)
-                    }}
-                  </b-table-column>
-                   <b-table-column field="date" label="Actions" v-slot="props">
-                     <b-button type="is-success" size="is-small" icon-right="check" v-if="props.row.pending==1" @click="MarkReviewComment(props.row.id)" ></b-button>
-                  </b-table-column>
-                </b-table>
-
+              </b-table-column>
+              <b-table-column field="comment" label="Comment" v-slot="props">
+                {{ props.row.comment }}
+              </b-table-column>
+              <b-table-column field="date" label="Date" v-slot="props">
+                {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
+              </b-table-column>
+              <b-table-column field="date" label="Actions" v-slot="props">
+                <b-button
+                  type="is-success"
+                  size="is-small"
+                  icon-right="check"
+                  v-if="props.row.pending == 1"
+                  @click="MarkReviewComment(props.row.id)"
+                ></b-button>
+              </b-table-column>
+            </b-table>
           </b-tab-item>
-            <b-tab-item>
-            <template #header >
-                <b-icon icon="source-pull"></b-icon>
-                <span> Logs 
-                
-                
-                 </span>
+          <b-tab-item>
+            <template #header>
+              <b-icon icon="source-pull"></b-icon>
+              <span> Logs </span>
             </template>
-<ChatItemLogs :threadid="item.id" />
-            </b-tab-item>
+            <ChatItemLogs :threadid="item.id" />
+          </b-tab-item>
         </b-tabs>
       </section>
       <footer class="modal-card-foot">
@@ -353,34 +308,32 @@
   </form>
 </template>
 <script>
-import ChatItemLogs from './ChatItemLogs.vue'
+import ChatItemLogs from "./ChatItemLogs.vue";
 import debounce from "lodash/debounce";
 import { mapActions, mapState } from "vuex";
-import { dateMixin } from '../mixins/dateMixin.js'
+import { dateMixin } from "../mixins/dateMixin.js";
 export default {
   name: "ChatItemEditModal",
   props: ["item"],
   mixins: [dateMixin],
-  components: {ChatItemLogs},
+  components: { ChatItemLogs },
   computed: {
     ...mapState(["groupMember"]),
-    reviewTabHeader()
-    {
-      if(this.reviewStatus == 1)
-      {
-        return 'reviewTabHeader';
+    reviewTabHeader() {
+      if (this.reviewStatus == 1) {
+        return "reviewTabHeader";
       }
-      return ''
-    }
+      return "";
+    },
   },
   methods: {
     ...mapActions({
       loadChats: "chat/loadChats",
       getPermissions: "getPermissions",
-      loadLogs: 'chatlogs/loadLogs'
+      loadLogs: "chatlogs/loadLogs",
     }),
     getAgents: debounce(function (name) {
-      this.isFetchingAgents = true
+      this.isFetchingAgents = true;
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=${name}`
@@ -388,35 +341,33 @@ export default {
         .then(({ data }) => {
           this.filteredAgentArray = data.data;
         })
-      .catch((error) => {
-                  this.filteredAgentArray = []
-                  throw error
-      })
-      .finally(() => {
-          this.isFetchingAgents = false
-      })
-        ;
-    },500),
-    MarkReviewComment(commentid)
-    {
-      const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join("&");
+        .catch((error) => {
+          this.filteredAgentArray = [];
+          throw error;
+        })
+        .finally(() => {
+          this.isFetchingAgents = false;
+        });
+    }, 500),
+    MarkReviewComment(commentid) {
+      const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join(
+        "&"
+      );
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: commentid,
           action: "ReviewComment",
-          threadid: this.item.id
+          threadid: this.item.id,
         })
         .then((response) => {
           if (response.data.data == "success") {
-           
             this.$buefy.toast.open({
               container: ".modal-card",
-              message: 'Entry marked as seen',
+              message: "Entry marked as seen",
               type: "is-success",
             });
-            this.loadReviews()
-            this.loadReviewStatus()
-            
+            this.loadReviews();
+            this.loadReviewStatus();
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -449,11 +400,10 @@ export default {
           if (response.data == "success") {
             // this.$emit("close")
             //this.loadChats()
-      if(this.groupMember == 2)
-      {
-        this.loadReviews()
-      }
-      this.loadReviewStatus()
+            if (this.groupMember == 2) {
+              this.loadReviews();
+            }
+            this.loadReviewStatus();
             this.$buefy.toast.open({
               container: ".modal-card",
               message: "Chat sent to review successfuly",
@@ -527,47 +477,72 @@ export default {
           }
         });
     },
-    checkOrder() {
+     checkOrder(onlyreturn = false) {
       if (!this.selectedOrder) {
-        this.OrderStatusField = "is-danger";
-        return;
+        // this.OrderStatusField = "is-danger";
+        return true;
       }
-      this.OrderStatusField = null;
+      // this.OrderStatusField = null;
       const params = [`module=ChatManager`, `c=Orders`, `json=1`].join("&");
       this.loadingCheckBtn = true;
-      this.$api
-        .post(`addonmodules.php?${params}`, {
-          order: this.selectedOrder,
-          a: "CheckOrderID",
-          threadid: this.item.id,
-        })
-        .then((response) => {
-          if (response.data == "success") {
-            // this.$emit("close")
-            //this.loadChats()
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: "This Order is new.",
-              type: "is-success",
-            });
-          } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data,
-              type: "is-warning",
-            });
-          }
-          this.loadingCheckBtn = false;
-        });
+      return new Promise((resolve) => {
+        this.$api
+          .post(`addonmodules.php?${params}`, {
+            order: this.selectedOrder,
+            a: "CheckOrderID",
+            threadid: this.item.id,
+          })
+          .then((response) => {
+            console.log(response);
+            if (response.data == "success") {
+              // this.$emit("close")
+              //this.loadChats()
+              if (!onlyreturn)
+                this.$buefy.toast.open({
+                  container: ".modal-card",
+                  message: "This Order is new.",
+                  type: "is-success",
+                });
+              this.loadingCheckBtn = false;
+              resolve('success');
+              return 1;
+            } else {
+              if (!onlyreturn)
+                this.$buefy.toast.open({
+                  container: ".modal-card",
+                  message: response.data,
+                  type: "is-warning",
+                });
+                resolve(response.data)
+              this.loadingCheckBtn = false;
+              return 0;
+            }
+          });
+      });
     },
-    save() {
+    async save() {
+      this.saveLoadingBtn = true;
+     if(this.selectedOrder) {
+       console.log(this.selectedOrder)
+      const checkorder = await this.checkOrder(true);
+      console.log(checkorder);
+      if (checkorder != 'success' ) {
+        this.$buefy.toast.open({
+          container: ".modal-card",
+          message: "This order id is already assigned to another thread.",
+          type: "is-warning",
+        });
+        this.saveLoadingBtn = false;
+        return;
+      }
+      }
       const params = [`module=ChatManager`, `c=Threads`, `json=1`].join("&");
       this.loadingSaveBtn = true;
 
       var cannotofferReason = this.cannotofferCustom
         ? this.cannotofferCustom
         : this.cannotoffer;
-      this.saveLoadingBtn = true;
+
       this.$api
         .post(`addonmodules.php?${params}`, {
           id: this.item.id,
@@ -577,7 +552,7 @@ export default {
           order: this.selectedOrder,
           notes: this.notes,
           customoffer: cannotofferReason,
-          agent: this.agent
+          agent: this.agent,
         })
         .then((response) => {
           if (response.data == "success") {
@@ -648,7 +623,7 @@ export default {
         });
     },
     HasCustomOfferCheck() {
-      if (!this.cannotofferReasons.includes(this.item.customoffer)) {
+      if (this.item.customoffer && !this.cannotofferReasons.includes(this.item.customoffer)) {
         this.cannotoffer = "Other";
         this.cannotofferCustom = this.item.customoffer;
       }
@@ -660,20 +635,16 @@ export default {
         }
       });
     },
-    loadReviewStatus()
-    {
+    loadReviewStatus() {
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=ReviewThread&json=1&action=GetReviewStatus&threadid=${this.item.id}`
         )
         .then(({ data }) => {
-          if(data.result == 'success')
-          {
-            this.reviewStatus = data.data
-          }
-          else
-          {
-             this.$buefy.toast.open({
+          if (data.result == "success") {
+            this.reviewStatus = data.data;
+          } else {
+            this.$buefy.toast.open({
               container: ".modal-card",
               message: data.msg,
               type: "is-warning",
@@ -681,20 +652,16 @@ export default {
           }
         });
     },
-    loadReviews()
-    {
-       this.$api
+    loadReviews() {
+      this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=ReviewThread&json=1&action=GetReviews&threadid=${this.item.id}`
         )
         .then(({ data }) => {
-          if(data.result == 'success')
-          {
-            this.reviewRequests = data.data
-          }
-          else
-          {
-             this.$buefy.toast.open({
+          if (data.result == "success") {
+            this.reviewRequests = data.data;
+          } else {
+            this.$buefy.toast.open({
               container: ".modal-card",
               message: data.msg,
               type: "is-warning",
@@ -729,15 +696,13 @@ export default {
     this.domain = this.item.domain;
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
-    this.agent = this.item.agent
+    this.agent = this.item.agent;
     this.getPermissions().then(() => {
       if (this.groupMember == 2) {
-        this.loadTagsHistory()
-        this.loadReviews()
-      }
-      else
-      {
-        this.loadReviewStatus()
+        this.loadTagsHistory();
+        this.loadReviews();
+      } else {
+        this.loadReviewStatus();
       }
     });
     this.tags = this.item.tags;
@@ -749,14 +714,12 @@ export default {
     cannotoffer() {
       //this.cannotofferCustom = ''
     },
-    activeTab(val)
-    {
-      if(val === 3)
-      {
+    activeTab(val) {
+      if (val === 3) {
         //if tab is switched to Logs...
-        this.loadLogs({itemid: this.item.id})
+        this.loadLogs({ itemid: this.item.id });
       }
-    }
+    },
     //watch selection of client and read service when client is selected
     // selectedClient(val) {
     //   if (val) {
@@ -790,9 +753,9 @@ export default {
     return {
       activeTab: 0,
       isFetchingAgents: false,
-      selectedAgent: '',
+      selectedAgent: "",
       filteredAgentArray: [],
-      agent: '',
+      agent: "",
       reviewStatus: 0,
       reviewRequests: [],
       commmentReview: "",
@@ -867,7 +830,7 @@ export default {
         "Other",
       ],
       loadingCheckBtn: false,
-      OrderStatusField: undefined,
+      // OrderStatusField: undefined,
       HasCustomOffer: false,
       cannotoffer: "",
       cannotofferCustom: "",
@@ -877,9 +840,8 @@ export default {
 };
 </script>
 <style >
-.reviewTabHeader
-{
-     background: #ffcf76;
+.reviewTabHeader {
+  background: #ffcf76;
 }
 .modaltable {
   border: 1px solid black;

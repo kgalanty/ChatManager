@@ -1,7 +1,9 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
+import Buefy from 'buefy'
 Vue.use(Vuex)
+Vue.use(Buefy)
 const chatsLogStore = 
 {
   namespaced: true,
@@ -120,6 +122,7 @@ const chatsStore = {
         });
     },
     loadChats(context) {
+      return new Promise((resolve,reject) => {
       context.commit('setChatsLoading', true)
       const params = [
         `module=ChatManager`,
@@ -129,6 +132,7 @@ const chatsStore = {
         `perpage=${context.state.chatsPerPage}`,
         `datefrom=${context.state.filters.dateFrom ?? ''}`,
         `dateto=${context.state.filters.dateTo ?? ''}`,
+        `tags=${context.state.filters.tags ? context.state.filters.tags : ''}`,
         `tz=`
       ].join("&");
 
@@ -140,15 +144,22 @@ const chatsStore = {
 
             context.commit('setChats', response.data)
             context.commit('setChatsLoading', false)
+            resolve()
 
           }
         })
-        .catch((e) => {
-          console.log(e)
+        .catch(() => {
+          context.commit('setChats', [])
+          context.commit('setChatsLoading', false)
+          reject('Failed to download data. Check if you are logged in and have permission.')
+          return
+          //console.log(e)
           //window.location = 'login.php'
         });
-    }
-  },
+      
+    })
+  }
+},
   getters: {
 
   }

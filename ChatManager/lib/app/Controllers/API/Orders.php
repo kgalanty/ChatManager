@@ -38,8 +38,8 @@ class Orders extends API
     public function post()
     {
         if ($this->input['a'] == 'CheckOrderID') {
-            $id = $this->input['order'];
-            $threadid = $this->input['threadid'];
+            $id = (int)$this->input['order'];
+            $threadid = (int)$this->input['threadid'];
             $order = Threads::where('orderid', $id)->where('id', '<>', $threadid)->first();
             if($order)
             {

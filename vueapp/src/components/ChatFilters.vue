@@ -1,7 +1,22 @@
 <template>
   <div class="tile">
-    <div class="tile">
-      <b-field label="Select datetime range [From]" style="width: 100%">
+      <div class="tile is-4 is-child">
+      <b-field label="Tags" style="width: 95%">
+        <b-taginput
+                v-model="tags"
+                :data="filteredTags"
+                autocomplete
+                field="tag.tag"
+                icon="label"
+                type="is-info"
+                placeholder="Add a tag"
+                @typing="getFilteredTags"
+                @input="TagsChanged">
+            </b-taginput>
+      </b-field>
+    </div>
+    <div class="tile is-4 is-child">
+      <b-field label="Select datetime range [From]" style="width: 95%">
         <b-datetimepicker
           v-model="dateFrom"
           rounded
@@ -15,8 +30,8 @@
         </b-datetimepicker>
       </b-field>
     </div>
-    <div class="tile">
-      <b-field label="Select datetime range [to]" style="width: 100%">
+    <div class="tile is-4 is-child">
+      <b-field label="Select datetime range [to]" style="width: 95%">
         <b-datetimepicker
           v-model="dateTo"
           rounded
@@ -44,17 +59,36 @@ article > .panel-heading {
     rgba(40, 127, 207, 1) 100%
   );
 }
+.tile
+{
+  margin-bottom:10px;
+}
 </style>
 <script>
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import { mapActions } from "vuex";
+import { tagsMixin } from "../mixins/tagsMixin.js";
 export default {
   name: "ChatFilters",
+  mixins: [tagsMixin],
   components: {
     //HelloWorld
   },
   methods: {
+    TagsChanged()
+    {
+      this.$store.commit("chat/setFilter", {tags: this.tags});
+      this.loadChats()
+    },
+     getFilteredTags(text) {
+                this.filteredTags = this.tagsList.filter((option) => {
+                    return option
+                        .toString()
+                        .toLowerCase()
+                        .indexOf(text.toLowerCase()) >= 0
+                })
+            },
   ...mapActions({
       loadChats: "chat/loadChats",
     }),
@@ -87,6 +121,9 @@ export default {
     return {
       dateFrom: null,
       dateTo: null,
+      tagsinput: [],
+      filteredTags: [],
+      tags: []
     };
   },
   watch:
