@@ -13,7 +13,7 @@
         Chats list
       </p>
       
-      <PendingChatListTable />
+     <PendingChatListTable />
      <ChatListTable />
     </article>
   </div>

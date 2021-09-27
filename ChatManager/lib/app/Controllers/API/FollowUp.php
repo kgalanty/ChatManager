@@ -6,6 +6,7 @@ use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Models\Followup as FollowupModel;
+use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 class Followup extends API
 {
     public function get()
@@ -23,6 +24,7 @@ class Followup extends API
                 'doer' => $_SESSION['adminid']
             ]
             );
-        return ['results' => 'success'];
+        Logs::FollowUp($threadid, $_SESSION['adminid']);    
+        return ['result' => 'success'];
     }
 }

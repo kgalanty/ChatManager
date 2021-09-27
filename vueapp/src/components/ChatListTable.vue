@@ -3,8 +3,7 @@
     <span
       class="is-family-sans-serif"
       style="float: left; margin-top: 20px; font-size: 20px"
-      >Chats:</span
-    >
+      >Chats:</span>
     <b-table
       class="btable"
       :data="chats.data"
@@ -80,18 +79,8 @@
       <b-table-column field="date" label="IP" v-slot="props" width="160">
         {{ props.row.customer.ip }}
       </b-table-column>
-      <b-table-column field="date" label="Follow up" width="160" v-slot="props" >
-        <span v-if="showfollowup(props.row)">
-        <b-button type="is-primary" @click="followup(props.row)" v-if="props.row.followup.length < 2"
-          >Confirm</b-button
-        ><b-field>
-              <b-tag type="is-info" style="font-size:14px" v-if="props.row.followup.length < 2" >
-                <b-icon icon="alarm" size="is-small"></b-icon>
-                &nbsp;&nbsp;{{ calcFollowUp(props.row) }}
-                </b-tag>
-                </b-field>
-                 <b-icon v-if="props.row.followup.length >= 2" icon="check"  type="is-success" ></b-icon>
-           </span>
+      <b-table-column field="date" label="Follow up" width="160" v-slot="props">
+          <TableFollowUp :row="props.row" afterClickAction="loadChats" />
       </b-table-column>
       <b-table-column
         field="orderid"
@@ -101,7 +90,10 @@
       >
         {{ props.row.orderid }}
       </b-table-column>
-      <b-table-column label="Extra Points" width="160"> points </b-table-column>
+      <b-table-column label="Extra Points" width="160" v-slot="props">
+        <TablePoints :tags="props.row.tags" />
+
+      </b-table-column>
       <b-table-column field="date" label="Edit" v-slot="props" width="160">
         <b-button
           type="is-primary"
@@ -115,8 +107,7 @@
   </article>
 </template>
 <style >
-.is-latefollowup
-{
+.is-latefollowup {
   background: rgb(255, 129, 129) !important;
 }
 .is-cannotoffer {
@@ -154,61 +145,21 @@ article > .panel-heading {
 import { mapActions, mapState } from "vuex";
 import "buefy/dist/buefy.css";
 import ChatItemEditModal from "./ChatItemEditModal.vue";
+import TableFollowUp from "./TableFollowUp.vue"
+import TablePoints from "./TablePoints.vue";
 import tablecolorrowsMixin from "../mixins/tablecolorrowsMixin";
+import tableHelper from "../mixins/tableHelper";
 export default {
   name: "ChatListTable",
-  components: {},
-  mixins: [tablecolorrowsMixin],
+  components: {TablePoints, TableFollowUp},
+  mixins: [tablecolorrowsMixin,tableHelper],
   methods: {
     ...mapActions({
       loadChats: "chat/loadChats",
       loadPendingChats: "chat/loadPendingChats",
       getPermissions: "getPermissions",
     }),
-    showfollowup(row) {
-     return row.tags.find((e) => {
-        if (e.tag == "wcb" && e.approved == 1 && row.orderid == null) {
-          return true;
-        }
-      })
-    },
-    calcFollowUp(row)
-    {
-      if(row.followup.length > 0)
-      {
-        var now = this.moment.utc(row.followup[row.followup.length-1].followupdate)
-       // var dur = this.moment(now).utc().fromNow()
-       // var duration = this.moment.duration(now.diff(end))
-        var result = this.moment.utc(now).fromNow()
-          return result
-      }
-      return 'None'
-    },
-    followup(row) {
-     const params = [`module=ChatManager`, `c=FollowUp`, `json=1`].join("&");
-      this.$api
-        .post(`addonmodules.php?${params}`, {
-          threadid: row.id,
-        })
-        .then((response) => {
-          if (response.data.result == "success") {
-           
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: 'Entry marked',
-              type: "is-success",
-            });
-          
-            
-          } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data.result,
-              type: "is-warning",
-            });
-          }
-        });
-    },
+    
     isEditActive(row) {
       return row.tags.find((e) => {
         if (e.tag == "duplicate" && e.approved == 1 && this.groupMember < 2) {
@@ -241,6 +192,47 @@ export default {
     parseDateTime(dateTime) {
       return this.moment(dateTime).format("YYYY-MM-DD HH:mm:SS");
     },
+    showfollowup(row) {
+          return row.tags.find((e) => {
+            if (e.tag == "wcb" && e.approved == 1 && row.orderid == null) {
+              return true;
+            }
+          });
+        },
+        calcFollowUp(row) {
+          if (row.followup.length > 0) {
+            var now = this.moment.utc(
+              row.followup[row.followup.length - 1].followupdate
+            );
+            // var dur = this.moment(now).utc().fromNow()
+            // var duration = this.moment.duration(now.diff(end))
+            var result = this.moment.utc(now).fromNow();
+            return result;
+          }
+          return "None";
+        },
+        followup(row) {
+          const params = [`module=ChatManager`, `c=FollowUp`, `json=1`].join("&");
+          this.$api
+            .post(`addonmodules.php?${params}`, {
+              threadid: row.id,
+            })
+            .then((response) => {
+              if (response.data.result == "success") {
+                this.$buefy.toast.open({
+                  container: ".modal-card",
+                  message: "Entry marked",
+                  type: "is-success",
+                });
+              } else {
+                this.$buefy.toast.open({
+                  container: ".modal-card",
+                  message: response.data.result,
+                  type: "is-warning",
+                });
+              }
+            });
+        },
   },
   mounted() {
     this.loadChats().catch((e) => {
@@ -252,8 +244,8 @@ export default {
         icon: "close-circle",
         ariaRole: "alertdialog",
         ariaModal: true,
-        confirmText: 'Reload',
-         onConfirm: () => window.location.reload()
+        confirmText: "Reload",
+        onConfirm: () => window.location.reload(),
       });
     });
     this.getPermissions();

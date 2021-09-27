@@ -11,7 +11,8 @@
                 type="is-info"
                 placeholder="Add a tag"
                 @typing="getFilteredTags"
-                @input="TagsChanged">
+                @input="TagsChanged"
+                :open-on-focus="true">
             </b-taginput>
       </b-field>
     </div>
@@ -47,7 +48,13 @@
     </div>
   </div>
 </template>
+<style>
+.dropdown-content > a {
+  text-align:left !important;
+}
+</style>
 <style scoped>
+
 .btable {
   font-size: 13px;
 }

@@ -1,10 +1,10 @@
 <template>
   <div id="app">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css">
-    <div id="nav" class="hover">
-      <!-- <router-link to="/">Home</router-link> -->
-      <!-- <router-link to="/about">About</router-link> -->
-    </div>
+    <!-- <div id="nav" class="hover">
+       <router-link to="/">Home</router-link> 
+      <router-link to="/about">About</router-link>
+    </div> -->
     <router-view/>
   </div>
 </template>
