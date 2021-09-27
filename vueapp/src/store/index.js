@@ -66,7 +66,7 @@ const chatsStore = {
     pendingChatsLoading: true,
     pendingchats: [],
     chatsPerPage: 25,
-    filters: { dateFrom: null, dateTo: null },
+    filters: { dateFrom: null, dateTo: null, operator: null },
   }),
   mutations: {
     setChats(state, chats) {
@@ -133,6 +133,7 @@ const chatsStore = {
         `datefrom=${context.state.filters.dateFrom ?? ''}`,
         `dateto=${context.state.filters.dateTo ?? ''}`,
         `tags=${context.state.filters.tags ? context.state.filters.tags : ''}`,
+        `operator=${context.state.filters.operator ? context.state.filters.operator : ''}`,
         `tz=`
       ].join("&");
 

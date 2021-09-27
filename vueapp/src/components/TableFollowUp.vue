@@ -1,32 +1,31 @@
 <template>
-         <span v-if="showfollowup(row)">
-          <b-button
-            type="is-primary"
-            @click="click"
-            v-if="row.followup.length < 2"
-            :disabled="disabled"
-            :loading="loading"
-            >Confirm</b-button
-          ><b-field>
-            <b-tag
-              type="is-info"
-              style="font-size: 14px"
-              v-if="row.followup.length < 2"
-            >
-              <b-icon icon="alarm" size="is-small"></b-icon>
-              &nbsp;&nbsp;{{ calcFollowUp(row) }}
-            </b-tag>
+  <span v-if="showfollowup(row)">
+    <b-button
+      type="is-primary"
+      @click="click"
+      v-if="row.followup && row.followup.length < 2"
+      :disabled="disabled"
+      :loading="loading"
+      >Confirm</b-button
+    ><b-field>
+      <b-tag
+        type="is-info"
+        style="font-size: 14px"
+        v-if="row.followup && row.followup.length == 1"
+      >
+        <b-icon icon="alarm" size="is-small"></b-icon>
+        &nbsp;&nbsp;{{ diff }}
+      </b-tag>
 
-            <b-icon
-              v-if="row.followup.length >= 2"
-              icon="check"
-              type="is-success"
-            ></b-icon>
-          </b-field>
-        </span>
+      <b-icon
+        v-if="row.followup && row.followup.length >= 2"
+        icon="check"
+        type="is-success"
+      ></b-icon>
+    </b-field>
+  </span>
 </template>
 <style>
-
 </style>
 <script>
 // @ is an alias to /src
@@ -37,38 +36,53 @@ export default {
   name: "TableFollowUp",
   components: {},
   mixins: [tableHelper],
-  props: ['row', 'afterClickAction'],
+  props: ["row", "afterClickAction"],
   methods: {
-  ...mapActions({
+    ...mapActions({
       loadChats: "chat/loadChats",
       loadPendingChats: "chat/loadPendingChats",
       getPermissions: "getPermissions",
     }),
-    click()
-    {
-      this.loading = true
-      this.disabled = true
-        this.followup(this.row)
-        .then(() => {
+    click() {
+      this.loading = true;
+      this.disabled = true;
+      this.followup(this.row).then(() => {
         {
-           this.loading = false
-           this.disabled = false
-           if(this.afterClickAction){
-               this[this.afterClickAction]()
-            }
+          this.loading = false;
+          this.disabled = false;
+          if (this.afterClickAction) {
+            this[this.afterClickAction]();
+          }
         }
-    })
-  }
+      });
+    },
+    updateTimers() {
+      var that = this;
+      this.interval = setInterval(() => {
+        if (this.row.followup.length == 1) {
+          that.diff = that.calcFollowUp(that.row);
+        } else {
+          if (this.interval) {
+            clearInterval(this.interval);
+            this.interval = null
+          }
+        }
+      }, 60000);
+    },
+  },
+  updated() {
+    this.updateTimers();
   },
   mounted() {
+    this.diff = this.calcFollowUp(this.row);
   },
-  computed: {
-   
-  },
+  computed: {},
   data() {
     return {
-      disabled:false,
-      loading: false
+      disabled: false,
+      loading: false,
+      diff: "",
+      interval: null,
     };
   },
 };

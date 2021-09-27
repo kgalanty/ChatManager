@@ -14,7 +14,7 @@ class ChatTable extends API
         if ($_GET['pending'] == 1) {
             if (AuthControl::isAdmin()) {
                 $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
-                $result = Threads::with(['tags', 'customer', 'pendingReviews'])
+                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup'])
                     ->whereHas('pendingReviews', function ($q) {
                         $q->where('pending', '=', '1');
                     })
@@ -34,7 +34,7 @@ class ChatTable extends API
         $page = $_GET['page'] == 1 ? 0 : ($_GET['page'] - 1) * $_GET['perpage'];
         $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
         $myemail = Admin::where('id', $_SESSION['adminid'])->value('email');
-
+        $operator = $_GET['operator'] != '' ? trim($_GET['operator']) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
         $result = Threads:: with('followup')->withCount(['pendingReviews' => function ($q) {
@@ -44,6 +44,10 @@ class ChatTable extends API
             ->orderBy('id', 'DESC');
         if ($_GET['datefrom']) {
             $result->whereBetween('date', [$_GET['datefrom'], $dateTo]);
+        }
+        if($operator)
+        {
+            $result->where('agent', $operator);
         }
         if(AuthControl::isAgent())
         {

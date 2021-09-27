@@ -20,6 +20,9 @@
       pagination-position="top"
       :row-class="colorRows"
     >
+    <template #empty>No entries for given criteria. 
+      <!-- <b-button @click="resetFilters">Reset Filters</b-button> -->
+      </template>
       <b-table-column field="date" label="Date" v-slot="props" width="160">
         {{ parseDateTime(props.row.date) }}
       </b-table-column>
@@ -49,6 +52,7 @@
         </b-taglist>
       </b-table-column>
       <b-table-column field="date" label="All Chats" v-slot="props" width="160">
+        <b-tooltip label="Click to open LiveChat Archive in new window">
         <b-button
           type="is-primary"
           outlined
@@ -57,6 +61,7 @@
           @click="showAllChats(props.row.users)"
           >Show All Chats</b-button
         >
+        </b-tooltip>
       </b-table-column>
       <b-table-column field="date" label="Name" v-slot="props" width="160">
         <span v-if="props.row.name">{{ props.row.name }}</span
@@ -233,6 +238,11 @@ export default {
               }
             });
         },
+        // resetFilters()
+        // {
+        //   this.$store.commit("chat/setFilter", { dateFrom: null, dateTo: null, operator: null });
+        //    this.loadChats();
+        // }
   },
   mounted() {
     this.loadChats().catch((e) => {

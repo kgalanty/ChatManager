@@ -16,6 +16,8 @@ class Agents extends API
             $query = trim($_GET['q']);
             $result = Admin::where('firstname', 'LIKE', '%'.$query.'%')->orWhere('lastname', 'LIKE', '%'.$query.'%')
             ->orWhere('username', 'LIKE','%'.$query.'%')->orWhere('email', 'LIKE', '%'.$query.'%')
+            ->where('disabled', '0')
+            ->orderBy('firstname', 'ASC')
             ->get();
             return ['data' => $result, 'result' => 'success'];
 

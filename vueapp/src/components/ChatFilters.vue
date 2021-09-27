@@ -1,22 +1,39 @@
 <template>
   <div class="tile">
-      <div class="tile is-4 is-child">
+    <div class="tile is-3 is-child">
       <b-field label="Tags" style="width: 95%">
         <b-taginput
-                v-model="tags"
-                :data="filteredTags"
-                autocomplete
-                field="tag.tag"
-                icon="label"
-                type="is-info"
-                placeholder="Add a tag"
-                @typing="getFilteredTags"
-                @input="TagsChanged"
-                :open-on-focus="true">
-            </b-taginput>
+          v-model="tags"
+          :data="filteredTags"
+          autocomplete
+          field="tag.tag"
+          icon="label"
+          type="is-info"
+          placeholder="Add a tag"
+          @typing="getFilteredTags"
+          @input="TagsChanged"
+          :open-on-focus="true"
+        >
+        </b-taginput>
       </b-field>
     </div>
-    <div class="tile is-4 is-child">
+    <div class="tile is-3 is-child">
+      <b-field label="Operator" style="width: 95%">
+        <b-select
+          placeholder="Select an operator"
+          :loading="loadingOperator"
+          @focus="loadOperators"
+          v-model="operator"
+          expanded
+        >
+        <option value="">-</option>
+          <option :value="op.email" :key="i" v-for="(op, i) in operators">
+            {{ op.firstname }} {{ op.lastname }}
+          </option>
+        </b-select>
+      </b-field>
+    </div>
+    <div class="tile is-3 is-child">
       <b-field label="Select datetime range [From]" style="width: 95%">
         <b-datetimepicker
           v-model="dateFrom"
@@ -25,13 +42,13 @@
           icon="calendar-today"
           :icon-right="'close-circle'"
           icon-right-clickable
-          @icon-right-click="dateFrom=null"
+          @icon-right-click="dateFrom = null"
           horizontal-time-picker
         >
         </b-datetimepicker>
       </b-field>
     </div>
-    <div class="tile is-4 is-child">
+    <div class="tile is-3 is-child">
       <b-field label="Select datetime range [to]" style="width: 95%">
         <b-datetimepicker
           v-model="dateTo"
@@ -40,7 +57,7 @@
           icon="calendar-today"
           :icon-right="'close-circle'"
           icon-right-clickable
-          @icon-right-click="dateTo=null"
+          @icon-right-click="dateTo = null"
           horizontal-time-picker
         >
         </b-datetimepicker>
@@ -50,11 +67,10 @@
 </template>
 <style>
 .dropdown-content > a {
-  text-align:left !important;
+  text-align: left !important;
 }
 </style>
 <style scoped>
-
 .btable {
   font-size: 13px;
 }
@@ -66,9 +82,8 @@ article > .panel-heading {
     rgba(40, 127, 207, 1) 100%
   );
 }
-.tile
-{
-  margin-bottom:10px;
+.tile {
+  margin-bottom: 10px;
 }
 </style>
 <script>
@@ -83,25 +98,40 @@ export default {
     //HelloWorld
   },
   methods: {
-    TagsChanged()
-    {
-      this.$store.commit("chat/setFilter", {tags: this.tags});
-      this.loadChats()
+    TagsChanged() {
+      this.$store.commit("chat/setFilter", { tags: this.tags });
+      this.loadChats();
     },
-     getFilteredTags(text) {
-                this.filteredTags = this.tagsList.filter((option) => {
-                    return option
-                        .toString()
-                        .toLowerCase()
-                        .indexOf(text.toLowerCase()) >= 0
-                })
-            },
-  ...mapActions({
+    getFilteredTags(text) {
+      this.filteredTags = this.tagsList.filter((option) => {
+        return option.toString().toLowerCase().indexOf(text.toLowerCase()) >= 0;
+      });
+    },
+    loadOperators() {
+      if (this.operators.length == 0) {
+        this.loadingOperator = true;
+        this.$api
+          .get(
+            `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=`
+          )
+          .then(({ data }) => {
+            this.operators = data.data;
+          })
+          .catch((error) => {
+            this.operators = [];
+            throw error;
+          })
+          .finally(() => {
+            this.loadingOperator = false;
+          });
+      }
+    },
+    ...mapActions({
       loadChats: "chat/loadChats",
     }),
     clearField(field) {
-      this[field] = null
-       this.$store.commit("chat/setFilter", {[field]: null});
+      this[field] = null;
+      this.$store.commit("chat/setFilter", { [field]: null });
     },
     constructParams() {
       const params = {
@@ -111,18 +141,18 @@ export default {
       };
       return params;
     },
-    createUTCDatetime(datetime)
-    {
-      return this.moment(datetime).utc().format('YYYY-MM-DDTHH:mm:SS')+'.000000Z'
+    createUTCDatetime(datetime) {
+      return (
+        this.moment(datetime).utc().format("YYYY-MM-DDTHH:mm:SS") + ".000000Z"
+      );
     },
     parseDateTime(dateTime) {
       return this.moment(dateTime).format("YYYY-MM-DD HH:DD:SS");
     },
   },
-  mounted() {
-  },
+  mounted() {},
   computed: {
-  //  ...mapState(["chats", "chatsPage", "chatsLoading"]),
+    //  ...mapState(["chats", "chatsPage", "chatsLoading"]),
   },
   data() {
     return {
@@ -130,23 +160,27 @@ export default {
       dateTo: null,
       tagsinput: [],
       filteredTags: [],
-      tags: []
+      tags: [],
+      loadingOperator: false,
+      operators: [],
+      operator: "",
     };
   },
-  watch:
-  {
-    dateFrom(val)
-    {
-         var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
-         this.$store.commit("chat/setFilter", {dateFrom: datefromparsed});
-         this.loadChats()
+  watch: {
+    dateFrom(val) {
+      var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
+      this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
+      this.loadChats();
     },
-    dateTo(val)
-    {
-        var datetoparsed = val !== null ? this.createUTCDatetime(val) : null;
-        this.$store.commit("chat/setFilter", {dateTo: datetoparsed});
-        this.loadChats()
-    }
-  }
+    dateTo(val) {
+      var datetoparsed = val !== null ? this.createUTCDatetime(val) : null;
+      this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
+      this.loadChats();
+    },
+    operator(val) {
+      this.$store.commit("chat/setFilter", { operator: val });
+      this.loadChats();
+    },
+  },
 };
 </script>
