@@ -1,5 +1,5 @@
 <template>
-  <article style="background: rgb(152 212 255); padding: 5px">
+  <article style="padding: 5px" id="chatlisttable">
     <span
       class="is-family-sans-serif"
       style="float: left; margin-top: 20px; font-size: 20px"
@@ -85,7 +85,7 @@
         {{ props.row.customer.ip }}
       </b-table-column>
       <b-table-column field="date" label="Follow up" width="160" v-slot="props">
-          <TableFollowUp :row="props.row" afterClickAction="loadChats" />
+          <TableFollowUp :row="props.row" afterClickAction="loadChats" style="text-align: center" />
       </b-table-column>
       <b-table-column
         field="orderid"
@@ -111,25 +111,46 @@
     </b-table>
   </article>
 </template>
+<style scoped>
+
+</style>
 <style >
+#chatlisttable .table
+{
+border-collapse: collapse !important;
+}
+#chatlisttable .table td {
+  border: 1px solid rgb(255, 255, 255);
+    margin: 3px;  
+}
+#chatlisttable th span
+{
+  margin: 0 auto;
+  text-align:center;
+}
+#chatlisttable th 
+{
+  border:0;
+}
 .is-latefollowup {
-  background: rgb(255, 129, 129) !important;
+  background: rgb(252, 186, 186) !important;
 }
 .is-cannotoffer {
-  background: rgb(251, 255, 0) !important;
+  background: rgb(254, 255, 190) !important;
 }
 .is-duplicate {
-  background: rgb(204, 204, 204) !important;
+  background: rgb(219, 219, 219) !important;
 }
 .is-directsale {
-  background: rgb(100, 255, 126) !important;
+  background: rgb(170, 255, 184) !important;
   color: #000;
 }
 .btable {
   font-size: 13px;
 }
 .btable th {
-  background: rgb(77, 144, 245);
+  background: white;
+
   font-size: 14px;
   color: white !important;
   text-transform: uppercase;

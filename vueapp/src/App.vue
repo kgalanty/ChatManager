@@ -1,49 +1,85 @@
 <template>
   <div id="app">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css"
+    />
     <!-- <div id="nav" class="hover">
        <router-link to="/">Home</router-link> 
       <router-link to="/about">About</router-link>
     </div> -->
-    <router-view/>
+    <router-view />
   </div>
 </template>
 <style>
-.pagination-list a
-{
+@font-face {
+  font-family: "Manrope";
+  font-display: swap;
+  src: url(fonts/Manrope-Regular.8ae23f32.woff2) format("woff2"),
+    url(fonts/Manrope-Regular.871132a5.woff) format("woff");
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Manrope";
+  font-display: swap;
+  src: url(fonts/Manrope-Medium.5db70385.woff2) format("woff2"),
+    url(fonts/Manrope-Medium.e59358f6.woff) format("woff");
+  font-weight: 500;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Manrope";
+  font-display: swap;
+  src: url(fonts/Manrope-Bold.09745328.woff2) format("woff2"),
+    url(fonts/Manrope-Bold.ec201dfb.woff) format("woff");
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Manrope";
+  font-display: swap;
+  src: url(fonts/Manrope-ExtraBold.6fdca7c1.woff2) format("woff2"),
+    url(fonts/Manrope-ExtraBold.014a33bb.woff) format("woff");
+  font-weight: 800;
+  font-style: normal;
+}
+.pagination-list a {
   background: white;
 }
-.pagination-link
-{
+.pagination-link {
   background: white;
+}
+body {
+  font-family: "Manrope",arial,sans-serif;
 }
 </style>
 <style scoped>
-
 #app .hover a {
   text-decoration: none;
   position: relative;
-  margin:0 10px;
+  margin: 0 10px;
 }
 #app .hover a::after {
   position: absolute;
   content: "";
-  height: .05em;
+  height: 0.05em;
   top: 100%;
-  background: rgb(26,77,128);
+  background: rgb(26, 77, 128);
   z-index: 100;
   left: 0;
   right: 0;
   transform: scaleX(0);
-  transition: transform .3s cubic-bezier(.95, .05, .795, .035);
+  transition: transform 0.3s cubic-bezier(0.95, 0.05, 0.795, 0.035);
 }
 
 #app .hover a:hover::after {
-  transition-timing-function: cubic-bezier(.19, 1, .22, 1);  
+  transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
   transform: scaleX(1);
 }
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  /* font-family: Avenir, Helvetica, Arial, sans-serif; */
+  font-family: "Manrope",arial,sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

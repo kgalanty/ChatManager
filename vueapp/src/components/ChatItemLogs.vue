@@ -1,5 +1,5 @@
 <template>
-      <article style="">
+      <article style="" id="chatitemlogs">
       <b-table
         class="btable"
         :data="logs.data"
@@ -56,6 +56,10 @@
       </b-table></article>
 </template>
 <style >
+#chatitemlogs th span 
+{
+  margin: 0 auto;
+}
 .btable {
   font-size: 13px;
 }
@@ -66,6 +70,7 @@
   color:white !important;
   text-transform: uppercase;
   text-align:center !important;
+  margin:0 auto;
 }
 
 </style>

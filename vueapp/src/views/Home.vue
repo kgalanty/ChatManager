@@ -1,7 +1,7 @@
 <template>
   <div class="panel-block loading-container">
     <article
-      class="panel is-primary column is-full"
+      class="panel column is-full"
       style="width: 100% !important"
     >
       <p class="panel-heading" style="padding-left: 20px !important">Filters</p>
@@ -24,11 +24,7 @@
 }
 article > .panel-heading {
   background: rgb(165, 197, 255);
-  background: linear-gradient(
-    180deg,
-    rgba(165, 197, 255, 1) 0%,
-    rgba(40, 127, 207, 1) 100%
-  );
+  
 }
 </style>
 <script>

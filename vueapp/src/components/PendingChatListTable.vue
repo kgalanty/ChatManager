@@ -1,6 +1,7 @@
 <template>
   <article
-    style="background: #ff7373; padding: 5px"
+  id="pendingchatlisttable"
+    style="background: #f14668; color: white;padding: 5px;border-radius:5px;"
     v-if="pendingchats && pendingchats.data && pendingchats.data.length > 0"
   >
     <span
@@ -82,7 +83,7 @@
         {{ props.row.customer.ip }}
       </b-table-column>
       <b-table-column label="Follow up" width="160" v-slot="props" >
-        <TableFollowUp :row="props.row" afterClickAction="loadPendingChats" />
+        <TableFollowUp :row="props.row" afterClickAction="loadPendingChats"  style="text-align: center" />
       </b-table-column>
       <b-table-column
         field="orderid"
@@ -104,24 +105,25 @@
     </b-table>
   </article>
 </template>
+<style scoped>
+
+</style>
 <style >
 .btable {
   font-size: 13px;
 }
 .btable th {
-  background: rgb(77, 144, 245);
   font-size: 14px;
-  color: white !important;
+  color: rgb(139, 140, 145) !important;
   text-transform: uppercase;
   text-align: center !important;
+ 
 }
-article > .panel-heading {
-  background: rgb(165, 197, 255);
-  background: linear-gradient(
-    180deg,
-    rgba(165, 197, 255, 1) 0%,
-    rgba(40, 127, 207, 1) 100%
-  );
+#pendingchatlisttable th span
+{
+   
+  margin: 0 auto;
+  text-align:center;
 }
 </style>
 <script>
