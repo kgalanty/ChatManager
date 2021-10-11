@@ -21,7 +21,14 @@ class Tags extends API
             return ['data' => $results];
 
         }
-        
+        elseif($_GET['a'] == 'GetDistinctTags')
+        {
+            $tags = [];
+            $results = Tag::distinct()->get(['tag']);
+            for($i=0;$i<count($results);$i++) $tags[]=strtolower($results[$i]->tag);
+            return ['result' => 'success', 'data' => $tags];
+
+        }
         //     $query= $_GET['q'];
 
         //     if($query)

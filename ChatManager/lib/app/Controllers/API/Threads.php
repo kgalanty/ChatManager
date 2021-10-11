@@ -52,10 +52,10 @@ class Threads extends APIProtected
         }
         $threaddata = $thread->first();
         $update = [];
-        if ($name && $name != $threaddata->customer->name && $threaddata->name == null) {
+        if ($name && $name != $threaddata->customer->name ) {
             $update['name'] = $name;
         }
-        if ($email && $email != $threaddata->customer->email && $threaddata->email == null) {
+        if ($email && ($email != $threaddata->customer->email || ($threaddata->email && $threaddata->email != $email))) {
             $update['email'] = $email;
         }
         //if ($domain) {
@@ -80,7 +80,6 @@ class Threads extends APIProtected
         // notes: this.notes,
         // customoffer: this.customoffer,
         if (count($update) > 0) {
-            $thread->update($update);
             return 'success';
         }
         return 'Nothing has been changed';

@@ -6,6 +6,10 @@ export default {
   },
   methods:
   {
+    showAllChats(customerid) {
+      window.open("https://my.livechatinc.com/archives/?query=" + customerid);
+      //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
+    },
     showfollowup(row) {
       return row.tags.find((e) => {
         if (e.tag == "wcb" && e.approved == 1 && row.orderid == null) {

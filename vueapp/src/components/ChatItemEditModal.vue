@@ -1,6 +1,6 @@
 <template>
   <form action="">
-    <div class="modal-card" style="width: 1200px">
+    <div class="modal-card" style="width: 95vw">
       <header class="modal-card-head">
         <p class="modal-card-title">Edit chat {{ item.threadid }}</p>
         <button type="button" class="delete" @click="$emit('close')" />
@@ -31,7 +31,7 @@
                 icon-right="magnify"
                 type="is-info"
                 :loading="loadingCheckBtn"
-                @click="checkOrder"
+                @click="checkOrder(false)"
               />
             </b-field>
             <b-field label="Cannot offer reason" v-if="HasCustomOffer">
@@ -57,7 +57,7 @@
                 expanded
               ></b-input>
             </b-field>
-            <b-field label="Agent" v-if="groupMember === 2">
+            <b-field label="Agent" v-if="isAdmin()">
               <b-autocomplete
                 v-model="agent"
                 ref="autocomplete"
@@ -65,7 +65,7 @@
                 @select="(option) => (selectedAgent = option)"
                 field="email"
                 @typing="getAgents"
-                :loading="isFetchingAgents"
+                :loading="loading.isFetchingAgents"
               >
                 <template slot-scope="props">
                   <div class="media">
@@ -90,6 +90,7 @@
                 striped
                 narrowed
               >
+                <template #empty>There is no tag here yet. </template>
                 <b-table-column field="date" label="Tag" v-slot="props">
                   <b-tag
                     :type="
@@ -112,7 +113,7 @@
                       type="is-success"
                       style="font-size: 0.8rem !important"
                       @click="approveTag(props.row)"
-                      v-if="groupMember === 2 && props.row.approved == 0" />
+                      v-if="isAdmin() && props.row.approved == 0" />
                     <b-button
                       icon-right="delete"
                       type="is-danger"
@@ -128,23 +129,27 @@
                 style="float: left"
                 v-model="newtag"
                 expanded
+                :disabled="loading.addtagBtnLoading"
               >
                 <option :value="tag" :key="i" v-for="(tag, i) in tagsList">
                   {{ tag }}
-                </option> </b-select
+                </option>
+                <option value="-addnew-">-Add New-</option> </b-select
               ><b-button
                 style="float: left"
                 icon-right="plus"
                 type="is-info"
                 @click="addtag"
-              />
+                :loading="loading.addtagBtnLoading"
+                >Add Tag</b-button
+              >
             </b-field>
 
             <b-collapse
               :open="false"
               position="is-top"
               animation="slide"
-              v-if="groupMember == 2"
+              v-if="isAdmin()"
             >
               <template #trigger="props">
                 <a aria-controls="contentIdForA11y1">
@@ -163,7 +168,7 @@
                   :data="tagslog"
                   narrowed
                   :per-page="5"
-                  :loading="tagsLogLoading"
+                  :loading="loading.tagsLogLoading"
                 >
                   <template #empty>
                     <div class="has-text-centered">No entries</div>
@@ -233,7 +238,7 @@
                   inverted
                   outlined
                   @click="sendToReview"
-                  :loading="sendReviewLoadingBtn"
+                  :loading="loading.sendReviewLoadingBtn"
                   >Send to review</b-button
                 >
               </div>
@@ -244,7 +249,7 @@
               :data="reviewRequests"
               narrowed
               :per-page="5"
-              v-if="groupMember == 2"
+              v-if="isAdmin()"
             >
               <template #empty>
                 <div class="has-text-centered">No entries</div>
@@ -301,7 +306,7 @@
           label="Save changes"
           type="is-primary"
           @click="save"
-          :loading="saveLoadingBtn"
+          :loading="loading.saveLoadingBtn"
         />
       </footer>
     </div>
@@ -310,20 +315,24 @@
 <script>
 import ChatItemLogs from "./ChatItemLogs.vue";
 import debounce from "lodash/debounce";
-import { mapActions, mapState } from "vuex";
+import { mapActions } from "vuex";
 import { dateMixin } from "../mixins/dateMixin.js";
+import { tagsMixin } from "../mixins/tagsMixin";
+import memberMixin from "../mixins/memberMixin";
 export default {
   name: "ChatItemEditModal",
   props: ["item"],
-  mixins: [dateMixin],
+  mixins: [dateMixin, tagsMixin, memberMixin],
   components: { ChatItemLogs },
   computed: {
-    ...mapState(["groupMember"]),
     reviewTabHeader() {
       if (this.reviewStatus == 1) {
         return "reviewTabHeader";
       }
       return "";
+    },
+    tagsList() {
+      return this.$store.state.tags.tags;
     },
   },
   methods: {
@@ -331,9 +340,10 @@ export default {
       loadChats: "chat/loadChats",
       getPermissions: "getPermissions",
       loadLogs: "chatlogs/loadLogs",
+      loadTags: "tags/loadTags",
     }),
     getAgents: debounce(function (name) {
-      this.isFetchingAgents = true;
+      this.loading.isFetchingAgents = true;
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=${name}`
@@ -346,7 +356,7 @@ export default {
           throw error;
         })
         .finally(() => {
-          this.isFetchingAgents = false;
+          this.loading.isFetchingAgents = false;
         });
     }, 500),
     MarkReviewComment(commentid) {
@@ -386,7 +396,7 @@ export default {
         });
         return;
       }
-      this.sendReviewLoadingBtn = true;
+      this.loading.sendReviewLoadingBtn = true;
       const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join(
         "&"
       );
@@ -400,7 +410,7 @@ export default {
           if (response.data == "success") {
             // this.$emit("close")
             //this.loadChats()
-            if (this.groupMember == 2) {
+            if (this.isAdmin()) {
               this.loadReviews();
             }
             this.loadReviewStatus();
@@ -418,7 +428,7 @@ export default {
               type: "is-warning",
             });
           }
-          this.sendReviewLoadingBtn = false;
+          this.loading.sendReviewLoadingBtn = false;
         });
     },
     deleteTag(tag) {
@@ -433,8 +443,9 @@ export default {
             // this.$emit("close")
             //this.loadChats()
             var msg = "";
-            if (this.groupMember == 2) msg = "You deleted the tag.";
+            if (this.isAdmin()) msg = "You deleted the tag.";
             else msg = "You proposed the tag deletion.";
+
             this.$buefy.toast.open({
               container: ".modal-card",
               message: msg ?? "",
@@ -442,6 +453,7 @@ export default {
             });
             this.getTags();
             this.loadTagsHistory();
+            this.HasCustomOfferCheck();
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -477,7 +489,7 @@ export default {
           }
         });
     },
-     checkOrder(onlyreturn = false) {
+    checkOrder(onlyreturn = false) {
       if (!this.selectedOrder) {
         // this.OrderStatusField = "is-danger";
         return true;
@@ -493,27 +505,29 @@ export default {
             threadid: this.item.id,
           })
           .then((response) => {
-            console.log(response);
             if (response.data == "success") {
               // this.$emit("close")
               //this.loadChats()
-              if (!onlyreturn)
+              if (!onlyreturn) {
                 this.$buefy.toast.open({
                   container: ".modal-card",
                   message: "This Order is new.",
                   type: "is-success",
                 });
+              }
               this.loadingCheckBtn = false;
-              resolve('success');
+              resolve("success");
               return 1;
             } else {
-              if (!onlyreturn)
+              if (!onlyreturn) {
                 this.$buefy.toast.open({
                   container: ".modal-card",
                   message: response.data,
                   type: "is-warning",
+                  duration: 5000,
                 });
-                resolve(response.data)
+              }
+              resolve(response.data);
               this.loadingCheckBtn = false;
               return 0;
             }
@@ -521,23 +535,21 @@ export default {
       });
     },
     async save() {
-      this.saveLoadingBtn = true;
-     if(this.selectedOrder) {
-       console.log(this.selectedOrder)
-      const checkorder = await this.checkOrder(true);
-      console.log(checkorder);
-      if (checkorder != 'success' ) {
-        this.$buefy.toast.open({
-          container: ".modal-card",
-          message: "This order id is already assigned to another thread.",
-          type: "is-warning",
-        });
-        this.saveLoadingBtn = false;
-        return;
-      }
+      this.loading.saveLoadingBtn = true;
+      if (this.selectedOrder) {
+        const checkorder = await this.checkOrder(true);
+        if (checkorder != "success") {
+          this.$buefy.toast.open({
+            container: ".modal-card",
+            message: "This order id is already assigned to another thread.",
+            type: "is-warning",
+          });
+          this.loading.saveLoadingBtn = false;
+          return;
+        }
       }
       const params = [`module=ChatManager`, `c=Threads`, `json=1`].join("&");
-      this.loadingSaveBtn = true;
+      this.loading.loadingSaveBtn = true;
 
       var cannotofferReason = this.cannotofferCustom
         ? this.cannotofferCustom
@@ -569,10 +581,11 @@ export default {
               type: "is-warning",
             });
           }
-          this.saveLoadingBtn = false;
+          this.loading.loadingSaveBtn = false;
         });
     },
     addtag() {
+      this.loading.addtagBtnLoading = true;
       const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
       this.$api
         .post(`addonmodules.php?${params}`, {
@@ -586,7 +599,7 @@ export default {
             //this.loadChats()
             this.getTags();
             var msg = "";
-            if (this.groupMember == 2) msg = "Added new tag";
+            if (this.isAdmin()) msg = "Added new tag";
             else msg = "Added to review by supervisor.";
             this.$buefy.toast.open({
               message: msg,
@@ -599,6 +612,7 @@ export default {
               type: "is-warning",
             });
           }
+          this.loading.addtagBtnLoading = false;
         });
     },
     getTags() {
@@ -612,22 +626,27 @@ export default {
         });
     },
     loadTagsHistory() {
-      this.tagsLogLoading = true;
+      this.loading.tagsLogLoading = true;
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=TagsHistory&json=1&a=GetTagsLog&threadid=${this.item.id}`
         )
         .then(({ data }) => {
           this.tagslog = data.data;
-          this.tagsLogLoading = false;
+          this.loading.tagsLogLoading = false;
         });
     },
     HasCustomOfferCheck() {
-      if (this.item.customoffer && !this.cannotofferReasons.includes(this.item.customoffer)) {
+      //sprawdzic czemu po usunieciu taga nadal wyswietla sie pole cannot offer z listą
+      if (
+        this.item.customoffer &&
+        !this.cannotofferReasons.includes(this.item.customoffer)
+      ) {
         this.cannotoffer = "Other";
         this.cannotofferCustom = this.item.customoffer;
       }
       var that = this;
+      this.HasCustomOffer = false;
       this.tags.forEach((element) => {
         if (element.tag == "cannot offer") {
           that.HasCustomOffer = true;
@@ -642,7 +661,7 @@ export default {
         )
         .then(({ data }) => {
           if (data.result == "success") {
-            this.reviewStatus = data.data;
+            this.reviewStatus = data.data
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -697,18 +716,18 @@ export default {
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
     this.agent = this.item.agent;
-    this.getPermissions().then(() => {
-      if (this.groupMember == 2) {
-        this.loadTagsHistory();
-        this.loadReviews();
-      } else {
-        this.loadReviewStatus();
-      }
-    });
+
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
 
     this.HasCustomOfferCheck();
+   this.getPermissions().then(() => {
+      if (this.isAdmin()) {
+        // this.loadTagsHistory();
+        this.loadReviews();
+      } 
+        this.loadReviewStatus();
+    });
   },
   watch: {
     cannotoffer() {
@@ -719,95 +738,102 @@ export default {
         //if tab is switched to Logs...
         this.loadLogs({ itemid: this.item.id });
       }
+      if (val == 1) {
+        this.loadTags();
+        if (this.isAdmin()) {
+          this.loadTagsHistory();
+        }
+      }
+      if (val == 2) {
+        this.getPermissions().then(() => {
+          if (this.isAdmin()) {
+            // this.loadTagsHistory();
+            this.loadReviews();
+          } else {
+            this.loadReviewStatus();
+          }
+        });
+      }
     },
-    //watch selection of client and read service when client is selected
-    // selectedClient(val) {
-    //   if (val) {
-    //     this.$api
-    //       .get(
-    //         `addonmodules.php?module=ChatManager&c=ClientsServices&json=1&cid=${val.id}`
-    //       )
-    //       .then(({ data }) => {
-    //         this.services = data.data;
-    //         // data.data.forEach((item) => this.services.push(item));
-    //       })
-    //       .catch((error) => {
-    //         this.services = [];
-    //         throw error;
-    //       });
-    //   } else {
-    //     this.services = [];
-    //     this.selectedService = null;
-    //   }
-    // },
-    // selectedService(val) {
-    //   if (val) {
-    //     this.services.forEach((item) => {
-    //       if (item.id == val) this.selectedOrder = item.orderid;
-    //       return;
-    //     });
-    //   }
-    // },
+    newtag(val) {
+      if (val == "-addnew-") {
+        this.newtag = "";
+        this.$buefy.dialog.prompt({
+          message: `Insert new tag`,
+          inputAttrs: {
+            placeholder: "",
+            maxlength: 20,
+          },
+          trapFocus: true,
+          onConfirm: (value) => {
+            this.newtag = value;
+            this.addtag();
+          },
+        });
+      }
+    },
   },
   data() {
     return {
+      loading: {
+        addtagBtnLoading: false,
+        tagsLogLoading: false,
+        saveLoadingBtn: false,
+        sendReviewLoadingBtn: false,
+        loadingSaveBtn: false,
+        isFetchingAgents: false,
+      },
       activeTab: 0,
-      isFetchingAgents: false,
       selectedAgent: "",
       filteredAgentArray: [],
       agent: "",
       reviewStatus: 0,
       reviewRequests: [],
       commmentReview: "",
-      tagsLogLoading: false,
-      saveLoadingBtn: false,
-      sendReviewLoadingBtn: false,
       tags: [],
       order: "",
       clients: [],
       tagslog: [],
-      isFetchingClients: false,
       selectedClient: null,
       currentClient: null,
       services: [],
       selectedService: null,
       selectedOrder: null,
-      loadingSaveBtn: false,
       newtag: null,
       name: null,
       email: null,
       domain: null,
       notes: "",
-      tagsList: [
-        "sales",
-        "wcb",
-        "directsale",
-        "convertedsale",
-        "notsure",
-        "georgistatev",
-        "upgrade",
-        "upsell",
-        "firstlastname",
-        "elvira",
-        "ivaylo",
-        "domain",
-        "pushupsell",
-        "tegan",
-        "cycle",
-        "promocode",
-        "emiliy",
-        "deni",
-        "alexp",
-        "pushcycle",
-        "pending",
-        "#blackfriday",
-        "custom",
-        "phone",
-        "#4thjuly",
-        "duplicate",
-        "vps/ds",
-        "cannot offer",
-      ],
+      // tagsList: [
+      //   "sales",
+      //   "wcb",
+      //   "directsale",
+      //   "convertedsale",
+      //   "notsure",
+      //   "georgistatev",
+      //   "upgrade",
+      //   "upsell",
+      //   "firstlastname",
+      //   "elvira",
+      //   "ivaylo",
+      //   "domain",
+      //   "pushupsell",
+      //   "tegan",
+      //   "cycle",
+      //   "promocode",
+      //   "emiliy",
+      //   "deni",
+      //   "alexp",
+      //   "pushcycle",
+      //   "pending",
+      //   "#blackfriday",
+      //   "custom",
+      //   "phone",
+      //   "#4thjuly",
+      //   "duplicate",
+      //   "vps/ds",
+      //   "cannot offer",
+      // ],
       cannotofferReasons: [
         "Pricing ( Reseller/Starter Shared)",
         "Accepting Bitcoins/Cryptocurrencies",

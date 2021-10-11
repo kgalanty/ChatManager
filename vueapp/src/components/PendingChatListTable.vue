@@ -1,7 +1,7 @@
 <template>
   <article
-  id="pendingchatlisttable"
-    style="background: #f14668; color: white;padding: 5px;border-radius:5px;"
+    id="pendingchatlisttable"
+    style="background: #f14668; color: white; padding: 5px; border-radius: 5px"
     v-if="pendingchats && pendingchats.data && pendingchats.data.length > 0"
   >
     <span
@@ -23,10 +23,10 @@
       pagination-position="top"
       :row-class="colorRows"
     >
-      <b-table-column field="date" label="Date" v-slot="props" width="160">
+      <b-table-column field="date" label="Date" v-slot="props" width="100">
         {{ parseDateTime(props.row.date) }}
       </b-table-column>
-      <b-table-column field="date" label="Operator" v-slot="props" width="160">
+      <b-table-column field="date" label="Operator" v-slot="props">
         {{ props.row.agent }}
       </b-table-column>
       <b-table-column
@@ -35,9 +35,19 @@
         v-slot="props"
         width="160"
       >
-        {{ props.row.threadid }}
+        <b-tooltip label="Click to open chat in LiveChat (new window)">
+          <b-button
+            type="is-primary"
+            size="is-small"
+            outlined
+            v-if="props.row.users"
+            icon-left="arrow-top-right"
+            @click="showAllChats(props.row.threadid)"
+            >{{ props.row.threadid }}</b-button
+          >
+        </b-tooltip>
       </b-table-column>
-      <b-table-column field="tags" label="Tags" v-slot="props" width="160">
+      <b-table-column field="tags" label="Tags" v-slot="props">
         <b-taglist>
           <span
             :key="index"
@@ -51,14 +61,15 @@
           >
         </b-taglist>
       </b-table-column>
-      <b-table-column field="date" label="All Chats" v-slot="props" width="160">
+      <b-table-column field="date" label="All Chats" v-slot="props">
         <b-button
           type="is-primary"
+          size="is-small"
           outlined
           v-if="props.row.users"
           icon-left="arrow-top-right"
           @click="showAllChats(props.row.users)"
-          >Show All Chats</b-button
+          >All Chats</b-button
         >
       </b-table-column>
       <b-table-column field="date" label="Name" v-slot="props" width="160">
@@ -82,8 +93,12 @@
       <b-table-column field="date" label="IP" v-slot="props" width="160">
         {{ props.row.customer.ip }}
       </b-table-column>
-      <b-table-column label="Follow up" width="160" v-slot="props" >
-        <TableFollowUp :row="props.row" afterClickAction="loadPendingChats"  style="text-align: center" />
+      <b-table-column label="Follow up" width="160" v-slot="props">
+        <TableFollowUp
+          :row="props.row"
+          afterClickAction="loadPendingChats"
+          style="text-align: center"
+        />
       </b-table-column>
       <b-table-column
         field="orderid"
@@ -93,20 +108,19 @@
       >
         {{ props.row.orderid }}
       </b-table-column>
-      <b-table-column label="Extra Points" width="160"> points </b-table-column>
-      <b-table-column field="date" label="Edit" v-slot="props" width="160">
+      <b-table-column label="Extra Points" width="160" v-slot="props" ><TablePoints :tags="props.row.tags" /></b-table-column>
+      <b-table-column field="date" label="Edit" v-slot="props" width="60">
         <b-button
           type="is-primary"
           icon-left="pencil"
           @click="editModal(props.row)"
-          >Edit</b-button
+          ></b-button
         >
       </b-table-column>
     </b-table>
   </article>
 </template>
 <style scoped>
-
 </style>
 <style >
 .btable {
@@ -117,13 +131,10 @@
   color: rgb(139, 140, 145) !important;
   text-transform: uppercase;
   text-align: center !important;
- 
 }
-#pendingchatlisttable th span
-{
-   
+#pendingchatlisttable th span {
   margin: 0 auto;
-  text-align:center;
+  text-align: center;
 }
 </style>
 <script>
@@ -132,19 +143,16 @@
 import { mapActions, mapState } from "vuex";
 import "buefy/dist/buefy.css";
 import ChatItemEditModal from "./ChatItemEditModal.vue";
-import TableFollowUp from "./TableFollowUp.vue"
+import TableFollowUp from "./TableFollowUp.vue";
 import tablecolorrowsMixin from "../mixins/tablecolorrowsMixin";
+import TablePoints from "./TablePoints.vue";
 import tableHelper from "../mixins/tableHelper";
 export default {
   name: "PendingChatListTable",
   mixins: [tablecolorrowsMixin, tableHelper],
-  components: {TableFollowUp},
+  components: { TableFollowUp, TablePoints },
   methods: {
     ...mapActions("chat", ["loadPendingChats", "loadChats"]),
-    showAllChats(customerid) {
-      window.open("https://my.livechatinc.com/archives/?query=" + customerid);
-      //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
-    },
     isEditActive(row) {
       row.tags.find((e) => {
         if (e.tag == "duplicate" && e.approved == 1) {
@@ -153,7 +161,7 @@ export default {
       });
       return true;
     },
-    
+
     editModal(item) {
       const modal = this.$buefy.modal.open({
         parent: this,
@@ -161,7 +169,7 @@ export default {
         hasModalCard: true,
         props: { item },
         trapFocus: true,
-        width: 1200,
+        width: "auto",
       });
       modal.$on("close", () => {
         this.loadChats();
@@ -181,6 +189,7 @@ export default {
   },
   computed: {
     ...mapState("chat", ["pendingchats", "pendingChatsLoading"]),
+    //...mapState('chatcolumns', ['filters']),
   },
   data() {
     return {

@@ -13,7 +13,7 @@ class FindOrderHelper
 {
     public static function findDomain($currentCustomer, $referenceDate)
     {
-        $orderNumber = DB::table('tblorders o')
+        $orderNumber = DB::table('tblorders as o')
         ->where('o.userid', $currentCustomer->id)
         ->where('o.date', '>', DateTimeHelper::setFormat($referenceDate, 'Y-m-d H:i:s'))
         ->count();

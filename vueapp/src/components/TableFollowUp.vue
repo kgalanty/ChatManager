@@ -6,6 +6,7 @@
       v-if="row.followup && row.followup.length < 2"
       :disabled="disabled"
       :loading="loading"
+      size="is-small"
       >Confirm</b-button
     ><b-field>
       <b-tag

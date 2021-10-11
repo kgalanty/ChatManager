@@ -23,6 +23,10 @@ class Logs
             ]
         );
     }
+    public static function CreatedByID($threadid, $doer)
+    {
+        self::log($threadid, 'Thread', $doer, 'Created manually');
+    }
     public static function SendToReview($itemid, $doer)
     {
         self::log($itemid, 'Thread', $doer, 'Sent to review');

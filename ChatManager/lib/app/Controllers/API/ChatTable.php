@@ -34,6 +34,7 @@ class ChatTable extends API
         $page = $_GET['page'] == 1 ? 0 : ($_GET['page'] - 1) * $_GET['perpage'];
         $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
         $myemail = Admin::where('id', $_SESSION['adminid'])->value('email');
+        $tags = $_GET['tags'];
         $operator = $_GET['operator'] != '' ? trim($_GET['operator']) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
@@ -41,13 +42,31 @@ class ChatTable extends API
             $q->where('pending', '0');
         }])
             ->with(['tags', 'customer'])
-            ->orderBy('id', 'DESC');
+           ;
         if ($_GET['datefrom']) {
             $result->whereBetween('date', [$_GET['datefrom'], $dateTo]);
         }
         if($operator)
         {
             $result->where('agent', $operator);
+        }
+        if($tags)
+        {
+            $result->whereHas('tags', function($query) use ($tags)
+            {
+                $query->whereIn('tag', explode(',', $tags));
+            });
+        }
+        if($_GET['q'])
+        {
+            $q = trim($_GET['q']);
+            $result->whereHas('customer', function($query) use ($q)
+            {
+                $query->where('email', 'LIKE', '%'.$q.'%');
+            })
+            ->orWhere('threadid', 'LIKE', '%'.$q.'%')
+            ->orWhere('email', 'LIKE', '%'.$q.'%')
+            ->orWhere('domain', 'LIKE', '%'.$q.'%')->orWhere('orderid', 'LIKE', '%'.$q.'%');
         }
         if(AuthControl::isAgent())
         {
@@ -58,7 +77,8 @@ class ChatTable extends API
             $result->has('pendingReviews', '0');
         }
         $total = $result->count();
-        $result = $result->skip($page)->take($perpage)->get();
+        $result = $result->skip($page)->take($perpage)->orderBy('date', 'DESC')
+        ->get();
         return ['data' => $result, 'total' => $total];
         //     $results = DB::table('tbladmins as a')
         //    ->orderBy('a.firstname', 'ASC')

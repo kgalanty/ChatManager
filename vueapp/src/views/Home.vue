@@ -4,11 +4,16 @@
       class="panel column is-full"
       style="width: 100% !important"
     >
-      <p class="panel-heading" style="padding-left: 20px !important">Filters</p>
+          <p
+        class="panel-heading"
+      >
+        Columns Visibility
+      </p>
+      <ColumnsFilter />
+      <p class="panel-heading">Filters</p>
       <ChatFilters />
       <p
         class="panel-heading"
-        style="padding-left: 20px !important; margin-bottom: 20px"
       >
         Chats list
       </p>
@@ -19,11 +24,13 @@
   </div>
 </template>
 <style scoped>
-.btable {
-  font-size: 13px;
+.panel-heading
+{
+  padding-left: 0px !important; margin-bottom: 5px;
 }
+
 article > .panel-heading {
-  background: rgb(165, 197, 255);
+  background: rgb(226 226 226);
   
 }
 </style>
@@ -34,11 +41,12 @@ article > .panel-heading {
 import ChatListTable from '../components/ChatListTable.vue'
 import PendingChatListTable from '../components/PendingChatListTable.vue'
 import ChatFilters from '../components/ChatFilters.vue'
+import ColumnsFilter from '../components/ColumnsFilter.vue'
 import "buefy/dist/buefy.css";
 export default {
   name: "Home",
   components: {
-    ChatListTable, ChatFilters, PendingChatListTable
+    ChatListTable, ChatFilters, PendingChatListTable,ColumnsFilter
   },
   methods: {
    // ...mapActions([""]),

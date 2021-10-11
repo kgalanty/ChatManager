@@ -1,7 +1,7 @@
 <template>
       <article style="" id="chatitemlogs">
       <b-table
-        class="btable"
+        class="modaltable"
         :data="logs.data"
         bordered
         striped
@@ -72,7 +72,17 @@
   text-align:center !important;
   margin:0 auto;
 }
-
+.modaltable {
+  border: 1px solid black;
+}
+.modaltable thead {
+  background: rgb(165, 197, 255);
+  background: linear-gradient(
+    180deg,
+    rgba(165, 197, 255, 1) 0%,
+    rgba(119, 172, 255, 1) 100%
+  );
+}
 </style>
 <script>
 // @ is an alias to /src
@@ -90,7 +100,7 @@ export default {
     ...mapActions('chatlogs', ["loadLogs"]),
   },
   mounted() {
-    this.loadLogs({ itemid: this.threadid})
+    //this.loadLogs({ itemid: this.threadid})
   },
   computed: {
     ...mapState('chatlogs', ["logs", "loading"]),

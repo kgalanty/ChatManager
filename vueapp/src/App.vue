@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" v-cloak>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css"
@@ -12,6 +12,8 @@
   </div>
 </template>
 <style>
+[v-cloak] > * { display:none }
+[v-cloak]::before { content: "loading…" }
 @font-face {
   font-family: "Manrope";
   font-display: swap;

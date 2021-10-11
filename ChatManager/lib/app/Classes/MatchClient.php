@@ -18,7 +18,7 @@ class MatchClient
         $client = FindClientHelper::execute($params['customer']);
         if ($client) {
             $orderid = FindOrderHelper::execute($params['customer'], $params['chatitem']->thread->events[0]->created_at);
-            if ($orderid) {
+            if ($orderid && $orderid != 0) {
                 $domain = FindOrderHelper::findDomainByOrder($orderid);
             }
         }

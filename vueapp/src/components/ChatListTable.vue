@@ -1,15 +1,29 @@
 <template>
-  <article style="padding: 5px" id="chatlisttable">
+  <article style="padding: 2px" id="chatlisttable">
     <span
       class="is-family-sans-serif"
       style="float: left; margin-top: 20px; font-size: 20px"
-      >Chats:</span>
+      >Chats:
+      <b-tag rounded type="is-primary">{{
+        $store.state.chat.chats.total
+      }}</b-tag>
+      <b-button
+        type="is-primary"
+        outlined
+        size="is-small"
+        @click="OpenNewChatModal"
+        style="margin-left: 10px; display: inline-block"
+        v-if="isAdmin()"
+        >Add Chat Manually</b-button
+      >
+    </span>
     <b-table
       class="btable"
       :data="chats.data"
       bordered
       striped
       narrowed
+      detailed
       :total="chats.total"
       paginated
       backend-pagination
@@ -17,27 +31,62 @@
       @page-change="onPageChange"
       :per-page="25"
       :loading="this.chatsLoading"
-      pagination-position="top"
+      pagination-position="both"
       :row-class="colorRows"
+      scrollable
     >
-    <template #empty>No entries for given criteria. 
-      <!-- <b-button @click="resetFilters">Reset Filters</b-button> -->
+      <template #empty v-if="chatsLoading === false"
+        >No entries for given criteria.</template
+      >
+      <template #detail="props" v-if="isAdmin()">
+        <article style="text-align: left">
+          <strong>Notes:</strong> {{ props.row.notes }}
+        </article>
       </template>
-      <b-table-column field="date" label="Date" v-slot="props" width="160">
+      <b-table-column
+        field="date"
+        label="Date"
+        v-slot="props"
+        width="100"
+        :visible="filters['date'].display"
+      >
         {{ parseDateTime(props.row.date) }}
       </b-table-column>
-      <b-table-column field="date" label="Operator" v-slot="props" width="160">
-        {{ props.row.agent }}
+      <b-table-column
+        field="date"
+        label="Operator"
+        v-slot="props"
+        width="160"
+        :visible="filters['operator'].display"
+      >
+        {{ operator(props.row.agent) }}
       </b-table-column>
       <b-table-column
         field="threadid"
         label="Chat ID"
         v-slot="props"
         width="160"
+        :visible="filters['chatid'].display"
       >
-        {{ props.row.threadid }}
+        <b-tooltip label="Click to open chat in LiveChat (new window)">
+          <b-button
+            type="is-primary"
+            size="is-small"
+            outlined
+            v-if="props.row.users"
+            icon-left="arrow-top-right"
+            @click="showAllChats(props.row.threadid)"
+            >{{ props.row.threadid }}</b-button
+          >
+        </b-tooltip>
       </b-table-column>
-      <b-table-column field="tags" label="Tags" v-slot="props" width="160">
+      <b-table-column
+        field="tags"
+        label="Tags"
+        v-slot="props"
+        width="160"
+        :visible="filters['tags'].display"
+      >
         <b-taglist>
           <span
             :key="index"
@@ -51,86 +100,143 @@
           >
         </b-taglist>
       </b-table-column>
-      <b-table-column field="date" label="All Chats" v-slot="props" width="160">
+      <b-table-column
+        field="date"
+        label="All Chats"
+        v-slot="props"
+        width="100"
+        :visible="filters['allchats'].display"
+      >
         <b-tooltip label="Click to open LiveChat Archive in new window">
-        <b-button
-          type="is-primary"
-          outlined
-          v-if="props.row.users"
-          icon-left="arrow-top-right"
-          @click="showAllChats(props.row.users)"
-          >Show All Chats</b-button
-        >
+          <b-button
+            type="is-primary"
+            size="is-small"
+            outlined
+            v-if="props.row.users"
+            icon-left="arrow-top-right"
+            @click="showAllChats(props.row.users)"
+            >All Chats</b-button
+          >
         </b-tooltip>
       </b-table-column>
-      <b-table-column field="date" label="Name" v-slot="props" width="160">
+      <b-table-column
+        field="date"
+        label="Name"
+        v-slot="props"
+        :visible="filters['name'].display"
+      >
         <span v-if="props.row.name">{{ props.row.name }}</span
         ><span v-else>{{ props.row.customer.name }}</span>
       </b-table-column>
-      <b-table-column field="date" label="E-mail" v-slot="props" width="160">
-        <span v-if="props.row.email">{{ props.row.email }}</span
-        ><span v-else> {{ props.row.customer.email }}</span>
+      <b-table-column
+        field="date"
+        label="E-mail"
+        v-slot="props"
+        :visible="filters['email'].display"
+      >
+        <span class="emailTable" v-if="props.row.email">{{
+          props.row.email
+        }}</span
+        ><span v-else class="emailTable">{{ props.row.customer.email }}</span>
       </b-table-column>
-      <b-table-column field="date" label="Domain" v-slot="props" width="160">
+      <b-table-column
+        field="domain"
+        label="Domain"
+        v-slot="props"
+        :visible="filters['domain'].display"
+      >
         {{ props.row.domain }}
       </b-table-column>
-      <b-table-column field="date" label="Location" v-slot="props" width="160">
+      <b-table-column
+        field="customer.geolocation"
+        label="Location"
+        v-slot="props"
+        width="60"
+        :visible="filters['location'].display"
+      >
         {{
           props.row.customer.geolocation
-            ? JSON.parse(props.row.customer.geolocation).country
+            ? JSON.parse(props.row.customer.geolocation).country_code
             : ""
         }}
       </b-table-column>
-      <b-table-column field="date" label="IP" v-slot="props" width="160">
+      <b-table-column
+        field="customer.ip"
+        label="IP"
+        v-slot="props"
+        :visible="filters['ip'].display"
+      >
         {{ props.row.customer.ip }}
       </b-table-column>
-      <b-table-column field="date" label="Follow up" width="160" v-slot="props">
-          <TableFollowUp :row="props.row" afterClickAction="loadChats" style="text-align: center" />
+      <b-table-column
+        field=""
+        label="Follow up"
+        width="100"
+        v-slot="props"
+        :visible="filters['followup'].display"
+      >
+        <TableFollowUp
+          :row="props.row"
+          afterClickAction="loadChats"
+          style="text-align: center"
+        />
       </b-table-column>
       <b-table-column
         field="orderid"
         label="Order ID"
         width="160"
         v-slot="props"
+        :visible="filters['orderid'].display"
       >
         {{ props.row.orderid }}
       </b-table-column>
-      <b-table-column label="Extra Points" width="160" v-slot="props">
+      <b-table-column
+        field="tags"
+        label="Extra Points"
+        v-slot="props"
+        :visible="filters['extrapoints'].display"
+      >
         <TablePoints :tags="props.row.tags" />
-
       </b-table-column>
-      <b-table-column field="date" label="Edit" v-slot="props" width="160">
+      <b-table-column
+        field="date"
+        label="Edit"
+        v-slot="props"
+        width="80"
+        :visible="filters['edit'].display"
+      >
         <b-button
           type="is-primary"
           icon-left="pencil"
           @click="editModal(props.row)"
           :disabled="isEditActive(props.row)"
-          >Edit</b-button
-        >
+        ></b-button>
       </b-table-column>
     </b-table>
   </article>
 </template>
 <style scoped>
-
 </style>
 <style >
-#chatlisttable .table
-{
-border-collapse: collapse !important;
+.emailTable {
+  overflow-wrap: anywhere !important;
+  word-wrap: anywhere !important;
+  hyphens: auto !important;
+}
+
+#chatlisttable .table {
+  border-collapse: collapse !important;
 }
 #chatlisttable .table td {
   border: 1px solid rgb(255, 255, 255);
-    margin: 3px;  
+  margin: 3px;
 }
-#chatlisttable th span
-{
+#chatlisttable th span {
   margin: 0 auto;
-  text-align:center;
+  text-align: center;
 }
-#chatlisttable th 
-{
-  border:0;
+#chatlisttable th {
+  border: 0;
 }
 .is-latefollowup {
   background: rgb(252, 186, 186) !important;
@@ -147,6 +253,7 @@ border-collapse: collapse !important;
 }
 .btable {
   font-size: 13px;
+  padding: -20px;
 }
 .btable th {
   background: white;
@@ -166,37 +273,81 @@ article > .panel-heading {
 }
 </style>
 <script>
+/* eslint-disable vue/no-unused-components */
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import { mapActions, mapState } from "vuex";
 import "buefy/dist/buefy.css";
 import ChatItemEditModal from "./ChatItemEditModal.vue";
-import TableFollowUp from "./TableFollowUp.vue"
+import TableFollowUp from "./TableFollowUp.vue";
 import TablePoints from "./TablePoints.vue";
 import tablecolorrowsMixin from "../mixins/tablecolorrowsMixin";
+import memberMixin from "../mixins/memberMixin";
 import tableHelper from "../mixins/tableHelper";
+import AddEntryModal from "./AddEntryModal.vue";
 export default {
   name: "ChatListTable",
-  components: {TablePoints, TableFollowUp},
-  mixins: [tablecolorrowsMixin,tableHelper],
+  components: { TablePoints, TableFollowUp, AddEntryModal },
+  mixins: [tablecolorrowsMixin, tableHelper, memberMixin],
   methods: {
     ...mapActions({
       loadChats: "chat/loadChats",
       loadPendingChats: "chat/loadPendingChats",
       getPermissions: "getPermissions",
     }),
-    
+    OpenNewChatModal() {
+      let that = this;
+      this.$buefy.modal.open({
+        parent: this,
+        component: AddEntryModal,
+        hasModalCard: true,
+        props: {},
+        events: {
+          runedition(item) {
+            const editmodal = that.$buefy.modal.open({
+              parent: that,
+              component: ChatItemEditModal,
+              hasModalCard: true,
+              props: { item },
+
+              trapFocus: true,
+              width: "auto",
+            });
+            editmodal.$on("close", () => {
+              that.loadChats();
+              that.loadPendingChats();
+            });
+          },
+        },
+        trapFocus: true,
+        width: "auto",
+      });
+    },
+    operator(email) {
+      if (email) {
+        const capitalize = ([first, ...rest]) =>
+          first.toUpperCase() + rest.join("").toLowerCase();
+        let firstlastname = email.split("@")[0].split(".");
+        if (firstlastname.length < 2) return email;
+        firstlastname[0].charAt(0).toUpperCase() +
+          firstlastname[0].slice(1).toLowerCase();
+        firstlastname[1].charAt(0).toUpperCase() +
+          firstlastname[1].slice(1).toLowerCase();
+
+        return (
+          capitalize(firstlastname[0]) + " " + capitalize(firstlastname[1])
+        );
+      }
+      return email;
+    },
     isEditActive(row) {
       return row.tags.find((e) => {
-        if (e.tag == "duplicate" && e.approved == 1 && this.groupMember < 2) {
+        if (e.tag == "duplicate" && e.approved == 1 && this.isAgent()) {
           return true;
         }
       });
     },
-    showAllChats(customerid) {
-      window.open("https://my.livechatinc.com/archives/?query=" + customerid);
-      //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
-    },
+
     editModal(item) {
       const modal = this.$buefy.modal.open({
         parent: this,
@@ -204,7 +355,7 @@ export default {
         hasModalCard: true,
         props: { item },
         trapFocus: true,
-        width: 1200,
+        width: "auto",
       });
       modal.$on("close", () => {
         this.loadChats();
@@ -219,51 +370,51 @@ export default {
       return this.moment(dateTime).format("YYYY-MM-DD HH:mm:SS");
     },
     showfollowup(row) {
-          return row.tags.find((e) => {
-            if (e.tag == "wcb" && e.approved == 1 && row.orderid == null) {
-              return true;
-            }
-          });
-        },
-        calcFollowUp(row) {
-          if (row.followup.length > 0) {
-            var now = this.moment.utc(
-              row.followup[row.followup.length - 1].followupdate
-            );
-            // var dur = this.moment(now).utc().fromNow()
-            // var duration = this.moment.duration(now.diff(end))
-            var result = this.moment.utc(now).fromNow();
-            return result;
-          }
-          return "None";
-        },
-        followup(row) {
-          const params = [`module=ChatManager`, `c=FollowUp`, `json=1`].join("&");
-          this.$api
-            .post(`addonmodules.php?${params}`, {
-              threadid: row.id,
-            })
-            .then((response) => {
-              if (response.data.result == "success") {
-                this.$buefy.toast.open({
-                  container: ".modal-card",
-                  message: "Entry marked",
-                  type: "is-success",
-                });
-              } else {
-                this.$buefy.toast.open({
-                  container: ".modal-card",
-                  message: response.data.result,
-                  type: "is-warning",
-                });
-              }
+      return row.tags.find((e) => {
+        if (e.tag == "wcb" && e.approved == 1 && row.orderid == null) {
+          return true;
+        }
+      });
+    },
+    calcFollowUp(row) {
+      if (row.followup.length > 0) {
+        var now = this.moment.utc(
+          row.followup[row.followup.length - 1].followupdate
+        );
+        // var dur = this.moment(now).utc().fromNow()
+        // var duration = this.moment.duration(now.diff(end))
+        var result = this.moment.utc(now).fromNow();
+        return result;
+      }
+      return "None";
+    },
+    followup(row) {
+      const params = [`module=ChatManager`, `c=FollowUp`, `json=1`].join("&");
+      this.$api
+        .post(`addonmodules.php?${params}`, {
+          threadid: row.id,
+        })
+        .then((response) => {
+          if (response.data.result == "success") {
+            this.$buefy.toast.open({
+              container: ".modal-card",
+              message: "Entry marked",
+              type: "is-success",
             });
-        },
-        // resetFilters()
-        // {
-        //   this.$store.commit("chat/setFilter", { dateFrom: null, dateTo: null, operator: null });
-        //    this.loadChats();
-        // }
+          } else {
+            this.$buefy.toast.open({
+              container: ".modal-card",
+              message: response.data.result,
+              type: "is-warning",
+            });
+          }
+        });
+    },
+    // resetFilters()
+    // {
+    //   this.$store.commit("chat/setFilter", { dateFrom: null, dateTo: null, operator: null });
+    //    this.loadChats();
+    // }
   },
   mounted() {
     this.loadChats().catch((e) => {
@@ -282,8 +433,8 @@ export default {
     this.getPermissions();
   },
   computed: {
-    ...mapState("chat", ["chats", "chatsPage", "chatsLoading"], "groupMember"),
-    ...mapState(["groupMember"]),
+    ...mapState("chat", ["chats", "chatsPage", "chatsLoading"]),
+    ...mapState("chatcolumns", ["filters"]),
   },
   data() {
     return {

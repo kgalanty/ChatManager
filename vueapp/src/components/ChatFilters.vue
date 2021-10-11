@@ -1,5 +1,17 @@
 <template>
   <div class="tile">
+        <div class="tile is-2 is-child">
+      <b-field label="Search (chat ID/E-mail/Domain/Order ID)" style="width: 95%">
+        <b-input 
+          v-model="searchtext"
+          placeholder="Start typing"
+          @input="doSearch"
+           type="search"
+           icon="magnify"
+        >
+        </b-input>
+      </b-field>
+    </div>
     <div class="tile is-3 is-child">
       <b-field label="Tags" style="width: 95%">
         <b-taginput
@@ -9,7 +21,7 @@
           field="tag.tag"
           icon="label"
           type="is-info"
-          placeholder="Add a tag"
+          placeholder="Start typing"
           @typing="getFilteredTags"
           @input="TagsChanged"
           :open-on-focus="true"
@@ -26,16 +38,16 @@
           v-model="operator"
           expanded
         >
-        <option value="">-</option>
+        <option value="">-All-</option>
           <option :value="op.email" :key="i" v-for="(op, i) in operators">
             {{ op.firstname }} {{ op.lastname }}
           </option>
         </b-select>
       </b-field>
     </div>
-    <div class="tile is-3 is-child">
-      <b-field label="Select datetime range [From]" style="width: 95%">
-        <b-datetimepicker
+    <div class="tile is-2 is-child">
+      <b-field label="Date [From]" style="width: 95%">
+        <b-datepicker
           v-model="dateFrom"
           rounded
           placeholder="Click to select..."
@@ -43,14 +55,13 @@
           :icon-right="'close-circle'"
           icon-right-clickable
           @icon-right-click="dateFrom = null"
-          horizontal-time-picker
         >
-        </b-datetimepicker>
+        </b-datepicker>
       </b-field>
     </div>
-    <div class="tile is-3 is-child">
-      <b-field label="Select datetime range [to]" style="width: 95%">
-        <b-datetimepicker
+    <div class="tile is-2 is-child">
+      <b-field label="Date [to]" style="width: 95%">
+        <b-datepicker
           v-model="dateTo"
           rounded
           placeholder="Click to select..."
@@ -58,9 +69,8 @@
           :icon-right="'close-circle'"
           icon-right-clickable
           @icon-right-click="dateTo = null"
-          horizontal-time-picker
         >
-        </b-datetimepicker>
+        </b-datepicker>
       </b-field>
     </div>
   </div>
@@ -98,12 +108,17 @@ export default {
     //HelloWorld
   },
   methods: {
+    doSearch()
+    {
+       this.$store.commit("chat/setQuery", this.searchtext);
+      this.loadChats();
+    },
     TagsChanged() {
       this.$store.commit("chat/setFilter", { tags: this.tags });
       this.loadChats();
     },
     getFilteredTags(text) {
-      this.filteredTags = this.tagsList.filter((option) => {
+      this.filteredTags = this.$store.state.tags.tags.filter((option) => {
         return option.toString().toLowerCase().indexOf(text.toLowerCase()) >= 0;
       });
     },
@@ -164,6 +179,7 @@ export default {
       loadingOperator: false,
       operators: [],
       operator: "",
+      searchtext:""
     };
   },
   watch: {

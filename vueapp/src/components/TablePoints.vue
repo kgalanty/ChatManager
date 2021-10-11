@@ -1,6 +1,6 @@
 <template>
-  <div v-if="points >0">
-    <b-tag type="is-info">{{points}}</b-tag>
+  <div v-if="points >0" style="display:block">
+    <b-tag type="is-success">{{points}}</b-tag>
   </div>
 </template>
 <style>

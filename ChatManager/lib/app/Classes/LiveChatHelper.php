@@ -29,6 +29,17 @@ class LiveChatHelper
         $this->datefrom = $datefrom;
         //$agents = $LiveChatAPI->agents->getArchives(['filters' => []]);
     }
+    public function findChatByID(string $tid)
+    {
+        if(Threads::where('threadid', $tid)->count())
+        {
+            return ['result' => 'This Thread ID already exists. Try with another one.'];
+        }
+
+        $params = ['filters' => ['thread_ids' => [$tid]]];
+        $this->results =  $this->api->agents->getArchives($params);
+        return ['result' => 'success', 'found_chats' => $this->results->found_chats];
+    }
     public function readRecentChats(array $filtersSet = [], string $pageid = null)
     {
         //DB::enableQueryLog();
@@ -38,7 +49,7 @@ class LiveChatHelper
             $filters['from'] = $this->datefrom;
         } else {
             //2021-08-30T00:00:00.000000-02:00
-            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT24H'))->format('Y-m-d\TH:i:s.000000P');
+            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT72H'))->format('Y-m-d\TH:i:s.000000P');
         }
         if ($pageid !== null) {
             $filters['pageid'] = $pageid;
@@ -63,6 +74,7 @@ class LiveChatHelper
             LiveChatParsers::parseArchiveList($this->results->chats);
         }
     }
+
     public static function getUserById(string $id, array $users) : ?object
     {
         foreach($users as $user)
