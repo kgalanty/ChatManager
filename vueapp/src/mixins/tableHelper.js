@@ -6,6 +6,23 @@ export default {
   },
   methods:
   {
+    operator(email) {
+      if (email) {
+        const capitalize = ([first, ...rest]) =>
+          first.toUpperCase() + rest.join("").toLowerCase();
+        let firstlastname = email.split("@")[0].split(".");
+        if (firstlastname.length < 2) return email;
+        firstlastname[0].charAt(0).toUpperCase() +
+          firstlastname[0].slice(1).toLowerCase();
+        firstlastname[1].charAt(0).toUpperCase() +
+          firstlastname[1].slice(1).toLowerCase();
+
+        return (
+          capitalize(firstlastname[0]) + " " + capitalize(firstlastname[1])
+        );
+      }
+      return email;
+    },
     showAllChats(customerid) {
       window.open("https://my.livechatinc.com/archives/?query=" + customerid);
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b

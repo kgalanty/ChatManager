@@ -27,7 +27,7 @@
         {{ parseDateTime(props.row.date) }}
       </b-table-column>
       <b-table-column field="date" label="Operator" v-slot="props">
-        {{ props.row.agent }}
+        {{ operator(props.row.agent) }}
       </b-table-column>
       <b-table-column
         field="threadid"
@@ -76,17 +76,17 @@
         <span v-if="props.row.name">{{ props.row.name }}</span
         ><span v-else>{{ props.row.customer.name }}</span>
       </b-table-column>
-      <b-table-column field="date" label="E-mail" v-slot="props" width="160">
-        <span v-if="props.row.email">{{ props.row.email }}</span
-        ><span v-else> {{ props.row.customer.email }}</span>
+      <b-table-column field="date" label="E-mail" v-slot="props">
+        <span v-if="props.row.email" class="emailTable">{{ props.row.email }}</span
+        ><span v-else class="emailTable"> {{ props.row.customer.email }}</span>
       </b-table-column>
       <b-table-column field="date" label="Domain" v-slot="props" width="160">
         {{ props.row.domain }}
       </b-table-column>
-      <b-table-column field="date" label="Location" v-slot="props" width="160">
+      <b-table-column field="date" label="Location" v-slot="props" width="30">
         {{
           props.row.customer.geolocation
-            ? JSON.parse(props.row.customer.geolocation).country
+            ? JSON.parse(props.row.customer.geolocation).country_code
             : ""
         }}
       </b-table-column>

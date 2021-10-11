@@ -8,8 +8,8 @@
         $store.state.chat.chats.total
       }}</b-tag>
       <b-button
-        type="is-primary"
-        outlined
+        type="is-info"
+        
         size="is-small"
         @click="OpenNewChatModal"
         style="margin-left: 10px; display: inline-block"
@@ -165,9 +165,7 @@
         label="IP"
         v-slot="props"
         :visible="filters['ip'].display"
-      >
-        {{ props.row.customer.ip }}
-      </b-table-column>
+      >{{ props.row.customer.ip }}</b-table-column>
       <b-table-column
         field=""
         label="Follow up"
@@ -176,6 +174,7 @@
         :visible="filters['followup'].display"
       >
         <TableFollowUp
+        class="cellcenter"
           :row="props.row"
           afterClickAction="loadChats"
           style="text-align: center"
@@ -218,6 +217,10 @@
 <style scoped>
 </style>
 <style >
+.extrapointscolumn, .cellcenter
+{
+  display:block;text-align: center;
+}
 .emailTable {
   overflow-wrap: anywhere !important;
   word-wrap: anywhere !important;
@@ -323,23 +326,7 @@ export default {
         width: "auto",
       });
     },
-    operator(email) {
-      if (email) {
-        const capitalize = ([first, ...rest]) =>
-          first.toUpperCase() + rest.join("").toLowerCase();
-        let firstlastname = email.split("@")[0].split(".");
-        if (firstlastname.length < 2) return email;
-        firstlastname[0].charAt(0).toUpperCase() +
-          firstlastname[0].slice(1).toLowerCase();
-        firstlastname[1].charAt(0).toUpperCase() +
-          firstlastname[1].slice(1).toLowerCase();
 
-        return (
-          capitalize(firstlastname[0]) + " " + capitalize(firstlastname[1])
-        );
-      }
-      return email;
-    },
     isEditActive(row) {
       return row.tags.find((e) => {
         if (e.tag == "duplicate" && e.approved == 1 && this.isAgent()) {

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="points >0" style="display:block">
+  <div v-if="points >0" class="extrapointscolumn">
     <b-tag type="is-success">{{points}}</b-tag>
   </div>
 </template>
