@@ -1,10 +1,10 @@
 <template>
   <div class="tile">
         <div class="tile is-2 is-child">
-      <b-field label="Search (chat ID/E-mail/Domain/Order ID)" style="width: 95%">
+      <b-field label="Search" style="width: 95%">
         <b-input 
           v-model="searchtext"
-          placeholder="Start typing"
+          placeholder="Search for chat ID/E-mail/Domain/Order ID"
           @input="doSearch"
            type="search"
            icon="magnify"

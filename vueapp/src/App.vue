@@ -12,6 +12,36 @@
   </div>
 </template>
 <style>
+@keyframes roundtime {
+  to {
+    /* More performant than `width` */
+    transform: scaleX(0);
+  }
+}
+.notification
+{
+  -webkit-box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
+-moz-box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
+box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
+}
+.notification:after {
+    content: "";
+    display: block;
+    height: 3px;
+    width: 100%;
+    z-index: 1;
+    position: absolute;
+    left: 0;
+    bottom: 0px;
+    transform-origin: left center;
+    animation: roundtime calc(5s) linear forwards;
+}
+.notification.is-success:after {
+  background: white;
+}
+.notification.is-warning:after {
+  background: black;
+}
 [v-cloak] > * { display:none }
 [v-cloak]::before { content: "loading…" }
 @font-face {

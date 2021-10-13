@@ -8,8 +8,7 @@
         narrowed
         :total="logs.total"
         paginated
-
-        :per-page="25"
+        :per-page="15"
         :loading="this.loading"
         pagination-position="bottom"
       ><template #empty>
@@ -19,8 +18,8 @@
           field="date"
           label="Date"
           v-slot="props"
-          width="160"
-          
+          width="100"
+          centered 
         >
           {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
         </b-table-column>
@@ -28,8 +27,8 @@
           field="date"
           label="Performed by"
           v-slot="props"
-          width="160"
-          
+          width="100"
+          centered 
         >
           <b-tag type="is-info">{{ props.row.doer.firstname }} {{ props.row.doer.lastname }}</b-tag>
         </b-table-column>
@@ -37,8 +36,8 @@
           field="threadid"
           label="Item type"
           v-slot="props"
-          width="160"
-          
+          width="100"
+          centered 
         >
           {{ props.row.itemclass }}
         </b-table-column>

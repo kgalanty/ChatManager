@@ -6,7 +6,7 @@
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
       <section class="modal-card-body">
-        <b-tabs type="is-toggle" expanded v-model="activeTab">
+        <b-tabs type="is-toggle" expanded v-model="activeTab" >
           <b-tab-item label="Customer" icon="google-photos">
             <b-field label="Client Name">
               <b-input v-model="name" placeholder="Fill client name"></b-input>
@@ -171,7 +171,7 @@
                   :loading="loading.tagsLogLoading"
                 >
                   <template #empty>
-                    <div class="has-text-centered">No entries</div>
+                    <div class="has-text-centered" v-if="!loading.tagsLogLoading">No entries</div>
                   </template>
                   <b-table-column field="date" label="Tag" v-slot="props">
                     <b-tag type="is-warning">{{ props.row.tag }}</b-tag>
@@ -206,7 +206,7 @@
               <b-icon icon="source-pull"></b-icon>
               <span>
                 Review
-                <b-tag rounded type="is-primary">
+                <b-tag rounded type="is-info">
                   {{ reviewRequests.length }}
                 </b-tag>
               </span>
@@ -443,23 +443,27 @@ export default {
             // this.$emit("close")
             //this.loadChats()
             var msg = "";
-            if (this.isAdmin()) msg = "You deleted the tag.";
-            else msg = "You proposed the tag deletion.";
-
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: msg ?? "",
-              type: "is-success",
-            });
+            if (this.isAdmin()) msg = "Tag has been deleted successfuly.";
+            else msg = "You proposed the tag to be deleted.";
+            this.$buefy.notification.open({
+                    message: msg,
+                    type: 'is-success',
+                    duration: 5000,
+                    autoClose: true,
+                    closable: false
+                })  
+           
             this.getTags();
             this.loadTagsHistory();
             this.HasCustomOfferCheck();
           } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data,
-              type: "is-warning",
-            });
+            this.$buefy.notification.open({
+                    message: response.data,
+                    type: 'is-warning',
+                    duration: 5000,
+                    autoClose: true,
+                    closable: false
+                })  
           }
         });
     },
@@ -585,6 +589,17 @@ export default {
         });
     },
     addtag() {
+      if(this.newtag=='' || this.newtag == null)
+      {
+        this.$buefy.notification.open({
+                    message: 'Select a tag to add.',
+                    type: 'is-warning',
+                    duration: 5000,
+                    autoClose: true,
+                    closable: false
+                })
+                return
+      }
       this.loading.addtagBtnLoading = true;
       const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
       this.$api
@@ -601,16 +616,30 @@ export default {
             var msg = "";
             if (this.isAdmin()) msg = "Added new tag";
             else msg = "Added to review by supervisor.";
-            this.$buefy.toast.open({
-              message: msg,
-              type: "is-success",
-            });
+             this.$buefy.notification.open({
+                    message: msg,
+                    type: 'is-success',
+                    duration: 5000,
+                    autoClose: true,
+                    closable: false
+                })
+            // this.$buefy.toast.open({
+            //   message: msg,
+            //   type: "is-success",
+            // });
           } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data,
-              type: "is-warning",
-            });
+            this.$buefy.notification.open({
+                    message: response.data,
+                    type: 'is-warning',
+                    duration: 5000,
+                    autoClose: true,
+                    closable: false
+                })
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: response.data,
+            //   type: "is-warning",
+            // });
           }
           this.loading.addtagBtnLoading = false;
         });
@@ -626,6 +655,7 @@ export default {
         });
     },
     loadTagsHistory() {
+         
       this.loading.tagsLogLoading = true;
       this.$api
         .get(
@@ -655,6 +685,7 @@ export default {
       });
     },
     loadReviewStatus() {
+
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=ReviewThread&json=1&action=GetReviewStatus&threadid=${this.item.id}`
@@ -865,7 +896,8 @@ export default {
   },
 };
 </script>
-<style >
+<style>
+
 .reviewTabHeader {
   background: #ffcf76;
 }
