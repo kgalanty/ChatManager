@@ -341,6 +341,7 @@ export default {
       getPermissions: "getPermissions",
       loadLogs: "chatlogs/loadLogs",
       loadTags: "tags/loadTags",
+      clearLogs: "chatlogs/clearLogs"
     }),
     getAgents: debounce(function (name) {
       this.loading.isFetchingAgents = true;
@@ -759,6 +760,7 @@ export default {
       } 
         this.loadReviewStatus();
     });
+    this.clearLogs()
   },
   watch: {
     cannotoffer() {

@@ -15,6 +15,6 @@ abstract class API
         $this->params = $params;
         //Entire php input variables
         $this->input = $input;
-
+        if(!$_SESSION['adminpw']) exit;
     }
 }

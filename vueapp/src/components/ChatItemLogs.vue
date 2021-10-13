@@ -11,7 +11,7 @@
         :per-page="15"
         :loading="this.loading"
         pagination-position="bottom"
-      ><template #empty>
+      ><template #empty v-if="!this.loading">
         <div class="has-text-centered">No entries</div>
       </template>
         <b-table-column

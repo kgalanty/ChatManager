@@ -7,7 +7,7 @@ class Addon
     {
         return [
             // Display name for your module
-            'name' => 'Chat Manager (TBD)',
+            'name' => 'Chat Manager',
             // Description displayed within the admin interface
             'description' => '',
             // Module author name

@@ -4,7 +4,7 @@
       class="is-family-sans-serif"
       style="float: left; margin-top: 20px; font-size: 20px"
       >Chats:
-      <b-tag rounded type="is-primary">{{
+      <b-tag rounded type="is-primary" v-if="$store.state.chat.chats.total">{{
         $store.state.chat.chats.total
       }}</b-tag>
       <b-button
