@@ -23,7 +23,7 @@
       bordered
       striped
       narrowed
-      detailed
+      :detailed="isAdmin()"
       :total="chats.total"
       paginated
       backend-pagination

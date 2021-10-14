@@ -7,7 +7,7 @@
       </header>
       <section class="modal-card-body">
         <b-tabs type="is-toggle" expanded v-model="activeTab" >
-          <b-tab-item label="Customer" icon="google-photos">
+          <b-tab-item label="Customer" icon="account-box">
             <b-field label="Client Name">
               <b-input v-model="name" placeholder="Fill client name"></b-input>
             </b-field>
@@ -63,9 +63,10 @@
                 ref="autocomplete"
                 :data="filteredAgentArray"
                 @select="(option) => (selectedAgent = option)"
-                field="email"
+                field="firstname+' '+lastname"
                 @typing="getAgents"
                 :loading="loading.isFetchingAgents"
+                :custom-formatter="option => option.firstname+' '+option.lastname"
               >
                 <template slot-scope="props">
                   <div class="media">
@@ -81,7 +82,7 @@
               <b-input type="textarea" v-model="notes"></b-input>
             </b-field>
           </b-tab-item>
-          <b-tab-item label="Tags" icon="google-photos">
+          <b-tab-item label="Tags" icon="tag-multiple">
             <b-field label="Tags">
               <b-table
                 class="modaltable"
@@ -203,23 +204,15 @@
           </b-tab-item>
           <b-tab-item :headerClass="reviewTabHeader">
             <template #header>
-              <b-icon icon="source-pull"></b-icon>
+              <b-icon icon="message-draw"></b-icon>
               <span>
                 Review
-                <b-tag rounded type="is-info">
+                <b-tag rounded type="is-info" v-if="isAdmin()">
                   {{ reviewRequests.length }}
                 </b-tag>
               </span>
             </template>
-            <b-notification
-              type="is-warning"
-              has-icon
-              v-if="reviewStatus == 1"
-              :closable="false"
-              role="alert"
-            >
-              This thread has pending reviews.
-            </b-notification>
+            <b-message type="is-warning" has-icon v-if="reviewStatus == 1&&isAdmin()">This thread has pending reviews.</b-message>
             <div class="notification is-primary">
               <div class="buttons">
                 Here you can send this chat to review by supervisors. Enter
@@ -293,7 +286,7 @@
           </b-tab-item>
           <b-tab-item>
             <template #header>
-              <b-icon icon="source-pull"></b-icon>
+              <b-icon icon="list-status"></b-icon>
               <span> Logs </span>
             </template>
             <ChatItemLogs :threadid="item.id" />
@@ -319,14 +312,16 @@ import { mapActions } from "vuex";
 import { dateMixin } from "../mixins/dateMixin.js";
 import { tagsMixin } from "../mixins/tagsMixin";
 import memberMixin from "../mixins/memberMixin";
+import notificationsMixin from "../mixins/notificationsMixin";
+
 export default {
   name: "ChatItemEditModal",
   props: ["item"],
-  mixins: [dateMixin, tagsMixin, memberMixin],
+  mixins: [dateMixin, tagsMixin, memberMixin, notificationsMixin],
   components: { ChatItemLogs },
   computed: {
     reviewTabHeader() {
-      if (this.reviewStatus == 1) {
+      if (this.reviewStatus == 1 && this.isAdmin()) {
         return "reviewTabHeader";
       }
       return "";
@@ -372,29 +367,35 @@ export default {
         })
         .then((response) => {
           if (response.data.data == "success") {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: "Entry marked as seen",
-              type: "is-success",
-            });
+            this.notifySuccess('Entry marked as seen')
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: "",
+            //   type: "is-success",
+            // });
             this.loadReviews();
             this.loadReviewStatus();
           } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data,
-              type: "is-warning",
-            });
+            this.notifyWarning(response.data)
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: response.data,
+            //   type: "is-warning",
+            // });
           }
         });
     },
     sendToReview() {
       if (this.commmentReview.length == 0) {
-        this.$buefy.toast.open({
-          container: ".modal-card",
-          message: "Comment cannot be empty",
-          type: "is-danger",
-        });
+        this.notifyDanger('Comment cannot be empty')
+      //  this.$buefy.notification.open({
+      //               message: 'Comment cannot be empty',
+      //               type: 'is-danger',
+      //               duration: 5000,
+      //               autoClose: true,
+      //               closable: false
+      //           })
+
         return;
       }
       this.loading.sendReviewLoadingBtn = true;
@@ -415,19 +416,21 @@ export default {
               this.loadReviews();
             }
             this.loadReviewStatus();
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: "Chat sent to review successfuly",
-              type: "is-success",
-            });
+            this.notifySuccess('Comment sent to review successfuly')
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: "Chat sent to review successfuly",
+            //   type: "is-success",
+            // });
             //this.getTags();
             //this.loadTagsHistory()
           } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data,
-              type: "is-warning",
-            });
+            this.notifyWarning(response.data)
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: response.data,
+            //   type: "is-warning",
+            // });
           }
           this.loading.sendReviewLoadingBtn = false;
         });
@@ -446,25 +449,20 @@ export default {
             var msg = "";
             if (this.isAdmin()) msg = "Tag has been deleted successfuly.";
             else msg = "You proposed the tag to be deleted.";
-            this.$buefy.notification.open({
-                    message: msg,
-                    type: 'is-success',
-                    duration: 5000,
-                    autoClose: true,
-                    closable: false
-                })  
+            this.notifySuccess(msg)
+            // this.$buefy.notification.open({
+            //         message: msg,
+            //         type: 'is-success',
+            //         duration: 5000,
+            //         autoClose: true,
+            //         closable: false
+            //     })  
            
             this.getTags();
             this.loadTagsHistory();
             this.HasCustomOfferCheck();
           } else {
-            this.$buefy.notification.open({
-                    message: response.data,
-                    type: 'is-warning',
-                    duration: 5000,
-                    autoClose: true,
-                    closable: false
-                })  
+            this.notifyWarning(response.data)
           }
         });
     },
@@ -479,18 +477,20 @@ export default {
           if (response.data.data == "success") {
             // this.$emit("close")
             //this.loadChats()
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: "You approved the tag",
-              type: "is-success",
-            });
+            this.notifySuccess('You approved the tag')
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: "You approved the tag",
+            //   type: "is-success",
+            // });
             this.getTags();
           } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data,
-              type: "is-warning",
-            });
+            this.notifyWarning(response.data)
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: response.data,
+            //   type: "is-warning",
+            // });
           }
         });
     },
@@ -514,23 +514,25 @@ export default {
               // this.$emit("close")
               //this.loadChats()
               if (!onlyreturn) {
-                this.$buefy.toast.open({
-                  container: ".modal-card",
-                  message: "This Order is new.",
-                  type: "is-success",
-                });
+                this.notifySuccess('This Order is new.')
+                // this.$buefy.toast.open({
+                //   container: ".modal-card",
+                //   message: "This Order is new.",
+                //   type: "is-success",
+                // });
               }
               this.loadingCheckBtn = false;
               resolve("success");
               return 1;
             } else {
               if (!onlyreturn) {
-                this.$buefy.toast.open({
-                  container: ".modal-card",
-                  message: response.data,
-                  type: "is-warning",
-                  duration: 5000,
-                });
+                 this.notifyWarning(response.data)
+                // this.$buefy.toast.open({
+                //   container: ".modal-card",
+                //   message: response.data,
+                //   type: "is-warning",
+                //   duration: 5000,
+                // });
               }
               resolve(response.data);
               this.loadingCheckBtn = false;
@@ -544,11 +546,12 @@ export default {
       if (this.selectedOrder) {
         const checkorder = await this.checkOrder(true);
         if (checkorder != "success") {
-          this.$buefy.toast.open({
-            container: ".modal-card",
-            message: "This order id is already assigned to another thread.",
-            type: "is-warning",
-          });
+          this.notifyWarning('This order id is already assigned to another thread.')
+          // this.$buefy.toast.open({
+          //   container: ".modal-card",
+          //   message: "This order id is already assigned to another thread.",
+          //   type: "is-warning",
+          // });
           this.loading.saveLoadingBtn = false;
           return;
         }
@@ -592,13 +595,14 @@ export default {
     addtag() {
       if(this.newtag=='' || this.newtag == null)
       {
-        this.$buefy.notification.open({
-                    message: 'Select a tag to add.',
-                    type: 'is-warning',
-                    duration: 5000,
-                    autoClose: true,
-                    closable: false
-                })
+        this.notifyWarning('Select a tag to add.')
+        // this.$buefy.notification.open({
+        //             message: 'Select a tag to add.',
+        //             type: 'is-warning',
+        //             duration: 5000,
+        //             autoClose: true,
+        //             closable: false
+        //         })
                 return
       }
       this.loading.addtagBtnLoading = true;
@@ -617,25 +621,27 @@ export default {
             var msg = "";
             if (this.isAdmin()) msg = "Added new tag";
             else msg = "Added to review by supervisor.";
-             this.$buefy.notification.open({
-                    message: msg,
-                    type: 'is-success',
-                    duration: 5000,
-                    autoClose: true,
-                    closable: false
-                })
+             this.notifySuccess(msg)
+            //  this.$buefy.notification.open({
+            //         message: msg,
+            //         type: 'is-success',
+            //         duration: 5000,
+            //         autoClose: true,
+            //         closable: false
+            //     })
             // this.$buefy.toast.open({
             //   message: msg,
             //   type: "is-success",
             // });
           } else {
-            this.$buefy.notification.open({
-                    message: response.data,
-                    type: 'is-warning',
-                    duration: 5000,
-                    autoClose: true,
-                    closable: false
-                })
+             this.notifyWarning(response.data)
+            // this.$buefy.notification.open({
+            //         message: response.data,
+            //         type: 'is-warning',
+            //         duration: 5000,
+            //         autoClose: true,
+            //         closable: false
+            //     })
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: response.data,
@@ -712,11 +718,7 @@ export default {
           if (data.result == "success") {
             this.reviewRequests = data.data;
           } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: data.msg,
-              type: "is-warning",
-            });
+            this.notifyWarning(data.msg)
           }
         });
     },
@@ -899,7 +901,9 @@ export default {
 };
 </script>
 <style>
-
+.message.is-warning {
+    background-color: #ffefac;
+}
 .reviewTabHeader {
   background: #ffcf76;
 }

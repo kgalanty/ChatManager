@@ -39,6 +39,9 @@ box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
 .notification.is-success:after {
   background: white;
 }
+.notification.is-danger:after {
+  background: rgb(255, 255, 255);
+}
 .notification.is-warning:after {
   background: black;
 }
