@@ -18,7 +18,7 @@ class LiveChatParsers
                 return $event->created_at;
             }
         }
-        return $eventsList[array_key_last($eventsList)]->created_at;
+        return $eventsList[key(array_slice($eventsList, -1, 1, true))]->created_at;
     }
     public static function parseArchiveList($list)
     {
@@ -59,7 +59,7 @@ class LiveChatParsers
                     ['chatitem' => $chatitem, 'customer' => $customer]
                 ));
 
-               
+                $_SESSION['cmcount'] += count($insertRow);
                 $id = DB::table('chat_threads')->insertGetId($insertRow);
                 //echo('<pre>'); var_dump($insertRow, $id, $chatitem, count($list)); die;
                 self::parseTags($id, $chatitem->thread->tags);

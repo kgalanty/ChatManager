@@ -3,11 +3,11 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
-class ReviewThread extends Model
+class ReviewOrder extends Model
 {
     public $timestamps = false;
-    protected $table = 'chat_reviewthreads';
-    protected $fillable = ['orderid','threadid', 'sender', 'comment', 'created_at'];
+    protected $table = 'chat_revieworders';
+    protected $fillable = ['threadid', 'sender', 'created_at'];
     public function doer()
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'sender', 'id');
@@ -19,10 +19,6 @@ class ReviewThread extends Model
     public function scopeBy($query, $doer)
     {
         return $query->where('sender', $doer);
-    }
-    public function scopeIsPending($query)
-    {
-        return $query->where('pending', '1');
     }
     public function scopeId($query, $id)
     {

@@ -11,3 +11,5 @@ use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatHelper;
 // error_reporting(E_ALL);
 $livechat = new LiveChatHelper();
 $livechat->readRecentChats(['tags' => ['values'=> ['sales']]]);
+logActivity('Chat manager inserted '.$_SESSION['cmcount'].' rows');
+unset($_SESSION['cmcount']);

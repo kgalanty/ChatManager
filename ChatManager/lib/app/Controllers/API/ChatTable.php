@@ -14,10 +14,15 @@ class ChatTable extends API
         if ($_GET['pending'] == 1) {
             if (AuthControl::isAdmin()) {
                 $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
-                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup'])
+                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup', 'revieworder'])
                     ->whereHas('pendingReviews', function ($q) {
                         $q->where('pending', '=', '1');
                     })
+                    ->orWhereHas('tags', function($query)
+                    {
+                        $query->where('approved', '0')->orWhere('proposed_deletion', '1');
+                    })
+                    ->orHas('revieworder', '>', '0')
                     ->orderBy('id', 'DESC');
                 if ($_GET['datefrom']) {
                     $result->whereBetween('date', [$_GET['datefrom'], $dateTo]);

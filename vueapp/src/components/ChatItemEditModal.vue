@@ -6,7 +6,7 @@
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
       <section class="modal-card-body">
-        <b-tabs type="is-toggle" expanded v-model="activeTab" >
+        <b-tabs type="is-toggle" expanded v-model="activeTab">
           <b-tab-item label="Customer" icon="account-box">
             <b-field label="Client Name">
               <b-input v-model="name" placeholder="Fill client name"></b-input>
@@ -25,6 +25,7 @@
                 v-model="selectedOrder"
                 placeholder="Fill order number"
                 expanded
+                type="number"
               ></b-input>
               <b-button
                 style="float: left"
@@ -34,6 +35,97 @@
                 @click="checkOrder(false)"
               />
             </b-field>
+            <!-- btable with order suggestions -->
+            <b-collapse
+              :open="false"
+              position="is-bottom"
+              v-if="orderchangesuggestions.length > 0"
+            >
+              <template #trigger="props">
+                <a>
+                  <b-icon
+                    :icon="!props.open ? 'menu-down' : 'menu-up'"
+                  ></b-icon>
+                  {{ !props.open ? "Pending Order Sugestions" : "Hide" }}
+                </a>
+              </template>
+              <b-table
+                class="smalltable"
+                :data="orderchangesuggestions"
+                bordered
+                striped
+                narrowed
+                :total="orderchangesuggestions.length"
+                :loading="loading.orderSuggestionTable"
+                ><template #empty v-if="orderchangesuggestions == []">
+                  <div class="has-text-centered">No entries</div>
+                </template>
+                <b-table-column
+                  field="orderid"
+                  label="Suggestion of matching order ID"
+                  v-slot="props"
+                  width="100"
+                  centered
+                >
+                  {{ props.row.orderid }}
+                </b-table-column>
+                <b-table-column
+                  field="doer"
+                  label="By"
+                  v-slot="props"
+                  width="100"
+                  centered
+                >
+                  {{ props.row.doer.firstname }} {{ props.row.doer.lastname }}
+                </b-table-column>
+                <b-table-column
+                  field="date"
+                  label="Date"
+                  v-slot="props"
+                  width="100"
+                  centered
+                >
+                  {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
+                </b-table-column>
+                <b-table-column
+                  label="Status"
+                  width="100"
+                  centered
+                
+                  v-if="isAgent()"
+                >Verification pending
+                   </b-table-column>
+                <b-table-column
+                  field="date"
+                  label="Actions"
+                  width="100"
+                  centered
+                  v-slot="props"
+                  v-if="isAdmin()"
+                >
+                  <p style="display: inline-block; margin: 2px">
+                    <b-tooltip
+                      label="By accepting, you will set order ID and remove other suggestions"
+                      ><b-button
+                        @click="acceptOrderSuggestion(props.row.id)"
+                        type="is-link"
+                        icon-right="check"
+                        size="is-small"
+                      ></b-button
+                    ></b-tooltip>
+                  </p>
+                  <p style="display: inline-block">
+                    <b-button
+                      type="is-danger"
+                      @click="declineOrderSuggestion(props.row.id)"
+                      icon-right="close"
+                      size="is-small"
+                    ></b-button>
+                  </p>
+                </b-table-column>
+              </b-table>
+            </b-collapse>
+
             <b-field label="Cannot offer reason" v-if="HasCustomOffer">
               <b-select
                 @change="cannotofferCustom = ''"
@@ -66,7 +158,9 @@
                 field="firstname+' '+lastname"
                 @typing="getAgents"
                 :loading="loading.isFetchingAgents"
-                :custom-formatter="option => option.firstname+' '+option.lastname"
+                :custom-formatter="
+                  (option) => option.firstname + ' ' + option.lastname
+                "
               >
                 <template slot-scope="props">
                   <div class="media">
@@ -172,7 +266,12 @@
                   :loading="loading.tagsLogLoading"
                 >
                   <template #empty>
-                    <div class="has-text-centered" v-if="!loading.tagsLogLoading">No entries</div>
+                    <div
+                      class="has-text-centered"
+                      v-if="!loading.tagsLogLoading"
+                    >
+                      No entries
+                    </div>
                   </template>
                   <b-table-column field="date" label="Tag" v-slot="props">
                     <b-tag type="is-warning">{{ props.row.tag }}</b-tag>
@@ -212,7 +311,12 @@
                 </b-tag>
               </span>
             </template>
-            <b-message type="is-warning" has-icon v-if="reviewStatus == 1&&isAdmin()">This thread has pending reviews.</b-message>
+            <b-message
+              type="is-warning"
+              has-icon
+              v-if="reviewStatus == 1 && isAdmin()"
+              >This thread has pending reviews.</b-message
+            >
             <div class="notification is-primary">
               <div class="buttons">
                 Here you can send this chat to review by supervisors. Enter
@@ -336,7 +440,7 @@ export default {
       getPermissions: "getPermissions",
       loadLogs: "chatlogs/loadLogs",
       loadTags: "tags/loadTags",
-      clearLogs: "chatlogs/clearLogs"
+      clearLogs: "chatlogs/clearLogs",
     }),
     getAgents: debounce(function (name) {
       this.loading.isFetchingAgents = true;
@@ -355,6 +459,46 @@ export default {
           this.loading.isFetchingAgents = false;
         });
     }, 500),
+    acceptOrderSuggestion(suggestionid) {
+      this.loading.orderSuggestionTable = true
+      const params = [`module=ChatManager`, `c=Orders`, `json=1`].join("&");
+      this.$api
+        .post(`addonmodules.php?${params}`, {
+          entry: suggestionid,
+          a: "AcceptSuggestion",
+        })
+        .then((response) => {
+          this.loading.orderSuggestionTable = false
+          if (response.data == "success") {
+            this.loadOrdersSuggestions()
+            this.notifySuccess("Order suggestion approved");
+          }
+          else
+          {
+            this.notifyWarning(response.data)
+          }
+        });
+    },
+    declineOrderSuggestion(suggestionid) {
+      this.loading.orderSuggestionTable = true
+      const params = [`module=ChatManager`, `c=Orders`, `json=1`].join("&");
+      this.$api
+        .post(`addonmodules.php?${params}`, {
+          entry: suggestionid,
+          a: "DeclineSuggestion",
+        })
+        .then((response) => {
+          this.loading.orderSuggestionTable = false
+          if (response.data == "success") {
+            this.loadOrdersSuggestions()
+            this.notifySuccess("Order suggestion rejected");
+          }
+          else
+          {
+            this.notifyWarning(response.data)
+          }
+        });
+    },
     MarkReviewComment(commentid) {
       const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join(
         "&"
@@ -367,7 +511,7 @@ export default {
         })
         .then((response) => {
           if (response.data.data == "success") {
-            this.notifySuccess('Entry marked as seen')
+            this.notifySuccess("Entry marked as seen");
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: "",
@@ -376,7 +520,7 @@ export default {
             this.loadReviews();
             this.loadReviewStatus();
           } else {
-            this.notifyWarning(response.data)
+            this.notifyWarning(response.data);
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: response.data,
@@ -387,14 +531,14 @@ export default {
     },
     sendToReview() {
       if (this.commmentReview.length == 0) {
-        this.notifyDanger('Comment cannot be empty')
-      //  this.$buefy.notification.open({
-      //               message: 'Comment cannot be empty',
-      //               type: 'is-danger',
-      //               duration: 5000,
-      //               autoClose: true,
-      //               closable: false
-      //           })
+        this.notifyDanger("Comment cannot be empty");
+        //  this.$buefy.notification.open({
+        //               message: 'Comment cannot be empty',
+        //               type: 'is-danger',
+        //               duration: 5000,
+        //               autoClose: true,
+        //               closable: false
+        //           })
 
         return;
       }
@@ -416,7 +560,7 @@ export default {
               this.loadReviews();
             }
             this.loadReviewStatus();
-            this.notifySuccess('Comment sent to review successfuly')
+            this.notifySuccess("Comment sent to review successfuly");
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: "Chat sent to review successfuly",
@@ -425,7 +569,7 @@ export default {
             //this.getTags();
             //this.loadTagsHistory()
           } else {
-            this.notifyWarning(response.data)
+            this.notifyWarning(response.data);
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: response.data,
@@ -449,20 +593,20 @@ export default {
             var msg = "";
             if (this.isAdmin()) msg = "Tag has been deleted successfuly.";
             else msg = "You proposed the tag to be deleted.";
-            this.notifySuccess(msg)
+            this.notifySuccess(msg);
             // this.$buefy.notification.open({
             //         message: msg,
             //         type: 'is-success',
             //         duration: 5000,
             //         autoClose: true,
             //         closable: false
-            //     })  
-           
+            //     })
+
             this.getTags();
             this.loadTagsHistory();
             this.HasCustomOfferCheck();
           } else {
-            this.notifyWarning(response.data)
+            this.notifyWarning(response.data);
           }
         });
     },
@@ -477,7 +621,7 @@ export default {
           if (response.data.data == "success") {
             // this.$emit("close")
             //this.loadChats()
-            this.notifySuccess('You approved the tag')
+            this.notifySuccess("You approved the tag");
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: "You approved the tag",
@@ -485,7 +629,7 @@ export default {
             // });
             this.getTags();
           } else {
-            this.notifyWarning(response.data)
+            this.notifyWarning(response.data);
             // this.$buefy.toast.open({
             //   container: ".modal-card",
             //   message: response.data,
@@ -514,7 +658,7 @@ export default {
               // this.$emit("close")
               //this.loadChats()
               if (!onlyreturn) {
-                this.notifySuccess('This Order is new.')
+                this.notifySuccess("This Order is new.");
                 // this.$buefy.toast.open({
                 //   container: ".modal-card",
                 //   message: "This Order is new.",
@@ -526,7 +670,7 @@ export default {
               return 1;
             } else {
               if (!onlyreturn) {
-                 this.notifyWarning(response.data)
+                this.notifyWarning(response.data);
                 // this.$buefy.toast.open({
                 //   container: ".modal-card",
                 //   message: response.data,
@@ -543,10 +687,12 @@ export default {
     },
     async save() {
       this.loading.saveLoadingBtn = true;
-      if (this.selectedOrder) {
+      if (this.selectedOrder && this.orderwaschanged) {
         const checkorder = await this.checkOrder(true);
         if (checkorder != "success") {
-          this.notifyWarning('This order id is already assigned to another thread.')
+          this.notifyWarning(
+            "This order id is already assigned to another thread."
+          );
           // this.$buefy.toast.open({
           //   container: ".modal-card",
           //   message: "This order id is already assigned to another thread.",
@@ -593,9 +739,8 @@ export default {
         });
     },
     addtag() {
-      if(this.newtag=='' || this.newtag == null)
-      {
-        this.notifyWarning('Select a tag to add.')
+      if (this.newtag == "" || this.newtag == null) {
+        this.notifyWarning("Select a tag to add.");
         // this.$buefy.notification.open({
         //             message: 'Select a tag to add.',
         //             type: 'is-warning',
@@ -603,7 +748,7 @@ export default {
         //             autoClose: true,
         //             closable: false
         //         })
-                return
+        return;
       }
       this.loading.addtagBtnLoading = true;
       const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
@@ -621,32 +766,10 @@ export default {
             var msg = "";
             if (this.isAdmin()) msg = "Added new tag";
             else msg = "Added to review by supervisor.";
-             this.notifySuccess(msg)
-            //  this.$buefy.notification.open({
-            //         message: msg,
-            //         type: 'is-success',
-            //         duration: 5000,
-            //         autoClose: true,
-            //         closable: false
-            //     })
-            // this.$buefy.toast.open({
-            //   message: msg,
-            //   type: "is-success",
-            // });
+            this.notifySuccess(msg);
+            this.loadTagsHistory();
           } else {
-             this.notifyWarning(response.data)
-            // this.$buefy.notification.open({
-            //         message: response.data,
-            //         type: 'is-warning',
-            //         duration: 5000,
-            //         autoClose: true,
-            //         closable: false
-            //     })
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: response.data,
-            //   type: "is-warning",
-            // });
+            this.notifyWarning(response.data);
           }
           this.loading.addtagBtnLoading = false;
         });
@@ -662,7 +785,6 @@ export default {
         });
     },
     loadTagsHistory() {
-         
       this.loading.tagsLogLoading = true;
       this.$api
         .get(
@@ -671,6 +793,15 @@ export default {
         .then(({ data }) => {
           this.tagslog = data.data;
           this.loading.tagsLogLoading = false;
+        });
+    },
+    loadOrdersSuggestions() {
+      this.$api
+        .get(
+          `addonmodules.php?module=ChatManager&c=Orders&json=1&tid=${this.item.id}`
+        )
+        .then(({ data }) => {
+          this.orderchangesuggestions = data.data;
         });
     },
     HasCustomOfferCheck() {
@@ -692,14 +823,13 @@ export default {
       });
     },
     loadReviewStatus() {
-
       this.$api
         .get(
           `addonmodules.php?module=ChatManager&c=ReviewThread&json=1&action=GetReviewStatus&threadid=${this.item.id}`
         )
         .then(({ data }) => {
           if (data.result == "success") {
-            this.reviewStatus = data.data
+            this.reviewStatus = data.data;
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -718,7 +848,7 @@ export default {
           if (data.result == "success") {
             this.reviewRequests = data.data;
           } else {
-            this.notifyWarning(data.msg)
+            this.notifyWarning(data.msg);
           }
         });
     },
@@ -753,16 +883,21 @@ export default {
 
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
-
+    this.orderchangesuggestions = [];
+    this.loadOrdersSuggestions();
     this.HasCustomOfferCheck();
-   this.getPermissions().then(() => {
+    this.getPermissions().then(() => {
       if (this.isAdmin()) {
         // this.loadTagsHistory();
         this.loadReviews();
-      } 
-        this.loadReviewStatus();
+      }
+      this.loadReviewStatus();
     });
-    this.clearLogs()
+    //clear Logs tab to prevent showing logs from previously loaded thread to show when new logs are being loaded
+    this.clearLogs();
+    this.$nextTick(() => {
+       this.WatchOrder = true
+   });
   },
   watch: {
     cannotoffer() {
@@ -789,6 +924,15 @@ export default {
           }
         });
       }
+    },
+    selectedOrder(prev, val)
+    {
+      if(this.WatchOrder && prev != val)
+      {
+        this.orderwaschanged = true
+      }
+      console.log( val)
+      console.log(this.WatchOrder)
     },
     newtag(val) {
       if (val == "-addnew-") {
@@ -817,6 +961,7 @@ export default {
         sendReviewLoadingBtn: false,
         loadingSaveBtn: false,
         isFetchingAgents: false,
+        orderSuggestionTable: false
       },
       activeTab: 0,
       selectedAgent: "",
@@ -834,6 +979,8 @@ export default {
       services: [],
       selectedService: null,
       selectedOrder: null,
+      orderwaschanged: false,
+      WatchOrder: false,
       newtag: null,
       name: null,
       email: null,
@@ -895,6 +1042,7 @@ export default {
       HasCustomOffer: false,
       cannotoffer: "",
       cannotofferCustom: "",
+      orderchangesuggestions: [],
       // perPage: 10
     };
   },
@@ -902,13 +1050,22 @@ export default {
 </script>
 <style>
 .message.is-warning {
-    background-color: #ffefac;
+  background-color: #ffefac;
 }
 .reviewTabHeader {
   background: #ffcf76;
 }
+.smalltable {
+  border: 1px solid black;
+  font-size: 0.75em;
+}
 .modaltable {
   border: 1px solid black;
+}
+.smalltable thead
+{
+background: rgb(255,168,227);
+background: linear-gradient(180deg, rgba(255,168,227,1) 0%, rgba(166,163,251,1) 0%);
 }
 .modaltable thead {
   background: rgb(165, 197, 255);

@@ -7,6 +7,7 @@ use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
+use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 
 class Threads extends APIProtected
 {
@@ -61,9 +62,26 @@ class Threads extends APIProtected
         //if ($domain) {
             $update['domain'] = $domain;
        // }
-        //if ($order) {
-            $update['orderid'] = $order!='' ? $order : null;
-       // }
+        if ((int)$order != (int)$threaddata->orderid) {
+            if(AuthControl::isAgent())
+            {
+                
+                if(ReviewOrder::where('threadid', $itemid)->where('orderid', $order)->count() == 0)
+                {
+                    ReviewOrder::insert([
+                        'orderid' => $order,
+                        'threadid' => $itemid,
+                        'sender' => $_SESSION['adminid'],
+                        'created_at' => gmdate('Y-m-d H:i:s')
+                    ]);
+                    Logs::submitOrderReview($order, $_SESSION['adminid'], $itemid);
+                }
+            }
+            if(AuthControl::isAdmin())
+            {
+                $update['orderid'] = (int)$order;
+            }
+        }
         //if ($notes) {
             $update['notes'] = $notes;
        // }

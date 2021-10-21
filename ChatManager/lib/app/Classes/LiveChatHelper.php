@@ -42,14 +42,12 @@ class LiveChatHelper
     }
     public function readRecentChats(array $filtersSet = [], string $pageid = null)
     {
-        //DB::enableQueryLog();
-        //$t = Threads::with(['tags', 'customer'])->get(['id', 'chatid', 'threadid', 'users', 'domain', 'agent', 'date', 'created_at']);
-        //echo('<pre>'); var_dump(json_decode(json_encode($t))); die;
+        $_SESSION['cmcount'] = 0;
         if ($this->datefrom !== null) {
             $filters['from'] = $this->datefrom;
         } else {
             //2021-08-30T00:00:00.000000-02:00
-            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT72H'))->format('Y-m-d\TH:i:s.000000P');
+            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT10M'))->format('Y-m-d\TH:i:s.000000P');
         }
         if ($pageid !== null) {
             $filters['pageid'] = $pageid;
@@ -62,7 +60,7 @@ class LiveChatHelper
         }
 
         $this->results = $this->api->agents->getArchives($params);
-     
+       // echo('<pre>');var_dump($this->results); die;
         $this->runParseStore();
         if ($this->results->next_page_id) {
             $this->readRecentChats([], $this->results->next_page_id);
@@ -75,7 +73,7 @@ class LiveChatHelper
         }
     }
 
-    public static function getUserById(string $id, array $users) : ?object
+    public static function getUserById(string $id, array $users)
     {
         foreach($users as $user)
         {

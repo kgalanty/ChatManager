@@ -8,6 +8,7 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Customers;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Models\Followup as FollowupModel;
+use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 class Threads extends Model
 {
     public $timestamps = false;
@@ -32,6 +33,10 @@ class Threads extends Model
     public function followup()
     {
         return $this->hasMany(FollowupModel::class, 'threadid', 'id');
+    }
+    public function revieworder()
+    {
+        return $this->hasMany(ReviewOrder::class, 'threadid', 'id');
     }
     // public function scopeID($query, $serverid)
     // {

@@ -23,11 +23,6 @@ class Home extends Controller
     public function index($vars)
     {
         
-$LiveChatAPI = new LiveChat('0fce32f4-5759-4609-b155-4ec9435ed7b1', 'dal:-9MPtP5TFXnIbD8C1Dq3rqW8XX4');
-$agents = $LiveChatAPI->agents->getArchives(['filters' => []]);
-// echo('<pre>');
-// var_dump($agents);
-// echo('</pre>');
         //$vars['somevar'] = 'somevalue';
         return $vars;
     }
