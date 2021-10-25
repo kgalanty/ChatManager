@@ -4,10 +4,10 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css"
     />
-    <!-- <div id="nav" class="hover">
-       <router-link to="/">Home</router-link> 
-      <router-link to="/about">About</router-link>
-    </div> -->
+    <div id="nav" class="hover">
+       <router-link to="/">Chats</router-link> 
+      <router-link to="/stats">Statistics</router-link>
+    </div>
     <router-view />
   </div>
 </template>
@@ -93,7 +93,15 @@ body {
 #app .hover a {
   text-decoration: none;
   position: relative;
-  margin: 0 10px;
+  margin: 0 3px;
+  display:inline-block;
+  padding:15px;
+  
+}
+#app .hover a:hover {
+  background-color:rgb(225, 225, 255);
+  border-radius: 5px;
+  
 }
 #app .hover a::after {
   position: absolute;
@@ -122,7 +130,7 @@ body {
 }
 
 #app #nav {
-  padding: 30px;
+   /* padding: 30px; */
 }
 
 #app #nav a {

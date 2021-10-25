@@ -14,67 +14,63 @@ use WHMCS\Module\Addon\ChatManager\app\Classes\EmailTemplatesConsts;
 use WHMCS\Module\Addon\ChatManager\app\Classes\GidsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Classes\EmailHelper;
 use WHMCS\Module\Addon\ChatManager\app\Classes\Invoices as InvoicesClass;
-use WHMCS\Module\Addon\ChatManager\app\Models\Note;
+use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
+use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
+use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 
-class Stats extends APIProtected
+class Stats extends API
 {
     public function get()
     {
-        $date1 = $_GET['d1'] ? date('Y-m-d 00:00:00', strtotime($_GET['d1'])) : date('Y-m-01 00:00:00');
-        $date2 = $_GET['d2'] ? date('Y-m-d 23:59:59', strtotime($_GET['d2'])) : date('Y-m-t 23:59:59');
-
-        $total = CancelRequest::whereHas('service.product', function(\Illuminate\Database\Eloquent\Builder $query)
+        $dateFrom = $_GET['datefrom'] != '' ? $_GET['datefrom'] : gmdate('Y-m-' . (date('j') < 16 ? 1 : 16) . '\T00:00:00.000000\Z');
+        $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-' . (date('j') < 16 ? 15 : 't') . '\T23:59:59.000000\Z');
+        $threads = DB::table('chat_threads as t')
+            ->join('chat_tags as tg', 'tg.t_id', '=', 't.id')
+            ->join('tbladmins as a', 'a.email','=', 't.agent')
+            ->whereBetween('date', [$dateFrom, $dateTo])
+            ->where('tg.approved', 1);
+            if (AuthControl::isAgent()) {
+                $threads = $threads->where('a.id', $_SESSION['adminid']);
+            }
+            elseif($_GET['op'] != '')
+            {
+                $threads = $threads->where('a.id', intval(trim($_GET['op'])));
+            }
+            $threads = $threads->groupBy('t.agent')
+            ->groupBy('tg.tag')
+            ->selectRaw('t.agent, a.firstname, a.lastname, a.id as adminid, tg.tag, count(t.id) as count')
+            ->get();
+          //  echo('<pre>');var_dump($threads);die;
+        $r = [];
+        $tags = [
+            'canoffer' => 0,
+            'cannotoffer' => 0,
+            'totalsales' => 0,
+            'directsale' => 0,
+            'convertedsale' => 0,
+            'upsell' => 0,
+            'cycle' => 0,
+            'vpsds' => 0,
+            'wcb' => 0,
+            'sales' => 0,
+            'stayed' => 0,
+            'vpsds' => 0,
+            'upgrade' => 0
+        ];
+        foreach ($threads as $t) {
+            $r[$t->agent] = array_merge($tags, $r[$t->agent]);
+            $r[$t->agent]['agent'] = $t->agent;
+            $r[$t->agent]['agent_name'] = $t->firstname.' '.$t->lastname;
+            $r[$t->agent][str_replace(' ','',$t->tag)] = $t->count;
+        } 
+        $o = [];
+        foreach($r as $rr)
         {
-            $query->whereNotIn('gid', GidsConsts::EXTRASERVICESGIDS);
-        })
-        ->wherein('action', ['stayed', 'left'])
-        ->whereBetween('date', [$date1, $date2])
-        ->count();
-       $stayed = CancelRequest::whereHas('service.product', function(\Illuminate\Database\Eloquent\Builder $query)
-       {
-           $query->whereNotIn('gid', GidsConsts::EXTRASERVICESGIDS);
-       })
-       ->where('action', 'stayed')
-       ->whereBetween('date', [$date1, $date2])
-       ->count();
-       $left = CancelRequest::whereHas('service.product', function(\Illuminate\Database\Eloquent\Builder $query)
-       {
-           $query->whereNotIn('gid', GidsConsts::EXTRASERVICESGIDS);
-       })
-       ->whereBetween('date', [$date1, $date2])
-       ->where('action', 'left')->count();
-       $deleted = CancelRequest::whereHas('service.product', function(\Illuminate\Database\Eloquent\Builder $query)
-       {
-           $query->whereNotIn('gid', GidsConsts::EXTRASERVICESGIDS);
-       })
-       ->where('action', 'delete')
-       ->whereBetween('date', [$date1, $date2])
-       ->count();
-       $confirmed = DB::select( DB::raw("select count(*) as count FROM (select count(e.relid) from (select c.relid, c.action from kg_cancelrequests c
-
-       where c.relid in (select relid
-       from `kg_cancelrequests`
-       
-       group by relid
-       having count(*) > 2 and `c`.`action` = 'delete'
-       )
-       UNION
-       select d.relid, d.action from kg_cancelrequests d
-       where d.relid in (select relid
-       from `kg_cancelrequests`
-       
-       group by relid
-       having count(*) > 2 and `d`.`action` = 'left'
-       and d.date between '$date1' AND '$date2'
-       )
-       ) e
-       group by e.relid 
-       having count(e.relid) > 1) f" ))[0];
-       $retention = (int)round($stayed/($stayed+$left)*100);
-        return ['TotalC' => $total, 'Stayed' => $stayed, 'Left' => $left, 'Retention' => $retention.'%', 'Deleted' => $deleted, 'Confirmed'=>$confirmed->count];
+            $o[] = $rr;
+        }
+        return ['data' => $o];
     }
     public function post()
     {
-      
     }
 }
