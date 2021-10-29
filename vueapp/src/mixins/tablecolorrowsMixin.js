@@ -3,9 +3,10 @@ export default {
     methods: {
         colorRows(row) {
             if (this.colorLatefollowup(row)) return "is-latefollowup";
-            if (this.colorDirectsale(row.tags)) return "is-directsale";
+            if (this.colorDirectsale(row)) return "is-directsale";
             if (this.colorCannotoffer(row.tags)) return "is-cannotoffer";
             if (this.colorDuplicate(row.tags)) return "is-duplicate";
+            if (this.colorUpgradeWcbPaid(row)) return "is-upgrade";
           },
           colorDuplicate(tags) {
             return tags.find((e) => {
@@ -14,12 +15,12 @@ export default {
               }
             });
           },
-          colorDirectsale(tags) {
-            return tags.find((e) => {
+          colorDirectsale(row) {
+            return row.tags.find((e) => {
               if (e.tag == "directsale" && e.approved == 1) {
                 return true;
               }
-            });
+            }) && row?.order?.invoice?.status === 'Paid';
           },
           colorCannotoffer(tags) {
             return tags.find((e) => {
@@ -28,6 +29,13 @@ export default {
               }
             });
          },
+         colorUpgradeWcbPaid(row) {
+          return row.tags.find((e) => {
+            if (e.tag == "convertedsale" && e.approved == 1) {
+              return true;
+            }
+          }) && row?.order?.invoice?.status === 'Paid';
+       },
          colorLatefollowup(row) {
             const iswcb = row.tags.find((e) => {
                 if (e.tag == "wcb" && e.approved == 1) {

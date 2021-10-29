@@ -22,11 +22,12 @@ class LogsHistory extends API
         //     return 'No permission';
         // }
         $itemid = (int) $_GET['itemid'];
-        $itemtype = trim($_GET['itemtype']);
+        //$itemtype = trim($_GET['itemtype']);
         $data = LogHistoryModel::with(['doer'])
-        ->where('itemid', $itemid)
-        ->orderBy('id', 'DESC')
-        ->get(['itemclass', 'desc', 'created_at', 'doer']);
+        ->where('itemid', $itemid)->where('itemclass', 'Thread')
+        ->orderBy('chat_logs.created_at', 'DESC')
+        ->get();
+       // ->get(['itemclass', 'desc', 'created_at', 'doer']);
             return ['data' => $data];
     }
     public function post()

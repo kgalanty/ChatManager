@@ -61,6 +61,12 @@ class Logs
         $desc = $admin->firstname . ' ' . $admin->lastname . ' approved new tag ' . $tag . ' to chat ' . $thread;
         self::log($itemid, 'Tag', $doer, $desc);
     }
+    public static function DeclineProposeTagDeletion($itemid, $doer, $tag)
+    {
+        $admin = Admin::find($doer);
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' declined removal of tag ' . $tag;
+        self::log($itemid, 'Tag', $doer, $desc);
+    }
     public static function DelTag($itemid, $doer, $tag)
     {
         $admin = Admin::find($doer);

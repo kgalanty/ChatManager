@@ -43,7 +43,7 @@ class ChatTable extends API
         $operator = $_GET['operator'] != '' ? trim($_GET['operator']) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
-        $result = Threads:: with('followup')->withCount(['pendingReviews' => function ($q) {
+        $result = Threads:: with(['followup','order.invoice'])->withCount(['pendingReviews' => function ($q) {
             $q->where('pending', '0');
         }])
             ->with(['tags', 'customer'])
@@ -57,10 +57,17 @@ class ChatTable extends API
         }
         if($tags)
         {
-            $result->whereHas('tags', function($query) use ($tags)
+            $tagsExploded = explode(',', $tags);
+            foreach($tagsExploded as $tag)
             {
-                $query->whereIn('tag', explode(',', $tags));
-            });
+                $result->whereHas('tags', function($query) use ($tag)
+                {
+                    //$query->whereIn('tag', explode(',', $tags));
+                   
+                    $query->where('tag', $tag);
+                });;
+            }
+            
         }
         if($_GET['q'])
         {
@@ -69,9 +76,11 @@ class ChatTable extends API
             {
                 $query->where('email', 'LIKE', '%'.$q.'%');
             })
-            ->orWhere('threadid', 'LIKE', '%'.$q.'%')
+            ->where('threadid', 'LIKE', '%'.$q.'%')
             ->orWhere('email', 'LIKE', '%'.$q.'%')
-            ->orWhere('domain', 'LIKE', '%'.$q.'%')->orWhere('orderid', 'LIKE', '%'.$q.'%');
+            ->orWhere('domain', 'LIKE', '%'.$q.'%')
+            ->orWhere('chatid', 'LIKE', '%'.$q.'%')
+            ->orWhere('orderid', 'LIKE', '%'.$q.'%');
         }
         if(AuthControl::isAgent())
         {
@@ -84,6 +93,7 @@ class ChatTable extends API
         $total = $result->count();
         $result = $result->skip($page)->take($perpage)->orderBy('date', 'DESC')
         ->get();
+        
         return ['data' => $result, 'total' => $total];
         //     $results = DB::table('tbladmins as a')
         //    ->orderBy('a.firstname', 'ASC')

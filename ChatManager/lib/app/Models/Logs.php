@@ -20,4 +20,8 @@ class Logs extends Model
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'doer', 'id');
     }
+    public function tag()
+    {
+        return $this->hasOne('\WHMCS\Module\Addon\ChatManager\app\Models\Tags', 't_id', 'itemid');
+    }
 }

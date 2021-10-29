@@ -16,4 +16,12 @@ class Tags extends Model
     // {
     //     return $query->where('id', $serverid);
     // }
+    public function scopeThread($query, $threadid)
+    {
+        return $query->where('t_id', $threadid);
+    }
+    public function scopeTag($query, $tag)
+    {
+        return $query->where('tag', $tag);
+    }
 }

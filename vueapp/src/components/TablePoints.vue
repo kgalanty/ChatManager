@@ -16,7 +16,7 @@ import tableHelper from "@/mixins/tableHelper"
 
 export default {
   name: "TablePoints",
-  props: ['tags'],
+  props: ['row'],
   mixins: [tableHelper],
   components: {
   },
@@ -24,7 +24,7 @@ export default {
     
   },
   mounted() {
-   this.points= this.calculatePointsFromTags(this.tags)
+   this.points = this.calculatePointsFromTags(this.row)
   },
   computed: {
   //  ...mapState(["chats", "chatsPage", "chatsLoading"]),

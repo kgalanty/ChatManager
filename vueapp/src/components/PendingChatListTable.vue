@@ -108,7 +108,7 @@
       >
         {{ props.row.orderid }}
       </b-table-column>
-      <b-table-column label="Extra Points" width="160" v-slot="props" ><TablePoints :tags="props.row.tags" /></b-table-column>
+      <b-table-column label="Extra Points" width="160" v-slot="props" ><TablePoints :row="props.row" /></b-table-column>
       <b-table-column field="date" label="Edit" v-slot="props" width="60">
         <b-button
           type="is-primary"

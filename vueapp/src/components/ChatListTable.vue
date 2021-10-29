@@ -129,7 +129,7 @@
         ><span v-else>{{ props.row.customer.name }}</span>
       </b-table-column>
       <b-table-column
-        field="date"
+        field="email"
         label="E-mail"
         v-slot="props"
         :visible="filters['email'].display"
@@ -183,7 +183,7 @@
       <b-table-column
         field="orderid"
         label="Order ID"
-        width="160"
+        width="100"
         v-slot="props"
         :visible="filters['orderid'].display"
       >
@@ -195,7 +195,7 @@
         v-slot="props"
         :visible="filters['extrapoints'].display"
       >
-        <TablePoints :tags="props.row.tags" />
+        <TablePoints :row="props.row" />
       </b-table-column>
       <b-table-column
         field="date"
@@ -253,6 +253,10 @@
 .is-directsale {
   background: rgb(170, 255, 184) !important;
   color: #000;
+}
+.is-upgrade
+{
+  background: rgb(204 255 215) !important;
 }
 .btable {
   font-size: 13px;

@@ -72,16 +72,19 @@ export default {
           });
       })
     },
-    calculatePointsFromTags(tags) {
+    calculatePointsFromTags(row) {
       var n = 0
-      for (const i of tags) {
-        if (i.tag == 'directsale') n++
-        if (i.tag == 'covneredsale') n++
-        if (i.tag == 'upsell') n++
-        if (i.tag == 'cycle') n++
-        if (i.tag == 'vps/ds') n++
-
+      var upgradeMarker = false
+      for (let i of row.tags) {
+        if(parseInt(i.approved) !== 1) continue
+        if (i.tag == "directsale" && row?.order?.invoice?.status == 'Paid') n++
+        if (i.tag == "convertedsale") n++
+        if (i.tag == "upsell") n++
+        if (i.tag == "cycle") n++
+        if (i.tag == "vps/ds") n++
+        if (i.tag == "upgrade" && row?.order?.invoice?.status === 'Paid') upgradeMarker = true
       }
+      if(upgradeMarker) return 1
       return n > 0 ? n : ''
     }
   }

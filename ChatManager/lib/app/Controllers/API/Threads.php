@@ -82,6 +82,10 @@ class Threads extends APIProtected
                 $update['orderid'] = (int)$order;
             }
         }
+        elseif(strlen($order) == 0)
+        {
+            $update['orderid'] = null;
+        }
         //if ($notes) {
             $update['notes'] = $notes;
        // }
@@ -91,13 +95,14 @@ class Threads extends APIProtected
         if ($agent && AuthControl::isAdmin()) {
             $update['agent'] = $agent;
         }
-
+       
         Logs::updateThread($itemid, $_SESSION['adminid'], $update, $threaddata);
 
         // order: this.selectedOrder,
         // notes: this.notes,
         // customoffer: this.customoffer,
         if (count($update) > 0) {
+            ThreadsModel::where('id', $itemid)->update($update);
             return 'success';
         }
         return 'Nothing has been changed';

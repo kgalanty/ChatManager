@@ -11,13 +11,17 @@ class TagsLog
     {
        return self::log($threadid, $tag, 'Add');
     }
-    private static function log($thread_id, $tag, $action)
+    public static function ProposeNewTag($threadid, $tag)
+    {
+       return self::log($threadid, $tag, 'Proposition');
+    }
+    private static function log($thread_id, $tag, $action, int $doer=0)
     {
         TagHistory::create(
             [
                 'thread_id' => $thread_id,
                 'tag' => $tag,
-                'doer' => $_SESSION['adminid'],
+                'doer' => $doer>0 ? $doer : $_SESSION['adminid'],
                 'action' => $action,
                 'created_at' => gmdate('Y-m-d H:i:s')
             ]
@@ -34,5 +38,13 @@ class TagsLog
     public static function Approve($threadid, $tag)
     {
         return self::log($threadid, $tag, 'Approve');
+    }
+    public static function DeclineProposeDeletion($threadid, $tag)
+    {
+        return self::log($threadid, $tag, 'Declined deleting tag');
+    }
+    public static function AddedByCron($threadid, $tag)
+    {
+        return self::log($threadid, $tag, 'Added by cron', 1);
     }
 }

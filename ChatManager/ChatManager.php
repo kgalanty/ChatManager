@@ -2,6 +2,7 @@
 
 use WHMCS\Module\Addon\ChatManager\Dispatcher;
 use WHMCS\Module\Addon\ChatManager\app\Addon;
+use WHMCS\Module\Addon\ChatManager\app\ClientAreaDispatcher;
 if (!defined("WHMCS")) {
     die("This file cannot be accessed directly");
 }
@@ -33,4 +34,9 @@ function ChatManager_deactivate()
 function ChatManager_upgrade()
 {
     return Addon::upgrade();
+}
+function ChatManager_clientarea($vars)
+{
+    echo ClientAreaDispatcher::processRequest($vars);
+    die('test');
 }

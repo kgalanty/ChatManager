@@ -122,6 +122,16 @@
         {{ props.row.vpsds }}
       </b-table-column>
       <b-table-column
+      header-class="stats-sticky-column"
+      cell-class="stats-sticky-column"
+        field="date"
+        label="Conversion without points"
+        v-slot="props"
+        width="100"
+      >
+        {{ props.row.directsale+props.row.wcb > 0 ? returnPercents((props.row.directsale+props.row.convertedsale)*100/(props.row.directsale+props.row.wcb)) : '0 %'}}
+      </b-table-column>
+      <b-table-column
         field="date"
         label="Total Points"
         v-slot="props"
@@ -129,17 +139,17 @@
         header-class="stats-sticky-column"
         cell-class="stats-sticky-column"
       >
-        {{ props.row.upgrade > 0 ? 1 : (props.row.upsell+props.row.cycle+props.row.vpsds) }}
+   {{ (props.row.directsale+props.row.convertedsale+props.row.upsell+props.row.cycle+props.row.vpsds)-props.row.decrementpoints }}
       </b-table-column>
       <b-table-column
       header-class="stats-sticky-column"
       cell-class="stats-sticky-column"
         field="date"
-        label="Conversion"
+        label="Conversion with points"
         v-slot="props"
         width="100"
       >
-        {{ props.row.totalsales }}
+         {{ props.row.directsale+props.row.wcb > 0 ? returnPercents((props.row.directsale+props.row.convertedsale+props.row.upsell+props.row.cycle+props.row.vpsds)*100/(props.row.directsale+props.row.wcb)) : '0 %'}}
       </b-table-column>
     </b-table>
   </article>
@@ -197,6 +207,10 @@ export default {
     //   });
     //   return true;
     // },\
+    returnPercents(val)
+    {
+      return +parseFloat(val).toFixed(2)+'%'
+    },
     cannotofferPercent(row) {
       if (row.directsale+row.wcb + row.cannotoffer == 0) return 0;
       return Math.round((row.cannotoffer / (row.directsale+row.wcb + row.cannotoffer)) * 100);

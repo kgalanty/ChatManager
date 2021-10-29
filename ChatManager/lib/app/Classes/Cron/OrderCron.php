@@ -7,6 +7,10 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Module\Addon\ChatManager\app\Models\Client;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
+use WHMCS\Module\Addon\ChatManager\app\Classes\TagsLog;
+use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
+use WHMCS\Module\Addon\ChatManager\app\Classes\TagsHelper;
+
 class OrderCron
 {
     public $timezone;
@@ -47,8 +51,15 @@ class OrderCron
         if ($potentiallyCompletedOrder) {
             $thread->orderid = $potentiallyCompletedOrder->orderid;
             $thread->domain = $potentiallyCompletedOrder->domain;
-            Threads::where('id', $thread->id)->update(['domain' => $potentiallyCompletedOrder->domain, 'orderid' => $potentiallyCompletedOrder->orderid]);
+            Threads::where('id', $thread->id)
+                ->update(['domain' => $potentiallyCompletedOrder->domain, 'orderid' => $potentiallyCompletedOrder->orderid]);
+            if (Tags::thread($thread->id)->tag('wcb')->count() > 0) {
+                TagsHelper::addTag('convertedsale', $thread->id, true, 1);
+                TagsLog::AddedByCron($thread->id, 'convertedsale');
+            }
+
             Logs::MatchedOrderByCron($thread);
+            
             return;
         }
         $email = $thread->email ? $thread->email : $thread->customer->email;
@@ -76,6 +87,10 @@ class OrderCron
                 if ($order) {
                     if ($order->domain) {
                         Threads::where('id', $thread->id)->update(['domain' => $order->domain, 'orderid' => $order->orderid]);
+                        if (Tags::thread($thread->id)->tag('wcb')->count() > 0) {
+                            TagsHelper::addTag('convertedsale', $thread->id, true,1);
+                            TagsLog::AddedByCron($thread->id, 'convertedsale');
+                        }
                     }
                 }
             }

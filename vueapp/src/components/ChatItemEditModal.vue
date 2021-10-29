@@ -203,6 +203,18 @@
                     <b-icon icon="delete" size="is-small"> </b-icon>
                   </b-tooltip>
                   <span style="float: right">
+                    <b-tooltip
+                    label="Keep the tag & delete the proposal"
+                    position="is-left"
+                    v-if="isAdmin() && props.row.proposed_deletion == 1"
+                  >
+                     <b-button
+                      icon-right="check"
+                      type="is-success"
+                      style="font-size: 0.8rem !important"
+                      @click="undoProposeDeletion(props.row)"
+                       />
+                       </b-tooltip>
                     <b-button
                       icon-right="check"
                       type="is-success"
@@ -607,6 +619,36 @@ export default {
             this.HasCustomOfferCheck();
           } else {
             this.notifyWarning(response.data);
+          }
+        });
+    },
+    undoProposeDeletion(tag)
+    {
+      const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
+      this.$api
+        .post(`addonmodules.php?${params}`, {
+          tag: tag.id,
+          action: "undoProposeDeletion",
+        })
+        .then((response) => {
+          if (response.data.data == "success") {
+            // this.$emit("close")
+            //this.loadChats()
+            this.notifySuccess("You declined deletion of tag");
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: "You approved the tag",
+            //   type: "is-success",
+            // });
+            this.getTags()
+            this.loadTagsHistory()
+          } else {
+            this.notifyWarning(response.data);
+            // this.$buefy.toast.open({
+            //   container: ".modal-card",
+            //   message: response.data,
+            //   type: "is-warning",
+            // });
           }
         });
     },
