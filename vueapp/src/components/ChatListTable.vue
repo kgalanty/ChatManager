@@ -195,7 +195,7 @@
         v-slot="props"
         :visible="filters['extrapoints'].display"
       >
-        <TablePoints :row="props.row" />
+        <TablePoints :tags="props.row.tags" :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''" />
       </b-table-column>
       <b-table-column
         field="date"
@@ -292,10 +292,11 @@ import tablecolorrowsMixin from "../mixins/tablecolorrowsMixin";
 import memberMixin from "../mixins/memberMixin";
 import tableHelper from "../mixins/tableHelper";
 import AddEntryModal from "./AddEntryModal.vue";
+import requestMixin from "../mixins/requestsMixin";
 export default {
   name: "ChatListTable",
   components: { TablePoints, TableFollowUp, AddEntryModal },
-  mixins: [tablecolorrowsMixin, tableHelper, memberMixin],
+  mixins: [tablecolorrowsMixin, tableHelper, memberMixin, requestMixin],
   methods: {
     ...mapActions({
       loadChats: "chat/loadChats",
@@ -380,7 +381,7 @@ export default {
       return "None";
     },
     followup(row) {
-      const params = [`module=ChatManager`, `c=FollowUp`, `json=1`].join("&");
+      const params = this.generateParamsForRequest('FollowUp')
       this.$api
         .post(`addonmodules.php?${params}`, {
           threadid: row.id,

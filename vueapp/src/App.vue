@@ -5,7 +5,7 @@
       href="https://cdn.jsdelivr.net/npm/@mdi/font@5.8.55/css/materialdesignicons.min.css"
     />
     <div id="nav" class="hover">
-       <router-link to="/">Chats</router-link> 
+      <router-link to="/">Chats</router-link>
       <router-link to="/stats">Statistics</router-link>
     </div>
     <router-view />
@@ -18,23 +18,22 @@
     transform: scaleX(0);
   }
 }
-.notification
-{
-  -webkit-box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
--moz-box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
-box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
+.notification {
+  -webkit-box-shadow: 4px 5px 9px 1px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 4px 5px 9px 1px rgba(0, 0, 0, 0.75);
+  box-shadow: 4px 5px 9px 1px rgba(0, 0, 0, 0.75);
 }
 .notification:after {
-    content: "";
-    display: block;
-    height: 3px;
-    width: 100%;
-    z-index: 1;
-    position: absolute;
-    left: 0;
-    bottom: 0px;
-    transform-origin: left center;
-    animation: roundtime calc(5s) linear forwards;
+  content: "";
+  display: block;
+  height: 3px;
+  width: 100%;
+  z-index: 1;
+  position: absolute;
+  left: 0;
+  bottom: 0px;
+  transform-origin: left center;
+  animation: roundtime calc(5s) linear forwards;
 }
 .notification.is-success:after {
   background: white;
@@ -45,8 +44,12 @@ box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
 .notification.is-warning:after {
   background: black;
 }
-[v-cloak] > * { display:none }
-[v-cloak]::before { content: "loading…" }
+[v-cloak] > * {
+  display: none;
+}
+[v-cloak]::before {
+  content: "loading…";
+}
 @font-face {
   font-family: "Manrope";
   font-display: swap;
@@ -86,7 +89,7 @@ box-shadow: 4px 5px 9px 1px rgba(0,0,0,0.75);
   background: white;
 }
 body {
-  font-family: "Manrope",arial,sans-serif;
+  font-family: "Manrope", arial, sans-serif;
 }
 </style>
 <style scoped>
@@ -94,14 +97,12 @@ body {
   text-decoration: none;
   position: relative;
   margin: 0 3px;
-  display:inline-block;
-  padding:15px;
-  
+  display: inline-block;
+  padding: 15px;
 }
 #app .hover a:hover {
-  background-color:rgb(225, 225, 255);
+  background-color: rgb(225, 225, 255);
   border-radius: 5px;
-  
 }
 #app .hover a::after {
   position: absolute;
@@ -122,7 +123,7 @@ body {
 }
 #app {
   /* font-family: Avenir, Helvetica, Arial, sans-serif; */
-  font-family: "Manrope",arial,sans-serif;
+  font-family: "Manrope", arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -130,7 +131,7 @@ body {
 }
 
 #app #nav {
-   /* padding: 30px; */
+  /* padding: 30px; */
 }
 
 #app #nav a {

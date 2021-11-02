@@ -21,15 +21,13 @@ class Supervisors extends API
 {
     public function get()
     {
-        $supervisors = Admin::whereHas('role', function(Builder $query)
-        {
+        $supervisors = Admin::whereHas('role', function (Builder $query) {
             $query->whereIn('id', SupervisorsConsts::SV_ROLES);
-        })->orderBy('firstname','ASC')->orderBy('lastname','ASC')->get();
-        
+        })->orderBy('firstname', 'ASC')->orderBy('lastname', 'ASC')->get();
+
         return ['data' => $supervisors];
     }
     public function post()
     {
-       
     }
 }

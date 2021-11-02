@@ -8,6 +8,7 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\FindClientHelper;
 use WHMCS\Module\Addon\ChatManager\app\Classes\FindOrderHelper;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 
 class LiveChatParsers
 {
@@ -40,7 +41,7 @@ class LiveChatParsers
             //     }
             // }
 
-            if (DB::table('chat_threads')->where('threadid', $chatitem->thread->id)->count() == 0) {
+            if (DB::table(DBTables::Threads)->where('threadid', $chatitem->thread->id)->count() == 0) {
                 $insertRow = [
                     'chatid' => $chatitem->id,
                     'threadid' => $chatitem->thread->id,
@@ -60,7 +61,7 @@ class LiveChatParsers
                 ));
 
                 $_SESSION['cmcount'] += count($insertRow);
-                $id = DB::table('chat_threads')->insertGetId($insertRow);
+                $id = DB::table(DBTables::Threads)->insertGetId($insertRow);
                 //echo('<pre>'); var_dump($insertRow, $id, $chatitem, count($list)); die;
                 self::parseTags($id, $chatitem->thread->tags);
             }
@@ -71,20 +72,20 @@ class LiveChatParsers
     public static function parseTags(int $thread_id, array $tags)
     {
         foreach ($tags as $tag) {
-            if (DB::table('chat_tags')->where('t_id', $thread_id)->count() == 0) {
+            if (DB::table(DBTables::Tags)->where('t_id', $thread_id)->count() == 0) {
                 $rows[] = ['t_id' => $thread_id, 'tag' => $tag, 'approved' => 1];
             }
         }
 
         if ($rows) {
-            DB::table('chat_tags')->insert($rows);
+            DB::table(DBTables::Tags)->insert($rows);
         }
     }
     public static function parseCustomer(string $userid, array $users)
     {
         $customer = LiveChatHelper::getUserById($userid,  $users);
         if ($customer) {
-            DB::table('chat_customers')
+            DB::table(DBTables::Customers)
                 ->updateOrInsert(
                     [
                         'client_id' => $userid,

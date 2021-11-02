@@ -3,6 +3,7 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 use WHMCS\Module\Addon\ChatManager\app\Models\Customers;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread;
@@ -13,7 +14,7 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Order;
 class Threads extends Model
 {
     public $timestamps = false;
-    protected $table = 'chat_threads';
+    protected $table = DBTables::Threads;
     protected $fillable = ['chatid', 'threadid', 'users', 'domain','agent', 'date', 'created_at'];
     public function tags()
     {

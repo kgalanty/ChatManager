@@ -428,12 +428,13 @@ import { mapActions } from "vuex";
 import { dateMixin } from "../mixins/dateMixin.js";
 import { tagsMixin } from "../mixins/tagsMixin";
 import memberMixin from "../mixins/memberMixin";
+import requestMixin from "../mixins/requestsMixin";
 import notificationsMixin from "../mixins/notificationsMixin";
 
 export default {
   name: "ChatItemEditModal",
   props: ["item"],
-  mixins: [dateMixin, tagsMixin, memberMixin, notificationsMixin],
+  mixins: [dateMixin, tagsMixin, memberMixin, notificationsMixin, requestMixin],
   components: { ChatItemLogs },
   computed: {
     reviewTabHeader() {
@@ -456,9 +457,10 @@ export default {
     }),
     getAgents: debounce(function (name) {
       this.loading.isFetchingAgents = true;
+      const params = this.generateParamsForRequest('Agents')
       this.$api
         .get(
-          `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=${name}`
+          `addonmodules.php?${params}&q=${name}`
         )
         .then(({ data }) => {
           this.filteredAgentArray = data.data;
@@ -473,7 +475,7 @@ export default {
     }, 500),
     acceptOrderSuggestion(suggestionid) {
       this.loading.orderSuggestionTable = true
-      const params = [`module=ChatManager`, `c=Orders`, `json=1`].join("&");
+      const params = this.generateParamsForRequest('Orders')
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: suggestionid,
@@ -493,7 +495,7 @@ export default {
     },
     declineOrderSuggestion(suggestionid) {
       this.loading.orderSuggestionTable = true
-      const params = [`module=ChatManager`, `c=Orders`, `json=1`].join("&");
+      const params = this.generateParamsForRequest('Orders')
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: suggestionid,
@@ -512,9 +514,7 @@ export default {
         });
     },
     MarkReviewComment(commentid) {
-      const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join(
-        "&"
-      );
+      const params = this.generateParamsForRequest('ReviewThread')
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: commentid,
@@ -524,40 +524,20 @@ export default {
         .then((response) => {
           if (response.data.data == "success") {
             this.notifySuccess("Entry marked as seen");
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: "",
-            //   type: "is-success",
-            // });
             this.loadReviews();
             this.loadReviewStatus();
           } else {
             this.notifyWarning(response.data);
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: response.data,
-            //   type: "is-warning",
-            // });
           }
         });
     },
     sendToReview() {
       if (this.commmentReview.length == 0) {
         this.notifyDanger("Comment cannot be empty");
-        //  this.$buefy.notification.open({
-        //               message: 'Comment cannot be empty',
-        //               type: 'is-danger',
-        //               duration: 5000,
-        //               autoClose: true,
-        //               closable: false
-        //           })
-
-        return;
+              return;
       }
       this.loading.sendReviewLoadingBtn = true;
-      const params = [`module=ChatManager`, `c=ReviewThread`, `json=1`].join(
-        "&"
-      );
+      const params =  this.generateParamsForRequest('ReviewThread')
       this.$api
         .post(`addonmodules.php?${params}`, {
           threadid: this.item.id,
@@ -592,7 +572,7 @@ export default {
         });
     },
     deleteTag(tag) {
-      const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
+      const params =  this.generateParamsForRequest('Tags')
       this.$api
         .post(`addonmodules.php?${params}`, {
           tag: tag.id,
@@ -624,7 +604,7 @@ export default {
     },
     undoProposeDeletion(tag)
     {
-      const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
+      const params =  this.generateParamsForRequest('Tags')
       this.$api
         .post(`addonmodules.php?${params}`, {
           tag: tag.id,
@@ -653,7 +633,8 @@ export default {
         });
     },
     approveTag(tag) {
-      const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
+      const params =  this.generateParamsForRequest('Tags')
+
       this.$api
         .post(`addonmodules.php?${params}`, {
           tag: tag.id,
@@ -661,22 +642,10 @@ export default {
         })
         .then((response) => {
           if (response.data.data == "success") {
-            // this.$emit("close")
-            //this.loadChats()
             this.notifySuccess("You approved the tag");
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: "You approved the tag",
-            //   type: "is-success",
-            // });
             this.getTags();
           } else {
             this.notifyWarning(response.data);
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: response.data,
-            //   type: "is-warning",
-            // });
           }
         });
     },
@@ -686,7 +655,7 @@ export default {
         return true;
       }
       // this.OrderStatusField = null;
-      const params = [`module=ChatManager`, `c=Orders`, `json=1`].join("&");
+      const params =  this.generateParamsForRequest('Orders')
       this.loadingCheckBtn = true;
       return new Promise((resolve) => {
         this.$api
@@ -744,7 +713,7 @@ export default {
           return;
         }
       }
-      const params = [`module=ChatManager`, `c=Threads`, `json=1`].join("&");
+      const params =  this.generateParamsForRequest('Threads')
       this.loading.loadingSaveBtn = true;
 
       var cannotofferReason = this.cannotofferCustom
@@ -783,17 +752,10 @@ export default {
     addtag() {
       if (this.newtag == "" || this.newtag == null) {
         this.notifyWarning("Select a tag to add.");
-        // this.$buefy.notification.open({
-        //             message: 'Select a tag to add.',
-        //             type: 'is-warning',
-        //             duration: 5000,
-        //             autoClose: true,
-        //             closable: false
-        //         })
         return;
       }
       this.loading.addtagBtnLoading = true;
-      const params = [`module=ChatManager`, `c=Tags`, `json=1`].join("&");
+      const params =  this.generateParamsForRequest('Tags')
       this.$api
         .post(`addonmodules.php?${params}`, {
           tid: this.item.id,
@@ -973,8 +935,8 @@ export default {
       {
         this.orderwaschanged = true
       }
-      console.log( val)
-      console.log(this.WatchOrder)
+      // console.log( val)
+      // console.log(this.WatchOrder)
     },
     newtag(val) {
       if (val == "-addnew-") {
@@ -1028,36 +990,6 @@ export default {
       email: null,
       domain: null,
       notes: "",
-      // tagsList: [
-      //   "sales",
-      //   "wcb",
-      //   "directsale",
-      //   "convertedsale",
-      //   "notsure",
-      //   "georgistatev",
-      //   "upgrade",
-      //   "upsell",
-      //   "firstlastname",
-      //   "elvira",
-      //   "ivaylo",
-      //   "domain",
-      //   "pushupsell",
-      //   "tegan",
-      //   "cycle",
-      //   "promocode",
-      //   "emiliy",
-      //   "deni",
-      //   "alexp",
-      //   "pushcycle",
-      //   "pending",
-      //   "#blackfriday",
-      //   "custom",
-      //   "phone",
-      //   "#4thjuly",
-      //   "duplicate",
-      //   "vps/ds",
-      //   "cannot offer",
-      // ],
       cannotofferReasons: [
         "Pricing ( Reseller/Starter Shared)",
         "Accepting Bitcoins/Cryptocurrencies",

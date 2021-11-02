@@ -3,10 +3,12 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
+
 class Logs extends Model
 {
     public $timestamps = false;
-    protected $table = 'chat_logs';
+    protected $table = DBTables::Logs;
     protected $fillable = ['itemid', 'itemclass', 'doer', 'desc', 'created_at'];
     // public function service()
     // {

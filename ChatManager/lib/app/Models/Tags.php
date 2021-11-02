@@ -3,10 +3,12 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
+
 class Tags extends Model
 {
     public $timestamps = false;
-    protected $table = 'chat_tags';
+    protected $table = DBTables::Tags;
     protected $fillable = ['t_id', 'tag', 'approved'];
     // public function service()
     // {

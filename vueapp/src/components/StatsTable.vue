@@ -3,23 +3,22 @@
     <div class="tile">
       <div class="tile is-2 is-child">
         <b-field label="Operator" style="width: 95%; padding: 9px">
-        <b-select
-          placeholder="Select an operator"
-          :loading="loading.operators"
-          @focus="loadOperators"
-          v-model="filters.operator"
-          expanded
-          @input="loadStats"
-        >
-        <option value="">-All-</option>
-          <option :value="op.id" :key="i" v-for="(op, i) in operators">
-            {{ op.firstname }} {{ op.lastname }}
-          </option>
-        </b-select>
+          <b-select
+            placeholder="Select an operator"
+            :loading="loading.operators"
+            @focus="loadOperators"
+            v-model="filters.operator"
+            expanded
+            @input="loadStats"
+          >
+            <option value="">-All-</option>
+            <option :value="op.id" :key="i" v-for="(op, i) in operators">
+              {{ op.firstname }} {{ op.lastname }}
+            </option>
+          </b-select>
         </b-field>
       </div>
       <div class="tile is-2 is-child">
-        
         <b-field label="Date [From]" style="width: 95%; padding: 9px">
           <b-datepicker
             v-model="filters.dateFrom"
@@ -63,8 +62,15 @@
       <b-table-column field="date" label="Agent" v-slot="props" width="100">
         {{ props.row.agent_name }}
       </b-table-column>
-      <b-table-column field="date" label="Can Offer" v-slot="props" width="100" header-class="stats-sticky-column" cell-class="stats-sticky-column">
-        {{ props.row.directsale+props.row.wcb }}
+      <b-table-column
+        field="date"
+        label="Can Offer"
+        v-slot="props"
+        width="100"
+        header-class="stats-sticky-column"
+        cell-class="stats-sticky-column"
+      >
+        {{ props.row.directsale + props.row.wcb }}
       </b-table-column>
       <b-table-column
         field="date"
@@ -80,7 +86,7 @@
         v-slot="props"
         width="100"
       >
-        {{ props.row.directsale+props.row.wcb + props.row.cannotoffer }}
+        {{ props.row.directsale + props.row.wcb + props.row.cannotoffer }}
       </b-table-column>
       <b-table-column
         field="date"
@@ -108,8 +114,7 @@
       >
         {{ props.row.directsale + props.row.convertedsale }}
       </b-table-column>
-      <b-table-column field="date" label="Upsell" v-slot="props" width="100"
-        >
+      <b-table-column field="date" label="Upsell" v-slot="props" width="100">
         {{ props.row.upsell }}
       </b-table-column>
       <b-table-column field="date" label="Cycle" v-slot="props" width="100">
@@ -122,14 +127,21 @@
         {{ props.row.vpsds }}
       </b-table-column>
       <b-table-column
-      header-class="stats-sticky-column"
-      cell-class="stats-sticky-column"
+        header-class="stats-sticky-column"
+        cell-class="stats-sticky-column"
         field="date"
         label="Conversion without points"
         v-slot="props"
         width="100"
       >
-        {{ props.row.directsale+props.row.wcb > 0 ? returnPercents((props.row.directsale+props.row.convertedsale)*100/(props.row.directsale+props.row.wcb)) : '0 %'}}
+        {{
+          props.row.directsale + props.row.wcb > 0
+            ? returnPercents(
+                ((props.row.directsale + props.row.convertedsale) * 100) /
+                  (props.row.directsale + props.row.wcb)
+              )
+            : "0 %"
+        }}
       </b-table-column>
       <b-table-column
         field="date"
@@ -139,30 +151,47 @@
         header-class="stats-sticky-column"
         cell-class="stats-sticky-column"
       >
-   {{ (props.row.directsale+props.row.convertedsale+props.row.upsell+props.row.cycle+props.row.vpsds)-props.row.decrementpoints }}
+        {{
+          props.row.directsale +
+          props.row.convertedsale +
+          props.row.upsell +
+          props.row.cycle +
+          props.row.vpsds -
+          props.row.decrementpoints
+        }}
       </b-table-column>
       <b-table-column
-      header-class="stats-sticky-column"
-      cell-class="stats-sticky-column"
+        header-class="stats-sticky-column"
+        cell-class="stats-sticky-column"
         field="date"
         label="Conversion with points"
         v-slot="props"
         width="100"
       >
-         {{ props.row.directsale+props.row.wcb > 0 ? returnPercents((props.row.directsale+props.row.convertedsale+props.row.upsell+props.row.cycle+props.row.vpsds)*100/(props.row.directsale+props.row.wcb)) : '0 %'}}
+        {{
+          props.row.directsale + props.row.wcb > 0
+            ? returnPercents(
+                ((props.row.directsale +
+                  props.row.convertedsale +
+                  props.row.upsell +
+                  props.row.cycle +
+                  props.row.vpsds) *
+                  100) /
+                  (props.row.directsale + props.row.wcb)
+              )
+            : "0 %"
+        }}
       </b-table-column>
     </b-table>
   </article>
 </template>
 <style>
-.stats-sticky-column
-{
+.stats-sticky-column {
   background: #ffebb8 !important;
-    color: rgb(0, 0, 0) !important;
+  color: rgb(0, 0, 0) !important;
 }
 </style>
 <style scoped>
-
 #statstable {
   background: #acc6ff;
   color: white;
@@ -207,13 +236,14 @@ export default {
     //   });
     //   return true;
     // },\
-    returnPercents(val)
-    {
-      return +parseFloat(val).toFixed(2)+'%'
+    returnPercents(val) {
+      return +parseFloat(val).toFixed(2) + "%";
     },
     cannotofferPercent(row) {
-      if (row.directsale+row.wcb + row.cannotoffer == 0) return 0;
-      return Math.round((row.cannotoffer / (row.directsale+row.wcb + row.cannotoffer)) * 100);
+      if (row.directsale + row.wcb + row.cannotoffer == 0) return 0;
+      return Math.round(
+        (row.cannotoffer / (row.directsale + row.wcb + row.cannotoffer)) * 100
+      );
     },
     loadOperators() {
       if (this.operators.length == 0) {
@@ -230,13 +260,13 @@ export default {
             throw error;
           })
           .finally(() => {
-            this.loading.operators = false
+            this.loading.operators = false;
           });
       }
     },
     loadStats() {
       const startDay = this.moment().format("DD") < 16 ? 1 : 16;
-  this.loading.stats = true
+      this.loading.stats = true;
       // const endDay = this.moment().daysInMonth()
       // console.log(startDay)
       // console.log(endDay)
@@ -258,7 +288,7 @@ export default {
                 this.moment().add(1, "months").format("YYYY-MM-01")
               )
         }`,
-        `op=${this.filters.operator}`
+        `op=${this.filters.operator}`,
       ].join("&");
 
       //context.commit('setChatsPage', payload.chatsPage)
@@ -274,10 +304,9 @@ export default {
           console.log(e);
           //window.location = 'login.php'
         })
-        .finally(()=> 
-        {
-          this.loading.stats = false
-        })
+        .finally(() => {
+          this.loading.stats = false;
+        });
     },
     // editModal(item) {
     //   const modal = this.$buefy.modal.open({
@@ -313,7 +342,7 @@ export default {
     return {
       loading: {
         stats: false,
-        operators: false
+        operators: false,
       },
       stats: {
         data: [],
@@ -322,9 +351,9 @@ export default {
       filters: {
         dateFrom: null,
         dateTo: null,
-        operator: ''
+        operator: "",
       },
-      operators: []
+      operators: [],
     };
   },
 };

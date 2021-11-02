@@ -3,12 +3,14 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
+
 class StatsHelper
 {
     public static function getStats($params)
     {
-        $threads = DB::table('chat_threads as t')
-        ->join('chat_tags as tg', 'tg.t_id', '=', 't.id')
+        $threads = DB::table(DBTables::Threads.' as t')
+        ->join(DBTables::Tags.' as tg', 'tg.t_id', '=', 't.id')
         ->join('tbladmins as a', 'a.email', '=', 't.agent')
         ->whereBetween('date', [$params['datefrom'], $params['dateto']])
         ->where('tg.approved', 1);
@@ -26,12 +28,12 @@ class StatsHelper
     public static function getDecrementPoints($params)
     {
         $q = 'select sum(x.c) as s, agent FROM ( select
-            t.agent, count(t.id) as c from `chat_threads` t 
-            join `chat_tags` as tg ON tg.t_id = t.id
+            t.agent, count(t.id) as c from `'.DBTables::Threads.'` t 
+            join `'.DBTables::Tags.'` as tg ON tg.t_id = t.id
             join `tbladmins` as ad ON ad.email = t.agent
             where 
             tg.tag in ("upgrade", "cycle", "upsell")
-            and exists (select id from chat_tags as tg where tg.tag = "upgrade" and tg.t_id = t.id and tg.approved = 1)
+            and exists (select id from '.DBTables::Tags.' as tg where tg.tag = "upgrade" and tg.t_id = t.id and tg.approved = 1)
             and date between ? and ?
             ';
         if (AuthControl::isAgent()) {

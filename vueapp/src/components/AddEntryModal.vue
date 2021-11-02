@@ -42,9 +42,10 @@
 <script>
 /* eslint-disable vue/no-unused-components */
 import memberMixin from "../mixins/memberMixin";
+import requestsMixin from '../mixins/requestsMixin';
 export default {
   name: "AddEntryModal",
-  mixins: [memberMixin],
+  mixins: [memberMixin,requestsMixin],
   components: {},
   computed: {},
   methods: {
@@ -53,10 +54,11 @@ export default {
     },
     lookupAPI() {
         this.error = ''
-      this.proceedBtnLoading = true;
+      this.proceedBtnLoading = true
+      const params = this.generateParamsForRequest('LiveChat')
       this.$api
         .get(
-          `addonmodules.php?module=ChatManager&c=LiveChat&json=1&tid=${this.threadid}`
+          `addonmodules.php?${params}&tid=${this.threadid}`
         )
         .then((data) => {
           this.proceedBtnLoading = false;

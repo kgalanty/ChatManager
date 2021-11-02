@@ -100,10 +100,11 @@ article > .panel-heading {
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import { mapActions } from "vuex";
+import requestsMixin from '../mixins/requestsMixin.js';
 import { tagsMixin } from "../mixins/tagsMixin.js";
 export default {
   name: "ChatFilters",
-  mixins: [tagsMixin],
+  mixins: [tagsMixin, requestsMixin],
   components: {
     //HelloWorld
   },
@@ -125,9 +126,10 @@ export default {
     loadOperators() {
       if (this.operators.length == 0) {
         this.loadingOperator = true;
+        const params = this.generateParamsForRequest('Agents')
         this.$api
           .get(
-            `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=`
+            `addonmodules.php?${params}&a=GetAgentsList&q=`
           )
           .then(({ data }) => {
             this.operators = data.data;

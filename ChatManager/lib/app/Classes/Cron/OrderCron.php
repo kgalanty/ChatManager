@@ -2,7 +2,6 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Classes\Cron;
 
-use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Module\Addon\ChatManager\app\Models\Client;
 use WHMCS\Database\Capsule as DB;
@@ -10,6 +9,7 @@ use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 use WHMCS\Module\Addon\ChatManager\app\Classes\TagsLog;
 use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 use WHMCS\Module\Addon\ChatManager\app\Classes\TagsHelper;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 
 class OrderCron
 {
@@ -76,7 +76,7 @@ class OrderCron
                         $join->where('ii.type', '=', 'Hosting');
                     })
                     ->join('tblhosting as h', 'h.id', '=', 'ii.relid')
-                    ->leftJoin('chat_threads as t', 't.orderid', '=', 'o.id')
+                    ->leftJoin(DBTables::Threads.' as t', 't.orderid', '=', 'o.id')
                     ->where('o.userid', $client->id)
                     ->whereBetween('o.date', [date('Y-m-d h:i:s', strtotime($thread->date . " -1 days")), date('Y-m-d h:i:s')])
                     ->where('o.status', 'Active')
@@ -88,7 +88,7 @@ class OrderCron
                     if ($order->domain) {
                         Threads::where('id', $thread->id)->update(['domain' => $order->domain, 'orderid' => $order->orderid]);
                         if (Tags::thread($thread->id)->tag('wcb')->count() > 0) {
-                            TagsHelper::addTag('convertedsale', $thread->id, true,1);
+                            TagsHelper::addTag('convertedsale', $thread->id, true, 1);
                             TagsLog::AddedByCron($thread->id, 'convertedsale');
                         }
                     }
@@ -101,5 +101,11 @@ class OrderCron
         $threads = $this->getThreads();
         if (!$threads) return;
         $this->processThreads($threads);
+
+        $unpaidThreads = $this->getUnpaidThreads();
+    }
+    private function getUnpaidThreads()
+    {
+        
     }
 }

@@ -3,10 +3,12 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
+
 class ReviewThread extends Model
 {
     public $timestamps = false;
-    protected $table = 'chat_reviewthreads';
+    protected $table = DBTables::ReviewThreads;
     protected $fillable = ['orderid','threadid', 'sender', 'comment', 'created_at'];
     public function doer()
     {
