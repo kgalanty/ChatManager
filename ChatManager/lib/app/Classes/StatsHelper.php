@@ -12,12 +12,15 @@ class StatsHelper
         $threads = DB::table(DBTables::Threads.' as t')
         ->join(DBTables::Tags.' as tg', 'tg.t_id', '=', 't.id')
         ->join('tbladmins as a', 'a.email', '=', 't.agent')
-        ->whereBetween('date', [$params['datefrom'], $params['dateto']])
+        ->join('tblorders as o', 'o.id', '=', 't.orderid')
+        ->join('tblinvoices as inv', 'inv.id', '=', 'o.invoiceid')
+        ->whereBetween('t.date', [$params['datefrom'], $params['dateto']])
+        ->where('inv.status', 'Paid')
         ->where('tg.approved', 1);
     if (AuthControl::isAgent()) {
         $threads = $threads->where('a.id', $_SESSION['adminid']);
-    } elseif ($_GET['op'] != '') {
-        $threads = $threads->where('a.id', intval(trim($_GET['op'])));
+    } elseif ($params['op'] != '') {
+        $threads = $threads->where('a.id', intval(trim($params['op'])));
     }
     $threads = $threads->groupBy('t.agent')
         ->groupBy('tg.tag')
@@ -31,15 +34,18 @@ class StatsHelper
             t.agent, count(t.id) as c from `'.DBTables::Threads.'` t 
             join `'.DBTables::Tags.'` as tg ON tg.t_id = t.id
             join `tbladmins` as ad ON ad.email = t.agent
+            join tblorders as o ON o.id = t.orderid
+            join tblinvoices as inv ON inv.id = o.invoiceid
             where 
+            inv.status = "Paid" and 
             tg.tag in ("upgrade", "cycle", "upsell")
             and exists (select id from '.DBTables::Tags.' as tg where tg.tag = "upgrade" and tg.t_id = t.id and tg.approved = 1)
-            and date between ? and ?
+            and t.date between ? and ?
             ';
         if (AuthControl::isAgent()) {
             $q .= 'and agent = ' . $_SESSION['adminid'];
-        } elseif ($_GET['op'] != '') {
-            $q .= ' and ad.id = ' . intval(trim($_GET['op']));
+        } elseif ($params['op'] != '') {
+            $q .= ' and ad.id = ' . intval(trim($params['op']));
         }
         $q .= ' group by t.id, t.agent having c > 1) as x
             group by agent';
@@ -58,19 +64,19 @@ class StatsHelper
             'convertedsale' => 0,
             'upsell' => 0,
             'cycle' => 0,
-            'vpsds' => 0,
             'wcb' => 0,
             'sales' => 0,
             'stayed' => 0,
-            'vpsds' => 0,
+            "vps/ds" => 0,
             'upgrade' => 0
         ];
         //rearrange data from query to one unified array as query returns scattered data across rows
         foreach ($threads as $t) {
             $r[$t->agent] = array_merge($tags, $r[$t->agent]);
-            $r[$t->agent]['agent'] = $t->agent;
-            $r[$t->agent]['agent_name'] = $t->firstname . ' ' . $t->lastname;
-            $r[$t->agent][str_replace(' ', '', $t->tag)] = $t->count;
+            $r[$t->agent]['data']['agent'] = $t->agent;
+            $r[$t->agent]['data']['agent_name'] = $t->firstname . ' ' . $t->lastname;
+            $r[$t->agent]['data']['agent_id'] = $t->adminid;
+            $r[$t->agent][str_replace([' '], [''], $t->tag)] = $t->count;
         }
         $o = [];
         //add points to decrement to final array
@@ -80,6 +86,11 @@ class StatsHelper
             $o[] = $rr;
         }
         return $o;
+    }
+    public static function Details(array $params) : array
+    {
+        var_dump($params, $_GET);die;
+        return [];
     }
     // private static function log($thread_id, $tag, $action)
     // {

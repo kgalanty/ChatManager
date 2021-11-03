@@ -57,10 +57,17 @@
       :total="stats.total"
       :loading="this.loading.stats"
       pagination-position="top"
+      detailed
+      detail-transition="fade"
     >
       <template #empty>No entries yet.</template>
+      <template #detail="props">
+        <article style="text-align: left">
+          <StatsDetails :row="props.row" :filters="filters" />
+        </article>
+      </template>
       <b-table-column field="date" label="Agent" v-slot="props" width="100">
-        {{ props.row.agent_name }}
+        {{ props.row.data.agent_name }}
       </b-table-column>
       <b-table-column
         field="date"
@@ -123,8 +130,8 @@
       <b-table-column field="date" label="Stayed" v-slot="props" width="100">
         {{ props.row.stayed }}
       </b-table-column>
-      <b-table-column field="date" label="VPS/DS" v-slot="props" width="100">
-        {{ props.row.vpsds }}
+      <b-table-column field="vps/ds" label="VPS/DS" v-slot="props" width="100">
+        {{ props.row["vps/ds"] ? props.row["vps/ds"] : 0 }}
       </b-table-column>
       <b-table-column
         header-class="stats-sticky-column"
@@ -156,7 +163,7 @@
           props.row.convertedsale +
           props.row.upsell +
           props.row.cycle +
-          props.row.vpsds -
+          props.row["vps/ds"] -
           props.row.decrementpoints
         }}
       </b-table-column>
@@ -175,7 +182,7 @@
                   props.row.convertedsale +
                   props.row.upsell +
                   props.row.cycle +
-                  props.row.vpsds) *
+                  props.row["vps/ds"]) *
                   100) /
                   (props.row.directsale + props.row.wcb)
               )
@@ -222,10 +229,12 @@ import "buefy/dist/buefy.css";
 import { dateMixin } from "@/mixins/dateMixin.js";
 //import tableHelper from "../mixins/tableHelper";
 import axios from "axios";
+import requestsMixin from "../mixins/requestsMixin";
+import StatsDetails from "@/components/StatsDetails";
 export default {
   name: "StatsTable",
-  mixins: [dateMixin],
-  components: {},
+  mixins: [dateMixin, requestsMixin],
+  components: { StatsDetails },
   methods: {
     // ...mapActions("chat", ["loadPendingChats", "loadChats"]),
     // isEditActive(row) {
@@ -236,6 +245,9 @@ export default {
     //   });
     //   return true;
     // },\
+  //  loadDetails(row) {
+      //console.log(row);
+   // },
     returnPercents(val) {
       return +parseFloat(val).toFixed(2) + "%";
     },
@@ -264,32 +276,35 @@ export default {
           });
       }
     },
+    setDateFilters(dateFrom, dateTo) {
+      if (!this.filters.dateFrom) {
+        this.filters.dateFrom = new Date(dateFrom);
+      }
+      if (!this.filters.dateTo) {
+        this.filters.dateTo = new Date(dateTo);
+      }
+    },
     loadStats() {
       const startDay = this.moment().format("DD") < 16 ? 1 : 16;
       this.loading.stats = true;
       // const endDay = this.moment().daysInMonth()
       // console.log(startDay)
       // console.log(endDay)
-      const params = [
-        `module=ChatManager`,
-        `c=Stats`,
-        `json=1`,
-        `datefrom=${
-          this.filters.dateFrom
-            ? this.createUTCDatetime(this.filters.dateFrom)
-            : this.createUTCDatetime(
-                this.moment().format("YYYY-MM-" + startDay)
-              )
-        }`,
-        `dateto=${
-          this.filters.dateTo
-            ? this.createUTCDatetime(this.filters.dateTo)
-            : this.createUTCDatetime(
-                this.moment().add(1, "months").format("YYYY-MM-01")
-              )
-        }`,
+      const dateFrom = this.filters.dateFrom
+        ? this.createUTCDatetime(this.filters.dateFrom)
+        : this.createUTCDatetime(this.moment().format("YYYY-MM-" + startDay));
+
+      const dateTo = this.filters.dateTo
+        ? this.createUTCDatetime(this.filters.dateTo)
+        : this.createUTCDatetime(
+            this.moment().add(1, "months").format("YYYY-MM-01")
+          );
+      this.setDateFilters(dateFrom, dateTo);
+      const params = this.generateParamsForRequest("Stats", [
+        `datefrom=${dateFrom}`,
+        `dateto=${dateTo}`,
         `op=${this.filters.operator}`,
-      ].join("&");
+      ]);
 
       //context.commit('setChatsPage', payload.chatsPage)
       axios
@@ -308,27 +323,6 @@ export default {
           this.loading.stats = false;
         });
     },
-    // editModal(item) {
-    //   const modal = this.$buefy.modal.open({
-    //     parent: this,
-    //     component: ChatItemEditModal,
-    //     hasModalCard: true,
-    //     props: { item },
-    //     trapFocus: true,
-    //     width: "auto",
-    //   });
-    //   modal.$on("close", () => {
-    //     this.loadChats();
-    //     this.loadPendingChats();
-    //   });
-    // },
-    // onPageChange(page) {
-    //   this.$store.commit("chat/setChatsPage", page);
-    //   this.loadChats();
-    // },
-    // parseDateTime(dateTime) {
-    //   return this.moment(dateTime).format("YYYY-MM-DD HH:mm:SS");
-    // },
   },
   mounted() {
     // this.loadPendingChats();
@@ -354,6 +348,7 @@ export default {
         operator: "",
       },
       operators: [],
+      Details: [],
     };
   },
 };

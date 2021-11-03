@@ -10,8 +10,6 @@ import tagsStore from './tags/store'
 Vue.use(Vuex)
 Vue.use(Buefy)
 
-
-
 export default new Vuex.Store({
   state: {
     // chats: [],

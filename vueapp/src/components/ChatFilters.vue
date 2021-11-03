@@ -1,13 +1,13 @@
 <template>
   <div class="tile">
-        <div class="tile is-2 is-child">
+    <div class="tile is-2 is-child">
       <b-field label="Search" style="width: 95%">
-        <b-input 
+        <b-input
           v-model="searchtext"
           placeholder="Search for chat ID/E-mail/Domain/Order ID"
           @input="doSearch"
-           type="search"
-           icon="magnify"
+          type="search"
+          icon="magnify"
         >
         </b-input>
       </b-field>
@@ -38,7 +38,7 @@
           v-model="operator"
           expanded
         >
-        <option value="">-All-</option>
+          <option value="">-All-</option>
           <option :value="op.email" :key="i" v-for="(op, i) in operators">
             {{ op.firstname }} {{ op.lastname }}
           </option>
@@ -99,8 +99,8 @@ article > .panel-heading {
 <script>
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
-import { mapActions } from "vuex";
-import requestsMixin from '../mixins/requestsMixin.js';
+import { mapActions, mapState } from "vuex";
+import requestsMixin from "../mixins/requestsMixin.js";
 import { tagsMixin } from "../mixins/tagsMixin.js";
 export default {
   name: "ChatFilters",
@@ -109,13 +109,14 @@ export default {
     //HelloWorld
   },
   methods: {
-    doSearch()
-    {
-       this.$store.commit("chat/setQuery", this.searchtext);
+    doSearch() {
+      this.$store.commit("chat/setQuery", this.searchtext);
+
       this.loadChats();
     },
     TagsChanged() {
-      this.$store.commit("chat/setFilter", { tags: this.tags });
+      // this.$store.commit("chat/setFilter", { tags: this.tags });
+      this.setTagsFilter(this.tags);
       this.loadChats();
     },
     getFilteredTags(text) {
@@ -124,27 +125,31 @@ export default {
       });
     },
     loadOperators() {
-      if (this.operators.length == 0) {
-        this.loadingOperator = true;
-        const params = this.generateParamsForRequest('Agents')
-        this.$api
-          .get(
-            `addonmodules.php?${params}&a=GetAgentsList&q=`
-          )
-          .then(({ data }) => {
-            this.operators = data.data;
-          })
-          .catch((error) => {
-            this.operators = [];
-            throw error;
-          })
-          .finally(() => {
-            this.loadingOperator = false;
-          });
-      }
+      return new Promise((resolve) => {
+        if (this.operators.length == 0) {
+          this.loadingOperator = true;
+          const params = this.generateParamsForRequest("Agents");
+          this.$api
+            .get(`addonmodules.php?${params}&a=GetAgentsList&q=`)
+            .then(({ data }) => {
+              this.operators = data.data;
+            })
+            .catch((error) => {
+              this.operators = [];
+              throw error;
+            })
+            .finally(() => {
+              resolve()
+              this.loadingOperator = false;
+            });
+        }
+        resolve()
+      });
     },
     ...mapActions({
       loadChats: "chat/loadChats",
+      setTagsFilter: "chat/setTagsFilter",
+      setOperatorFilter: "chat/setOperatorFilter",
     }),
     clearField(field) {
       this[field] = null;
@@ -167,9 +172,27 @@ export default {
       return this.moment(dateTime).format("YYYY-MM-DD HH:DD:SS");
     },
   },
-  mounted() {},
+  mounted() {
+    if(this.filters.tags)
+    {
+      this.tags = this.filters.tags
+    }
+    if(this.filters.dateFrom)
+    {
+      this.dateFrom = new Date(this.filters.dateFrom)
+    }
+    if(this.filters.dateTo)
+    {
+      this.dateTo = new Date(this.filters.dateTo)
+    }
+    if (this.filters.operator) {
+      this.loadOperators().then(() => {
+          this.operator = this.filters.operator
+      })
+    }
+  },
   computed: {
-    //  ...mapState(["chats", "chatsPage", "chatsLoading"]),
+    ...mapState("chat", ["filters"]),
   },
   data() {
     return {
@@ -181,7 +204,7 @@ export default {
       loadingOperator: false,
       operators: [],
       operator: "",
-      searchtext:""
+      searchtext: "",
     };
   },
   watch: {
@@ -196,7 +219,8 @@ export default {
       this.loadChats();
     },
     operator(val) {
-      this.$store.commit("chat/setFilter", { operator: val });
+      this.setOperatorFilter(val);
+      //this.$store.commit("chat/setFilter", { operator: val });
       this.loadChats();
     },
   },

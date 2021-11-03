@@ -40,6 +40,10 @@ class Threads extends Model
     {
         return $this->belongsTo(Order::class, 'orderid', 'id');
     }
+    public function agent()
+    {
+        return $this->belongsTo(Admin::class, 'agent', 'email')->select('id, firstname, lastname');
+    }
     // public function scopeID($query, $serverid)
     // {
     //     return $query->where('id', $serverid);

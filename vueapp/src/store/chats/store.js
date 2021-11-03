@@ -39,6 +39,22 @@ const chatsStore = {
       }
     },
     actions: {
+      setTagsFilter(context,payload)
+      {
+        context.commit("setFilter", { tags: payload });
+      },
+      setDateFromFilter(context,payload)
+      {
+        context.commit("setFilter", { dateFrom: payload });
+      },
+      setDateToFilter(context,payload)
+      {
+        context.commit("setFilter", { dateTo: payload });
+      },
+      setOperatorFilter(context, payload)
+      {
+        context.commit("setFilter", { operator: payload });
+      },
       loadPendingChats(context) {
         context.commit('setPendingChatsLoading', true)
         const params = [
