@@ -40,10 +40,10 @@ class ChatTable extends API
         $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
         $myemail = Admin::where('id', $_SESSION['adminid'])->value('email');
         $tags = $_GET['tags'];
-        $operator = $_GET['operator'] != '' ? trim($_GET['operator']) : '';
+        $operator = $_GET['operator'] != '' ? intval(trim($_GET['operator'])) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
-        $result = Threads:: with(['followup','order.invoice'])->withCount(['pendingReviews' => function ($q) {
+        $result = Threads::with(['followup','order.invoice', 'agentdata'])->withCount(['pendingReviews' => function ($q) {
             $q->where('pending', '0');
         }])
             ->with(['tags', 'customer'])
@@ -53,7 +53,10 @@ class ChatTable extends API
         }
         if($operator)
         {
-            $result->where('agent', $operator);
+            $result->whereHas('agentdata', function($query) use ($operator)
+            {
+                $query->where('id', $operator);
+            });
         }
         if($tags)
         {

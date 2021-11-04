@@ -18,11 +18,7 @@
     transform: scaleX(0);
   }
 }
-.notification {
-  -webkit-box-shadow: 4px 5px 9px 1px rgba(0, 0, 0, 0.75);
-  -moz-box-shadow: 4px 5px 9px 1px rgba(0, 0, 0, 0.75);
-  box-shadow: 4px 5px 9px 1px rgba(0, 0, 0, 0.75);
-}
+
 .notification:after {
   content: "";
   display: block;

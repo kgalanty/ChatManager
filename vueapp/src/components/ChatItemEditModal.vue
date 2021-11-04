@@ -457,7 +457,7 @@ export default {
     }),
     getAgents: debounce(function (name) {
       this.loading.isFetchingAgents = true;
-      const params = this.generateParamsForRequest('Agents')
+      const params = this.generateParamsForRequest('Agents', ['a=GetAgentsList'])
       this.$api
         .get(
           `addonmodules.php?${params}&q=${name}`
@@ -729,7 +729,7 @@ export default {
           order: this.selectedOrder,
           notes: this.notes,
           customoffer: cannotofferReason,
-          agent: this.agent,
+          agent: this.selectedAgent.id,
         })
         .then((response) => {
           if (response.data == "success") {
@@ -883,7 +883,7 @@ export default {
     this.domain = this.item.domain;
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
-    this.agent = this.item.agent;
+    this.agent = this.item.agentdata.firstname + ' ' + this.item.agentdata.lastname
 
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;

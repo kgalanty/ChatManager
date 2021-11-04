@@ -1,15 +1,10 @@
 <?php
 
 namespace WHMCS\Module\Addon\ChatManager\app\Classes;
-
-use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatConsts;
-use WHMCS\Module\Addon\ChatManager\app\Classes\DateTimeHelper;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Database\Capsule as DB;
-use WHMCS\Module\Addon\ChatManager\app\Classes\FindClientHelper;
-use WHMCS\Module\Addon\ChatManager\app\Classes\FindOrderHelper;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
-
+use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 class LiveChatParsers
 {
     public static function findCloseChatDate($eventsList)
@@ -23,7 +18,7 @@ class LiveChatParsers
     }
     public static function parseArchiveList($list)
     {
-
+        $admins = Admin::get(['id', 'email'])->keyBy('email');
         foreach ($list as $chatitem) {
             // echo('<pre>'); var_dump($chatitem->thread->tags);die;
             $user = $chatitem->thread->user_ids[count($chatitem->thread->user_ids) - 1];
@@ -41,7 +36,7 @@ class LiveChatParsers
             //     }
             // }
 
-            if (DB::table(DBTables::Threads)->where('threadid', $chatitem->thread->id)->count() == 0) {
+            if (DB::table(DBTables::Threads)->where('threadid', $chatitem->thread->id)->count() == 0 && isset($admins[$chatitem->thread->user_ids[0]])) {
                 $insertRow = [
                     'chatid' => $chatitem->id,
                     'threadid' => $chatitem->thread->id,
@@ -50,7 +45,7 @@ class LiveChatParsers
                     'email' => '',
                     'domain' => '',
                     'orderid' => null,
-                    'agent' => $chatitem->thread->user_ids[0],
+                    'agent' => $admins[$chatitem->thread->user_ids[0]]->id,
                     'date' => self::findCloseChatDate($chatitem->thread->events),
                     'created_at' => DB::raw('NOW()')
 

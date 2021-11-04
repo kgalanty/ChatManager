@@ -1,10 +1,9 @@
 export default {
     methods: {
-        abstractNotify(msg, type)
-        {
+        abstractNotify(msg, type) {
             this.$buefy.notification.open({
                 message: msg,
-                type: 'is-'+type,
+                type: 'is-' + type,
                 duration: 5000,
                 autoClose: true,
                 closable: false
@@ -13,12 +12,10 @@ export default {
         notifyDanger(msg) {
             this.abstractNotify(msg, 'danger')
         },
-        notifySuccess(msg)
-        {
+        notifySuccess(msg) {
             this.abstractNotify(msg, 'success')
         },
-        notifyWarning(msg)
-        {
+        notifyWarning(msg) {
             this.abstractNotify(msg, 'warning')
         },
     }

@@ -17,13 +17,17 @@ class LiveChat extends APIProtected
             $threadid = $_GET['tid'];
             $livechat = new LiveChatHelper();
             $result = $livechat->findChatByID($threadid);
-            if ($result['result'] == 'success' && $result['found_chats'] > 0) {
+            if ($result['result'] == 'success') {
+                if($result['found_chats'] == 0)
+                {
+                    return ['result' => 'error', 'msg' => 'Cannot found the chat with this thread id.'];
+                }
                 $livechat->runParseStore();
                 $thread = ThreadsModel::with(['followup', 'tags', 'customer'])->where('threadid', $threadid)->first();
                 Logs::CreatedByID($thread->id, $_SESSION['adminid']);
                 return ['result' => 'success', 'data' => $thread];
             }
-            return ['result' => 'error', 'msg' => 'Cannot found the chat with this thread id.'];
+            return ['result' => 'error', 'msg' => $result['result']];
         }
         return ['result' => 'error', 'msg' => 'No permission to complete this operation'];
         //  echo('<pre>');var_dump($result); die;

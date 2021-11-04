@@ -87,7 +87,16 @@ class Logs
                 $oldvalue = $threaddata->$k;
             }
 
-            if ($updateitem != $threaddata->$k) $logChanges[] = $oldvalue ?? '""' . ' -> ' . $updateitem;
+            if ($updateitem != $threaddata->$k) 
+            {   if($k=='agent' && $oldvalue)
+                {
+                    $oldvalueDoer = Admin::find($oldvalue);
+                    $oldvalue = $oldvalueDoer->firstname.' '.$oldvalueDoer->lastname;
+                    $newvalueDoer = Admin::find($updateitem);
+                    $updateitem = $newvalueDoer->firstname.' '.$newvalueDoer->lastname;
+                }
+                $logChanges[] = ($oldvalue ?  $k.': '.$oldvalue : '""') . ' -> ' . $updateitem;
+            }
         }
         if (count($logChanges) > 0) {
             $admin = Admin::find($doer);

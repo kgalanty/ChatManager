@@ -11,7 +11,7 @@ class StatsHelper
     {
         $threads = DB::table(DBTables::Threads.' as t')
         ->join(DBTables::Tags.' as tg', 'tg.t_id', '=', 't.id')
-        ->join('tbladmins as a', 'a.email', '=', 't.agent')
+        ->join('tbladmins as a', 'a.id', '=', 't.agent')
         ->join('tblorders as o', 'o.id', '=', 't.orderid')
         ->join('tblinvoices as inv', 'inv.id', '=', 'o.invoiceid')
         ->whereBetween('t.date', [$params['datefrom'], $params['dateto']])
@@ -33,7 +33,7 @@ class StatsHelper
         $q = 'select sum(x.c) as s, agent FROM ( select
             t.agent, count(t.id) as c from `'.DBTables::Threads.'` t 
             join `'.DBTables::Tags.'` as tg ON tg.t_id = t.id
-            join `tbladmins` as ad ON ad.email = t.agent
+            join `tbladmins` as ad ON ad.id = t.agent
             join tblorders as o ON o.id = t.orderid
             join tblinvoices as inv ON inv.id = o.invoiceid
             where 

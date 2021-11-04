@@ -295,7 +295,7 @@ export default {
         : this.createUTCDatetime(this.moment().format("YYYY-MM-" + startDay));
 
       const dateTo = this.filters.dateTo
-        ? this.createUTCDatetime(this.filters.dateTo)
+        ? this.createUTCDateTimeAndAdd(this.filters.dateTo, '1', 'd')
         : this.createUTCDatetime(
             this.moment().add(1, "months").format("YYYY-MM-01")
           );

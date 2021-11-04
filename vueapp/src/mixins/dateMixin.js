@@ -11,6 +11,12 @@ export const dateMixin = {
             return (
               this.moment(datetime).utc().format("YYYY-MM-DDTHH:mm:SS") + ".000000Z"
             )
+        },
+        createUTCDateTimeAndAdd(datetime, val=0, unit='h')
+        {
+            return (
+                this.moment(datetime).utc().add(val, unit).format("YYYY-MM-DDTHH:mm:SS") + ".000000Z"
+              )
         }
     }
 }

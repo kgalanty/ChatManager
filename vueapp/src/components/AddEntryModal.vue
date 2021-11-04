@@ -11,18 +11,21 @@
           to review and edit all data.
         </b-message>
         <b-notification
-        v-if="error"
-            type="is-danger"
-            has-icon
-            :closable="false"
-            role="alert">
-            {{error}}
+          v-if="error"
+          type="is-danger"
+          has-icon
+          :closable="false"
+          role="alert"
+        >
+          {{ error }}
         </b-notification>
 
-        <b-field label="Thread ID">
+        <b-field label="Thread ID"   :type="threadid.type"
+            :message="threadid.msg">
           <b-input
-            v-model="threadid"
+            v-model="threadid.value"
             placeholder="Fill Thread ID. This cannot be edited later."
+          
           ></b-input>
         </b-field>
       </section>
@@ -42,45 +45,61 @@
 <script>
 /* eslint-disable vue/no-unused-components */
 import memberMixin from "../mixins/memberMixin";
-import requestsMixin from '../mixins/requestsMixin';
+import notificationsMixin from '../mixins/notificationsMixin';
+import requestsMixin from "../mixins/requestsMixin";
 export default {
   name: "AddEntryModal",
-  mixins: [memberMixin,requestsMixin],
+  mixins: [memberMixin, requestsMixin, notificationsMixin],
   components: {},
   computed: {},
   methods: {
     emitEvent(item) {
       this.$emit("runedition", item);
     },
+    resetFieldState(field)
+    {
+      this[field].type = ''
+      this[field].msg = ''
+      
+    },
+    showError(field, msg)
+    {
+      this[field].type = 'is-danger'
+      this[field].msg = msg
+      this[field].value = ''
+    },
     lookupAPI() {
-        this.error = ''
-      this.proceedBtnLoading = true
-      const params = this.generateParamsForRequest('LiveChat')
+      this.error = "";
+      this.resetFieldState('threadid')
+      this.proceedBtnLoading = true;
+      const params = this.generateParamsForRequest("LiveChat");
       this.$api
-        .get(
-          `addonmodules.php?${params}&tid=${this.threadid}`
-        )
+        .get(`addonmodules.php?${params}&tid=${this.threadid.value}`)
         .then((data) => {
           this.proceedBtnLoading = false;
           if (data.data.result == "success") {
             this.$emit("runedition", data.data.data);
             this.$emit("close");
-          }
-          else
-          {
-              this.error=data.data.msg
+          } else {
+
+            this.showError('threadid', data.data.msg)
+            //this.error = data.data.msg;
           }
         });
     },
   },
-  mounted()
-  {
-      this.error = ''
+  mounted() {
+    this.error = "";
   },
   data() {
     return {
-      threadid: '',
-      error: '',
+      threadid:
+      {
+        type: '',
+        msg: '',
+        value: ''
+      },
+      error: "",
       proceedBtnLoading: false,
     };
   },

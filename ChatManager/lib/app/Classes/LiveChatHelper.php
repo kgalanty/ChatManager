@@ -29,9 +29,9 @@ class LiveChatHelper
         $this->datefrom = $datefrom;
         //$agents = $LiveChatAPI->agents->getArchives(['filters' => []]);
     }
-    public function findChatByID(string $tid)
+    public function findChatByID(string $tid) : array
     {
-        if(Threads::where('threadid', $tid)->count())
+        if(Threads::where('threadid', $tid)->count() > 0)
         {
             return ['result' => 'This Thread ID already exists. Try with another one.'];
         }
@@ -47,7 +47,7 @@ class LiveChatHelper
             $filters['from'] = $this->datefrom;
         } else {
             //2021-08-30T00:00:00.000000-02:00
-            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT10M'))->format('Y-m-d\TH:i:s.000000P');
+            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT80M'))->format('Y-m-d\TH:i:s.000000P');
         }
         if ($pageid !== null) {
             $filters['pageid'] = $pageid;

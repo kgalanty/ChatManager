@@ -39,7 +39,7 @@
           expanded
         >
           <option value="">-All-</option>
-          <option :value="op.email" :key="i" v-for="(op, i) in operators">
+          <option :value="op.id" :key="i" v-for="(op, i) in operators">
             {{ op.firstname }} {{ op.lastname }}
           </option>
         </b-select>
@@ -100,11 +100,12 @@ article > .panel-heading {
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import { mapActions, mapState } from "vuex";
+import { dateMixin } from '../mixins/dateMixin.js';
 import requestsMixin from "../mixins/requestsMixin.js";
 import { tagsMixin } from "../mixins/tagsMixin.js";
 export default {
   name: "ChatFilters",
-  mixins: [tagsMixin, requestsMixin],
+  mixins: [tagsMixin, requestsMixin, dateMixin],
   components: {
     //HelloWorld
   },
@@ -214,7 +215,7 @@ export default {
       this.loadChats();
     },
     dateTo(val) {
-      var datetoparsed = val !== null ? this.createUTCDatetime(val) : null;
+      var datetoparsed = val !== null ? this.createUTCDateTimeAndAdd(val, 24, 'h') : null;
       this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
       this.loadChats();
     },

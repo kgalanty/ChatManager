@@ -59,7 +59,7 @@
         width="160"
         :visible="filters['operator'].display"
       >
-        {{ operator(props.row.agent) }}
+        {{ props.row.agentdata.firstname }} {{ props.row.agentdata.lastname }}
       </b-table-column>
       <b-table-column
         field="threadid"
