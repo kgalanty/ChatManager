@@ -30,7 +30,7 @@ class Logs
     }
     public static function SendToReview($itemid, $doer)
     {
-        self::log($itemid, 'Thread', $doer, 'Sent to review');
+        self::log($itemid, 'Thread', $doer, 'Sent new review');
     }
     public static function MarkAsReviewed($itemid, $doer, $reviewitem)
     {

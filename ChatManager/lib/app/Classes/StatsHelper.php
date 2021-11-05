@@ -4,7 +4,7 @@ namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
-
+use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 class StatsHelper
 {
     public static function getStats($params)
@@ -27,6 +27,21 @@ class StatsHelper
         ->selectRaw('t.agent, a.firstname, a.lastname, a.id as adminid, tg.tag, count(t.id) as count')
         ->get();
         return $threads;
+    }
+    public static function getPointsFromCancellations(?array $params)
+    {
+        $query = DB::table('kg_cancelrequests as cr')
+        ->whereBetween('date', [$params['datefrom'], $params['dateto']])
+        ;
+        if (AuthControl::isAgent()) {
+            $query = $query->where('cr.agent', $_SESSION['adminid']);
+        } elseif ($params['op'] != '') {
+            $query = $query->where('cr.agent', intval(trim($params['op'])));
+        }
+        $query = $query->where('cr.action', 'stayed')
+        ->groupBy('cr.agent')->selectRaw('cr.agent, count(*) as stayed')
+        ->get();
+        return $query;
     }
     public static function getDecrementPoints($params)
     {
@@ -53,7 +68,7 @@ class StatsHelper
         $threads_upgrade_points = collect(DB::select($q, [$params['datefrom'], $params['dateto']]))->keyBy('agent');
         return $threads_upgrade_points;
     }
-    public static function CreateResult($threads, $threads_upgrade_points)
+    public static function CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests)
     {
         $r = [];
         $tags = [
@@ -70,6 +85,7 @@ class StatsHelper
             "vps/ds" => 0,
             'upgrade' => 0
         ];
+       
         //rearrange data from query to one unified array as query returns scattered data across rows
         foreach ($threads as $t) {
             $r[$t->agent] = array_merge($tags, $r[$t->agent]);
@@ -77,12 +93,29 @@ class StatsHelper
             $r[$t->agent]['data']['agent_name'] = $t->firstname . ' ' . $t->lastname;
             $r[$t->agent]['data']['agent_id'] = $t->adminid;
             $r[$t->agent][str_replace([' '], [''], $t->tag)] = $t->count;
+            $r[$t->agent]['data']['cm_points'] = 0;
         }
+       
         $o = [];
+        $cm_points = collect($cm_stayed_requests)->keyBy('agent');
+        foreach($cm_points as $agent_id => $points)
+        {
+           
+            if(!array_key_exists($agent_id, $r))
+            {
+                $r[$agent_id] = $tags;
+                $agent_data = Admin::where('id',$agent_id)->first(['id', 'firstname', 'lastname']);
+                $r[$agent_id]['data']['agent_name'] = trim($agent_data->firstname).' '. trim($agent_data->lastname);
+                $r[$agent_id]['data']['agent_id'] = $agent_data->id;
+                
+            }
+            $r[$agent_id]['data']['cm_points'] = $points->stayed;
+        }
         //add points to decrement to final array
         foreach ($r as $agent_email => $rr) {
 
             $rr['decrementpoints'] = $threads_upgrade_points[$agent_email] ? (int)$threads_upgrade_points[$agent_email]->s - 1 : 0;
+            //$rr['cm_points'] = $cm_points[$agent_email] ? $cm_points[$agent_email]->stayed : 0;
             $o[] = $rr;
         }
         return $o;

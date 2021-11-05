@@ -91,10 +91,9 @@
                   label="Status"
                   width="100"
                   centered
-                
                   v-if="isAgent()"
-                >Verification pending
-                   </b-table-column>
+                  >Verification pending
+                </b-table-column>
                 <b-table-column
                   field="date"
                   label="Actions"
@@ -204,17 +203,17 @@
                   </b-tooltip>
                   <span style="float: right">
                     <b-tooltip
-                    label="Keep the tag & delete the proposal"
-                    position="is-left"
-                    v-if="isAdmin() && props.row.proposed_deletion == 1"
-                  >
-                     <b-button
-                      icon-right="check"
-                      type="is-success"
-                      style="font-size: 0.8rem !important"
-                      @click="undoProposeDeletion(props.row)"
-                       />
-                       </b-tooltip>
+                      label="Keep the tag & delete the proposal"
+                      position="is-left"
+                      v-if="isAdmin() && props.row.proposed_deletion == 1"
+                    >
+                      <b-button
+                        icon-right="check"
+                        type="is-success"
+                        style="font-size: 0.8rem !important"
+                        @click="undoProposeDeletion(props.row)"
+                      />
+                    </b-tooltip>
                     <b-button
                       icon-right="check"
                       type="is-success"
@@ -259,7 +258,7 @@
               v-if="isAdmin()"
             >
               <template #trigger="props">
-                <a aria-controls="contentIdForA11y1">
+                <a>
                   <h2 class="label">
                     <b-icon
                       :icon="!props.open ? 'menu-down' : 'menu-up'"
@@ -326,7 +325,7 @@
             <b-message
               type="is-warning"
               has-icon
-              v-if="reviewStatus == 1 && isAdmin()"
+              v-if="reviewStatus == 1"
               >This thread has pending reviews.</b-message
             >
             <div class="notification is-primary">
@@ -358,12 +357,12 @@
               :data="reviewRequests"
               narrowed
               :per-page="5"
-              v-if="isAdmin()"
+             
             >
               <template #empty>
                 <div class="has-text-centered">No entries</div>
               </template>
-              <b-table-column field="pending" label="Seen" v-slot="props">
+              <b-table-column field="pending" label="Seen" v-slot="props" width="50">
                 <b-icon
                   icon="close"
                   v-if="props.row.pending == 1"
@@ -377,7 +376,7 @@
                   type="is-success"
                 ></b-icon>
               </b-table-column>
-              <b-table-column field="date" label="Performed by" v-slot="props">
+              <b-table-column field="date" label="Performed by" v-slot="props" width="200">
                 <b-tag type="is-primary">
                   {{ props.row.doer.firstname }}
                   {{ props.row.doer.lastname }}</b-tag
@@ -389,7 +388,7 @@
               <b-table-column field="date" label="Date" v-slot="props">
                 {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
               </b-table-column>
-              <b-table-column field="date" label="Actions" v-slot="props">
+              <b-table-column field="pending" label="Actions" v-slot="props" :visible="isAdmin()">
                 <b-button
                   type="is-success"
                   size="is-small"
@@ -457,11 +456,11 @@ export default {
     }),
     getAgents: debounce(function (name) {
       this.loading.isFetchingAgents = true;
-      const params = this.generateParamsForRequest('Agents', ['a=GetAgentsList'])
+      const params = this.generateParamsForRequest("Agents", [
+        "a=GetAgentsList",
+      ]);
       this.$api
-        .get(
-          `addonmodules.php?${params}&q=${name}`
-        )
+        .get(`addonmodules.php?${params}&q=${name}`)
         .then(({ data }) => {
           this.filteredAgentArray = data.data;
         })
@@ -474,47 +473,43 @@ export default {
         });
     }, 500),
     acceptOrderSuggestion(suggestionid) {
-      this.loading.orderSuggestionTable = true
-      const params = this.generateParamsForRequest('Orders')
+      this.loading.orderSuggestionTable = true;
+      const params = this.generateParamsForRequest("Orders");
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: suggestionid,
           a: "AcceptSuggestion",
         })
         .then((response) => {
-          this.loading.orderSuggestionTable = false
+          this.loading.orderSuggestionTable = false;
           if (response.data == "success") {
-            this.loadOrdersSuggestions()
+            this.loadOrdersSuggestions();
             this.notifySuccess("Order suggestion approved");
-          }
-          else
-          {
-            this.notifyWarning(response.data)
+          } else {
+            this.notifyWarning(response.data);
           }
         });
     },
     declineOrderSuggestion(suggestionid) {
-      this.loading.orderSuggestionTable = true
-      const params = this.generateParamsForRequest('Orders')
+      this.loading.orderSuggestionTable = true;
+      const params = this.generateParamsForRequest("Orders");
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: suggestionid,
           a: "DeclineSuggestion",
         })
         .then((response) => {
-          this.loading.orderSuggestionTable = false
+          this.loading.orderSuggestionTable = false;
           if (response.data == "success") {
-            this.loadOrdersSuggestions()
+            this.loadOrdersSuggestions();
             this.notifySuccess("Order suggestion rejected");
-          }
-          else
-          {
-            this.notifyWarning(response.data)
+          } else {
+            this.notifyWarning(response.data);
           }
         });
     },
     MarkReviewComment(commentid) {
-      const params = this.generateParamsForRequest('ReviewThread')
+      const params = this.generateParamsForRequest("ReviewThread");
       this.$api
         .post(`addonmodules.php?${params}`, {
           entry: commentid,
@@ -534,10 +529,10 @@ export default {
     sendToReview() {
       if (this.commmentReview.length == 0) {
         this.notifyDanger("Comment cannot be empty");
-              return;
+        return;
       }
       this.loading.sendReviewLoadingBtn = true;
-      const params =  this.generateParamsForRequest('ReviewThread')
+      const params = this.generateParamsForRequest("ReviewThread");
       this.$api
         .post(`addonmodules.php?${params}`, {
           threadid: this.item.id,
@@ -572,7 +567,7 @@ export default {
         });
     },
     deleteTag(tag) {
-      const params =  this.generateParamsForRequest('Tags')
+      const params = this.generateParamsForRequest("Tags");
       this.$api
         .post(`addonmodules.php?${params}`, {
           tag: tag.id,
@@ -602,9 +597,8 @@ export default {
           }
         });
     },
-    undoProposeDeletion(tag)
-    {
-      const params =  this.generateParamsForRequest('Tags')
+    undoProposeDeletion(tag) {
+      const params = this.generateParamsForRequest("Tags");
       this.$api
         .post(`addonmodules.php?${params}`, {
           tag: tag.id,
@@ -620,8 +614,8 @@ export default {
             //   message: "You approved the tag",
             //   type: "is-success",
             // });
-            this.getTags()
-            this.loadTagsHistory()
+            this.getTags();
+            this.loadTagsHistory();
           } else {
             this.notifyWarning(response.data);
             // this.$buefy.toast.open({
@@ -633,7 +627,7 @@ export default {
         });
     },
     approveTag(tag) {
-      const params =  this.generateParamsForRequest('Tags')
+      const params = this.generateParamsForRequest("Tags");
 
       this.$api
         .post(`addonmodules.php?${params}`, {
@@ -655,7 +649,7 @@ export default {
         return true;
       }
       // this.OrderStatusField = null;
-      const params =  this.generateParamsForRequest('Orders')
+      const params = this.generateParamsForRequest("Orders");
       this.loadingCheckBtn = true;
       return new Promise((resolve) => {
         this.$api
@@ -713,7 +707,7 @@ export default {
           return;
         }
       }
-      const params =  this.generateParamsForRequest('Threads')
+      const params = this.generateParamsForRequest("Threads");
       this.loading.loadingSaveBtn = true;
 
       var cannotofferReason = this.cannotofferCustom
@@ -755,7 +749,7 @@ export default {
         return;
       }
       this.loading.addtagBtnLoading = true;
-      const params =  this.generateParamsForRequest('Tags')
+      const params = this.generateParamsForRequest("Tags");
       this.$api
         .post(`addonmodules.php?${params}`, {
           tid: this.item.id,
@@ -883,7 +877,8 @@ export default {
     this.domain = this.item.domain;
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
-    this.agent = this.item.agentdata.firstname + ' ' + this.item.agentdata.lastname
+    this.agent =
+      this.item.agentdata.firstname + " " + this.item.agentdata.lastname;
 
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
@@ -900,8 +895,8 @@ export default {
     //clear Logs tab to prevent showing logs from previously loaded thread to show when new logs are being loaded
     this.clearLogs();
     this.$nextTick(() => {
-       this.WatchOrder = true
-   });
+      this.WatchOrder = true;
+    });
   },
   watch: {
     cannotoffer() {
@@ -919,21 +914,13 @@ export default {
         }
       }
       if (val == 2) {
-        this.getPermissions().then(() => {
-          if (this.isAdmin()) {
-            // this.loadTagsHistory();
-            this.loadReviews();
-          } else {
-            this.loadReviewStatus();
-          }
-        });
+         this.loadReviews()
+         if(this.reviewStatus < 0) this.loadReviewStatus();
       }
     },
-    selectedOrder(prev, val)
-    {
-      if(this.WatchOrder && prev != val)
-      {
-        this.orderwaschanged = true
+    selectedOrder(prev, val) {
+      if (this.WatchOrder && prev != val) {
+        this.orderwaschanged = true;
       }
       // console.log( val)
       // console.log(this.WatchOrder)
@@ -965,13 +952,13 @@ export default {
         sendReviewLoadingBtn: false,
         loadingSaveBtn: false,
         isFetchingAgents: false,
-        orderSuggestionTable: false
+        orderSuggestionTable: false,
       },
       activeTab: 0,
       selectedAgent: "",
       filteredAgentArray: [],
       agent: "",
-      reviewStatus: 0,
+      reviewStatus: -1,
       reviewRequests: [],
       commmentReview: "",
       tags: [],
@@ -1036,10 +1023,13 @@ export default {
 .modaltable {
   border: 1px solid black;
 }
-.smalltable thead
-{
-background: rgb(255,168,227);
-background: linear-gradient(180deg, rgba(255,168,227,1) 0%, rgba(166,163,251,1) 0%);
+.smalltable thead {
+  background: rgb(255, 168, 227);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 168, 227, 1) 0%,
+    rgba(166, 163, 251, 1) 0%
+  );
 }
 .modaltable thead {
   background: rgb(165, 197, 255);

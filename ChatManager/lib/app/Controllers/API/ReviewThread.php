@@ -12,7 +12,7 @@ class ReviewThread extends API
     public function get()
     {
         if ($_GET['action'] == 'GetReviews') {
-            if (AuthControl::isAdmin()) {
+            if (AuthControl::isAdmin() || AuthControl::isAgent()) {
                 $threadid = (int)$_GET['threadid'];
                 $reviews = ReviewThreadModel::with(['doer'])->thread($threadid)->orderBy('id', 'DESC')->get();
                 return ['data' => $reviews, 'result' => 'success'];

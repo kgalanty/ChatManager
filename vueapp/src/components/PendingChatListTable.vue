@@ -27,7 +27,7 @@
         {{ parseDateTime(props.row.date) }}
       </b-table-column>
       <b-table-column field="date" label="Operator" v-slot="props">
-        {{ operator(props.row.agent) }}
+        {{ props.row.agentdata.firstname }} {{ props.row.agentdata.lastname }}
       </b-table-column>
       <b-table-column
         field="threadid"

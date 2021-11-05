@@ -7,6 +7,7 @@ use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
+
 class ChatTable extends API
 {
     public function get()
@@ -14,12 +15,11 @@ class ChatTable extends API
         if ($_GET['pending'] == 1) {
             if (AuthControl::isAdmin()) {
                 $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
-                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup', 'revieworder'])
+                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup', 'revieworder', 'agentdata'])
                     ->whereHas('pendingReviews', function ($q) {
                         $q->where('pending', '=', '1');
                     })
-                    ->orWhereHas('tags', function($query)
-                    {
+                    ->orWhereHas('tags', function ($query) {
                         $query->where('approved', '0')->orWhere('proposed_deletion', '1');
                     })
                     ->orHas('revieworder', '>', '0')
@@ -38,65 +38,56 @@ class ChatTable extends API
         $perpage = $_GET['perpage'] ? $_GET['perpage'] : 10;
         $page = $_GET['page'] == 1 ? 0 : ($_GET['page'] - 1) * $_GET['perpage'];
         $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
-        $myemail = Admin::where('id', $_SESSION['adminid'])->value('email');
+        //$myemail = Admin::where('id', $_SESSION['adminid'])->value('email');
         $tags = $_GET['tags'];
         $operator = $_GET['operator'] != '' ? intval(trim($_GET['operator'])) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
-        $result = Threads::with(['followup','order.invoice', 'agentdata'])->withCount(['pendingReviews' => function ($q) {
+        $result = Threads::with(['followup', 'order.invoice', 'agentdata'])->withCount(['pendingReviews' => function ($q) {
             $q->where('pending', '0');
         }])
-            ->with(['tags', 'customer'])
-           ;
+            ->with(['tags', 'customer']);
         if ($_GET['datefrom']) {
             $result->whereBetween('date', [$_GET['datefrom'], $dateTo]);
         }
-        if($operator)
-        {
-            $result->whereHas('agentdata', function($query) use ($operator)
-            {
+        if ($operator) {
+            $result->whereHas('agentdata', function ($query) use ($operator) {
                 $query->where('id', $operator);
             });
         }
-        if($tags)
-        {
+        if ($tags) {
             $tagsExploded = explode(',', $tags);
-            foreach($tagsExploded as $tag)
-            {
-                $result->whereHas('tags', function($query) use ($tag)
-                {
+            foreach ($tagsExploded as $tag) {
+                $result->whereHas('tags', function ($query) use ($tag) {
                     //$query->whereIn('tag', explode(',', $tags));
-                   
+
                     $query->where('tag', $tag);
                 });;
             }
-            
         }
-        if($_GET['q'])
-        {
+        if ($_GET['q']) {
             $q = trim($_GET['q']);
-            $result->whereHas('customer', function($query) use ($q)
-            {
-                $query->where('email', 'LIKE', '%'.$q.'%');
+            $result->whereHas('customer', function ($query) use ($q) {
+                $query->where('email', 'LIKE', '%' . $q . '%')
+                ->orWhere('geolocation', 'LIKE', '%country_code":"' . $q . '%');
             })
-            ->where('threadid', 'LIKE', '%'.$q.'%')
-            ->orWhere('email', 'LIKE', '%'.$q.'%')
-            ->orWhere('domain', 'LIKE', '%'.$q.'%')
-            ->orWhere('chatid', 'LIKE', '%'.$q.'%')
-            ->orWhere('orderid', 'LIKE', '%'.$q.'%');
+                ->orWhere('threadid', 'LIKE', '%' . $q . '%')
+                ->orWhere('email', 'LIKE', '%' . $q . '%')
+                ->orWhere('domain', 'LIKE', '%' . $q . '%')
+                ->orWhere('chatid', 'LIKE', '%' . $q . '%')
+                ->orWhere('orderid', 'LIKE', '%' . $q . '%');
+               
         }
-        if(AuthControl::isAgent())
-        {
-            $result->where('agent',  $myemail);
+        if (AuthControl::isAgent()) {
+            $result->where('agent',  $_SESSION['adminid']);
         }
-        if(AuthControl::isAdmin())
-        {
+        if (AuthControl::isAdmin()) {
             $result->has('pendingReviews', '0');
         }
         $total = $result->count();
         $result = $result->skip($page)->take($perpage)->orderBy('date', 'DESC')
-        ->get();
-        
+            ->get();
+
         return ['data' => $result, 'total' => $total];
         //     $results = DB::table('tbladmins as a')
         //    ->orderBy('a.firstname', 'ASC')

@@ -9,7 +9,6 @@
       }}</b-tag>
       <b-button
         type="is-info"
-        
         size="is-small"
         @click="OpenNewChatModal"
         style="margin-left: 10px; display: inline-block"
@@ -165,16 +164,18 @@
         label="IP"
         v-slot="props"
         :visible="filters['ip'].display"
-      >{{ props.row.customer.ip }}</b-table-column>
+        >{{ props.row.customer.ip }}</b-table-column
+      >
       <b-table-column
         field=""
         label="Follow up"
         width="100"
         v-slot="props"
         :visible="filters['followup'].display"
+        
       >
         <TableFollowUp
-        class="cellcenter"
+          class="cellcenter"
           :row="props.row"
           afterClickAction="loadChats"
           style="text-align: center"
@@ -185,8 +186,11 @@
         label="Order ID"
         width="100"
         v-slot="props"
+        cell-class="centernoblock"
         :visible="filters['orderid'].display"
       >
+        <b-icon style="color: red;margin: 0 auto;display: block;" icon="close-thick" size="is-medium" v-if="colorDirectConvertedSaleLackOrder(props.row)">
+        </b-icon>
         {{ props.row.orderid }}
       </b-table-column>
       <b-table-column
@@ -195,13 +199,16 @@
         v-slot="props"
         :visible="filters['extrapoints'].display"
       >
-        <TablePoints :tags="props.row.tags" :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''" />
+        <TablePoints
+          :tags="props.row.tags"
+          :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''"
+        />
       </b-table-column>
       <b-table-column
         field="date"
         label="Edit"
         v-slot="props"
-        width="80"
+        width="70"
         :visible="filters['edit'].display"
       >
         <b-button
@@ -217,9 +224,14 @@
 <style scoped>
 </style>
 <style >
-.extrapointscolumn, .cellcenter
+.extrapointscolumn,
+.cellcenter {
+  display:block;
+  text-align: center;
+}
+.centernoblock
 {
-  display:block;text-align: center;
+   text-align: center;
 }
 .emailTable {
   overflow-wrap: anywhere !important;
@@ -244,6 +256,14 @@
 .is-latefollowup {
   background: rgb(252, 186, 186) !important;
 }
+.is-lackorder {
+  background: rgb(255, 255, 255) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(250, 138, 0, 1) 100%
+  ) !important;
+}
 .is-cannotoffer {
   background: rgb(254, 255, 190) !important;
 }
@@ -254,8 +274,7 @@
   background: rgb(170, 255, 184) !important;
   color: #000;
 }
-.is-upgrade
-{
+.is-upgrade {
   background: rgb(204 255 215) !important;
 }
 .btable {
@@ -381,7 +400,7 @@ export default {
       return "None";
     },
     followup(row) {
-      const params = this.generateParamsForRequest('FollowUp')
+      const params = this.generateParamsForRequest("FollowUp");
       this.$api
         .post(`addonmodules.php?${params}`, {
           threadid: row.id,

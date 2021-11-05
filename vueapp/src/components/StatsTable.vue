@@ -164,7 +164,8 @@
           props.row.upsell +
           props.row.cycle +
           props.row["vps/ds"] -
-          props.row.decrementpoints
+          props.row.decrementpoints +
+          props.row.data.cm_points
         }}
       </b-table-column>
       <b-table-column

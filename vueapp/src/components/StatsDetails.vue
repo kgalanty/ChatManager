@@ -14,6 +14,10 @@
           </b-taglist></span
         >
       </li>
+      <li v-if="row.data.cm_points > 0"><b-taglist attached 
+            ><b-tag type="is-success">Stayed Cancellation Requests</b-tag
+            ><b-tag type="is-info">{{ row.data.cm_points }}</b-tag>
+          </b-taglist></li>
     </ul>
   </span>
 </template>

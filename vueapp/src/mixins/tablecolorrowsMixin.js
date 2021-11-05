@@ -2,11 +2,20 @@
 export default {
   methods: {
     colorRows(row) {
+      //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
       if (this.colorLatefollowup(row)) return "is-latefollowup";
       if (this.colorDirectsale(row)) return "is-directsale";
       if (this.colorCannotoffer(row.tags)) return "is-cannotoffer";
       if (this.colorDuplicate(row.tags)) return "is-duplicate";
       if (this.colorUpgradeWcbPaid(row)) return "is-upgrade";
+    },
+    colorDirectConvertedSaleLackOrder(row)
+    {
+      return row.tags.find((e) => {
+        if ((e.tag == "directsale" && e.approved == 1) || (e.tag == "convertedsale" && e.approved == 1)) {
+          return true;
+        }
+      }) && !row?.order
     },
     colorDuplicate(tags) {
       return tags.find((e) => {
