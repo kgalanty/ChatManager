@@ -713,7 +713,7 @@ export default {
       var cannotofferReason = this.cannotofferCustom
         ? this.cannotofferCustom
         : this.cannotoffer;
-
+      let newagent = this.selectedAgent ? this.selectedAgent.id : ''
       this.$api
         .post(`addonmodules.php?${params}`, {
           id: this.item.id,
@@ -723,7 +723,7 @@ export default {
           order: this.selectedOrder,
           notes: this.notes,
           customoffer: cannotofferReason,
-          agent: this.selectedAgent.id,
+          agent: newagent,
         })
         .then((response) => {
           if (response.data == "success") {
@@ -878,7 +878,7 @@ export default {
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
     this.agent =
-      this.item.agentdata.firstname + " " + this.item.agentdata.lastname;
+      this.item.agentdata ? this.item.agentdata?.firstname + " " + this.item.agentdata?.lastname : ''
 
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;

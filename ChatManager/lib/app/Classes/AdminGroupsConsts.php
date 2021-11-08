@@ -13,6 +13,11 @@ use WHMCS\Database\Capsule as DB;
 
 class AdminGroupsConsts
 {
-    public const AGENT = [2];
+    public const AGENT = [2,22];
     public const ADMIN = [1, 11];
+
+    /*
+    Below is the list of Admin IDs disallowed from access the module
+    */
+    public const AGENT_DISALLOWED = [272];
 }

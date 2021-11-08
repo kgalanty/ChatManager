@@ -23,7 +23,7 @@ class LiveChat extends APIProtected
                     return ['result' => 'error', 'msg' => 'Cannot found the chat with this thread id.'];
                 }
                 $livechat->runParseStore();
-                $thread = ThreadsModel::with(['followup', 'tags', 'customer'])->where('threadid', $threadid)->first();
+                $thread = ThreadsModel::with(['followup', 'tags', 'customer', 'agentdata'])->where('threadid', $threadid)->first();
                 Logs::CreatedByID($thread->id, $_SESSION['adminid']);
                 return ['result' => 'success', 'data' => $thread];
             }

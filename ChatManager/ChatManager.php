@@ -21,6 +21,7 @@ function ChatManager_output($vars)
     $dispatcher = new Dispatcher();
     $response = $dispatcher->dispatch($ctrl, $action, $vars);
     echo $response;
+    exit;
 }
 
 function ChatManager_activate()

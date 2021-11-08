@@ -18,11 +18,13 @@ class Agents extends API
             {
                 $q->where('firstname', 'LIKE', '%'.$query.'%')
                 ->orWhere('lastname', 'LIKE', '%'.$query.'%')
-                ->orWhere('username', 'LIKE','%'.$query.'%')->orWhere('email', 'LIKE', '%'.$query.'%');
+                ->orWhere('username', 'LIKE','%'.$query.'%')
+                ->orWhere('email', 'LIKE', '%'.$query.'%');
 
             })
             ->where('disabled', '0')
             ->whereIn('roleid', array_merge(AdminGroupsConsts::AGENT, AdminGroupsConsts::ADMIN))
+            ->whereNotIn('id', AdminGroupsConsts::AGENT_DISALLOWED)
             ->orderBy('firstname', 'ASC')
             ->get();
             return ['data' => $result, 'result' => 'success'];

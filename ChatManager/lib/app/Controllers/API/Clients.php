@@ -22,8 +22,7 @@ class Clients extends API
         }
         else
         {
-            $result = Client::take(10)
-            ->get();
+            $result = Client::take(10)->get();
         }
         
        // $total = $result->count();

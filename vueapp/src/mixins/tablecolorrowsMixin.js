@@ -15,7 +15,7 @@ export default {
         if ((e.tag == "directsale" && e.approved == 1) || (e.tag == "convertedsale" && e.approved == 1)) {
           return true;
         }
-      }) && !row?.order
+      }) && !row?.order && row.agent != 0
     },
     colorDuplicate(tags) {
       return tags.find((e) => {
@@ -29,7 +29,7 @@ export default {
         if (e.tag == "directsale" && e.approved == 1) {
           return true;
         }
-      }) && row?.order?.invoice?.status === 'Paid';
+      }) && row?.order?.invoice?.status === 'Paid'  && row.agent != 0
     },
     colorCannotoffer(tags) {
       return tags.find((e) => {
@@ -43,7 +43,7 @@ export default {
         if (e.tag == "convertedsale" && e.approved == 1) {
           return true;
         }
-      }) && row?.order?.invoice?.status === 'Paid';
+      }) && row?.order?.invoice?.status === 'Paid'  && row.agent != 0
     },
     colorLatefollowup(row) {
       const iswcb = row.tags.find((e) => {

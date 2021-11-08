@@ -7,6 +7,7 @@ module.exports = {
   },
   publicPath: ".",
   assetsDir: process.env.NODE_ENV === 'production' ? '../modules/addons/ChatManager/lib/app/Views/' : '',
+  indexPath: 'home@index.tpl',
   devServer: {
     // open: process.platform === 'darwin',
     // host: '0.0.0.0',
@@ -17,14 +18,14 @@ module.exports = {
     public: 'https://localhost:8080/',
   proxy: {
     "addonmodules.php": {
-      //target: "https://ticketing.stage.tmdhosting.com/admin/",
+    // target: "https://ticketing.stage.tmdhosting.com/admin/",
       target: "https://my.tmdhosting.com/admin/",
       logLevel: "debug",
      // changeOrigin: true,
       secure: false,
       withCredentials: true,
       cookieDomainRewrite: {"localhost": "my.tmdhosting.com" },
-      headers: { Cookie: 'WHMCSBaCqM4Y33YVw=93595795d68e2a076bb864a970e90c55'},
+      headers: { Cookie: 'WHMCSBaCqM4Y33YVw=f005b029758aee19b7b44af7b9cc5e3f'},
     }
   }
 }

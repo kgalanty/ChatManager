@@ -58,7 +58,9 @@
         width="160"
         :visible="filters['operator'].display"
       >
-        {{ props.row.agentdata.firstname }} {{ props.row.agentdata.lastname }}
+       <b-icon style="color: red;margin: 0 auto;display: block;" icon="close-thick" size="is-medium" v-if="props.row.agent==0">
+        </b-icon>
+        <span v-if="props.row.agentdata">{{ props.row.agentdata.firstname }} {{ props.row.agentdata.lastname }}</span>
       </b-table-column>
       <b-table-column
         field="threadid"
@@ -199,7 +201,7 @@
         v-slot="props"
         :visible="filters['extrapoints'].display"
       >
-        <TablePoints
+        <TablePoints v-if="props.row.agent != 0"
           :tags="props.row.tags"
           :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''"
         />

@@ -9,6 +9,7 @@ use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread as ReviewThreadModel;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
+use WHMCS\Module\Addon\ChatManager\app\Classes\ThreadEditDiffLogs;
 
 class Logs
 {
@@ -76,31 +77,10 @@ class Logs
     }
     public static function updateThread($itemid, $doer, $update, $threaddata)
     {
-
-        foreach ($update as $k => $updateitem) {
-            if (
-                ($k == 'name' && $updateitem != $threaddata->customer->name && $threaddata->name == null) ||
-                ($k == 'email' && $updateitem != $threaddata->customer->email && $threaddata->email == null)
-            ) {
-                $oldvalue = $threaddata->customer->$k;
-            } else {
-                $oldvalue = $threaddata->$k;
-            }
-
-            if ($updateitem != $threaddata->$k) 
-            {   if($k=='agent' && $oldvalue)
-                {
-                    $oldvalueDoer = Admin::find($oldvalue);
-                    $oldvalue = $oldvalueDoer->firstname.' '.$oldvalueDoer->lastname;
-                    $newvalueDoer = Admin::find($updateitem);
-                    $updateitem = $newvalueDoer->firstname.' '.$newvalueDoer->lastname;
-                }
-                $logChanges[] = ($oldvalue ?  $k.': '.$oldvalue : '""') . ' -> ' . $updateitem;
-            }
-        }
-        if (count($logChanges) > 0) {
+        $changes = ThreadEditDiffLogs::process($itemid, $doer, $update, $threaddata);
+        if ($changes) {
             $admin = Admin::find($doer);
-            $desc = $admin->firstname . ' ' . $admin->lastname . ' has updated chat ' . $threaddata->threadid . ': ' . implode(',', $logChanges);
+            $desc = $admin->firstname . ' ' . $admin->lastname . ' has updated chat ' . $threaddata->threadid . ': ' . $changes;
             self::log($itemid, 'Thread', $doer, $desc);
         }
     }
