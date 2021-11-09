@@ -17,6 +17,11 @@ export const dateMixin = {
             return (
                 this.moment(datetime).utc().add(val, unit).format("YYYY-MM-DDTHH:mm:SS") + ".000000Z"
               )
+        },
+        isDateAfter(firstdate, seconddate)
+        {
+            return this.moment(firstdate).isValid() && this.moment(seconddate).isValid() ? 
+            this.moment(seconddate).isAfter(firstdate) ||  this.moment(seconddate).isSame(firstdate)  : false
         }
     }
 }

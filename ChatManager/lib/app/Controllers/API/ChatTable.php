@@ -4,6 +4,7 @@ namespace WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 
 use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Database\Capsule as DB;
+use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
@@ -62,7 +63,7 @@ class ChatTable extends API
                     //$query->whereIn('tag', explode(',', $tags));
 
                     $query->where('tag', $tag);
-                });;
+                });
             }
         }
         if ($_GET['q']) {
@@ -80,6 +81,12 @@ class ChatTable extends API
         }
         if (AuthControl::isAgent()) {
             $result->where('agent',  $_SESSION['adminid']);
+            if(isset(AdminGroupsConsts::TAGSAGENTMAP[$_SESSION['adminid']]))
+            {
+                $result->orWhereHas('tags', function ($query) {
+                    $query->where('tag', AdminGroupsConsts::TAGSAGENTMAP[$_SESSION['adminid']]);
+                });
+            }
         }
         if (AuthControl::isAdmin()) {
             $result->has('pendingReviews', '0');

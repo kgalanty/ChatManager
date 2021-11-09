@@ -25,7 +25,7 @@ module.exports = {
       secure: false,
       withCredentials: true,
       cookieDomainRewrite: {"localhost": "my.tmdhosting.com" },
-      headers: { Cookie: 'WHMCSBaCqM4Y33YVw=f005b029758aee19b7b44af7b9cc5e3f'},
+      headers: { Cookie: 'WHMCSBaCqM4Y33YVw=beb9fb41d4434f1ec754730afc443e73'},
     }
   }
 }

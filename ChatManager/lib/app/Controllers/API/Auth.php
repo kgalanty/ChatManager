@@ -11,11 +11,13 @@ class Auth extends API
     {
         if($_GET['a'] == 'readPermissions')
         {
+            $data['aid'] = $_SESSION['adminid'];
             if($_SESSION['adminid'] > 0)
             {
                if(AuthControl::isAgent())
                 {
                     $data['perm'] = 1;
+                    
                     return ['results' => $data];
                 }
                 if(AuthControl::isAdmin())

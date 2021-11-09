@@ -17,13 +17,14 @@ export default new Vuex.Store({
     // chatsLoading: true,
     // chatsPerPage: 25,
     // filters: { dateFrom: null, dateTo: null },
-
+    aid: 0,
     groupMember: 0
 
   },
   mutations: {
     setGroupMember(state, val) {
       state.groupMember = val.results.perm
+      state.aid = val.results.aid
     },
 
   },

@@ -232,9 +232,10 @@ import { dateMixin } from "@/mixins/dateMixin.js";
 import axios from "axios";
 import requestsMixin from "../mixins/requestsMixin";
 import StatsDetails from "@/components/StatsDetails";
+import notificationsMixin from '../mixins/notificationsMixin';
 export default {
   name: "StatsTable",
-  mixins: [dateMixin, requestsMixin],
+  mixins: [dateMixin, requestsMixin, notificationsMixin],
   components: { StatsDetails },
   methods: {
     // ...mapActions("chat", ["loadPendingChats", "loadChats"]),
@@ -246,9 +247,9 @@ export default {
     //   });
     //   return true;
     // },\
-  //  loadDetails(row) {
-      //console.log(row);
-   // },
+    //  loadDetails(row) {
+    //console.log(row);
+    // },
     returnPercents(val) {
       return +parseFloat(val).toFixed(2) + "%";
     },
@@ -261,9 +262,10 @@ export default {
     loadOperators() {
       if (this.operators.length == 0) {
         this.loading.operators = true;
+         const params = this.generateParamsForRequest("Agents", ['a=GetAgentsList', 'q=']);
         this.$api
           .get(
-            `addonmodules.php?module=ChatManager&c=Agents&json=1&a=GetAgentsList&q=`
+           `addonmodules.php?${params}`
           )
           .then(({ data }) => {
             this.operators = data.data;
@@ -277,11 +279,11 @@ export default {
           });
       }
     },
-    setDateFilters(dateFrom, dateTo) {
-      if (!this.filters.dateFrom) {
+    setDateFilters(dateFrom = null, dateTo = null) {
+      if (!this.filters.dateFrom && dateFrom) {
         this.filters.dateFrom = new Date(dateFrom);
       }
-      if (!this.filters.dateTo) {
+      if (!this.filters.dateTo && dateTo) {
         this.filters.dateTo = new Date(dateTo);
       }
     },
@@ -291,12 +293,13 @@ export default {
       // const endDay = this.moment().daysInMonth()
       // console.log(startDay)
       // console.log(endDay)
+      //console.log(this.isDateAfter(this.filters.dateFrom, this.filters.dateTo))
       const dateFrom = this.filters.dateFrom
         ? this.createUTCDatetime(this.filters.dateFrom)
         : this.createUTCDatetime(this.moment().format("YYYY-MM-" + startDay));
 
       const dateTo = this.filters.dateTo
-        ? this.createUTCDateTimeAndAdd(this.filters.dateTo, '1', 'd')
+        ? this.createUTCDateTimeAndAdd(this.filters.dateTo, "1", "d")
         : this.createUTCDatetime(
             this.moment().add(1, "months").format("YYYY-MM-01")
           );
@@ -325,11 +328,31 @@ export default {
         });
     },
   },
+  watch: {
+    dateFrom(n, o) {
+      if (!this.isDateAfter(n, this.filters.dateTo)) {
+        this.filters.dateFrom = new Date(o);
+        this.notifyWarning('Date is after "Date To". Restored previous date.')
+      }
+    },
+    dateTo(n, o) {
+      if (!this.isDateAfter(this.filters.dateFrom,n)) {
+        this.notifyWarning('Date is before "Date From". Restored previous date.')
+        this.filters.dateTo = new Date(o);
+      }
+    },
+  },
   mounted() {
     // this.loadPendingChats();
     this.loadStats();
   },
   computed: {
+    dateFrom() {
+      return this.filters.dateFrom;
+    },
+    dateTo() {
+      return this.filters.dateTo;
+    },
     //...mapState("chat", ["pendingchats", "pendingChatsLoading"]),
     //...mapState('chatcolumns', ['filters']),
   },

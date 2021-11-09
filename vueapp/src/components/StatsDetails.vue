@@ -1,16 +1,20 @@
 <template>
   <span>
     <strong>Tags Frequency:</strong>
+    <ul v-show="data && data.length==0">
+      <li><b-skeleton width="30%" animated></b-skeleton></li>
+      <li><b-skeleton width="30%" animated></b-skeleton></li>
+      <li><b-skeleton width="30%" animated></b-skeleton></li>
+      </ul>
     <ul class="block-list is-outlined is-dark">
       <li
-        v-for="(column, index) in row"
+        v-for="(column, index) in data"
         :key="index"
-        v-show="index !== 'data' && column > 0"
       >
-        <span @click="navigateToFilteredChat(index)"
+        <span @click="navigateToFilteredChat(column.tag)"
           ><b-taglist attached 
-            ><b-tag type="is-dark">{{ index }}</b-tag
-            ><b-tag type="is-info">{{ column }}</b-tag>
+            ><b-tag type="is-dark">{{ column.tag }}</b-tag
+            ><b-tag type="is-info">{{ column.count }}</b-tag>
           </b-taglist></span
         >
       </li>
@@ -39,6 +43,7 @@
 import { dateMixin } from "@/mixins/dateMixin";
 import requestsMixin from "@/mixins/requestsMixin";
 import router from '@/router/'
+import axios from "axios"
 import { mapActions } from 'vuex';
 export default {
   name: "StatsDetails",
@@ -61,49 +66,37 @@ export default {
       this.setDateFromFilter(this.createUTCDatetime(this.filters.dateFrom))
       this.setDateToFilter(this.createUTCDatetime(this.filters.dateTo))
       router.push({ path: '/' })
-    }
-    // getStats() {
-    //   const startDay = this.moment().format("DD") < 16 ? 1 : 16;
-    //   this.loading.stats = true
-    //   const params = this.generateParamsForRequest('Stats',    [`datefrom=${
-    //       this.filters.dateFrom
-    //         ? this.createUTCDatetime(this.filters.dateFrom)
-    //         : this.createUTCDatetime(
-    //             this.moment().format("YYYY-MM-" + startDay)
-    //           )
-    //     }`,
-    //     `dateto=${
-    //       this.filters.dateTo
-    //         ? this.createUTCDatetime(this.filters.dateTo)
-    //         : this.createUTCDatetime(
-    //             this.moment().add(1, "months").format("YYYY-MM-01")
-    //           )
-    //     }`,
-    //     `op=${this.agent}`,
-    //     `a=StatsDetails`
-    //   ])
-    //   axios
-    //     .get("addonmodules.php?" + params)
-    //     .then((response) => {
-    //       if (response.data) {
-    //         this.data = response.data.data;
-    //       }
-    //     })
-    //     .catch((e) => {
-    //       console.log(e);
-    //       //window.location = 'login.php'
-    //     })
-    //     .finally(() => {
-    //       this.loading.stats = false;
-    //     });
-    // },
+    },
+    getStatsDetails( agentid) {
+      
+      const params = this.generateParamsForRequest('Stats',    [`datefrom=${
+           this.createUTCDatetime(this.filters.dateFrom)
+        }`,
+        `dateto=${
+         this.createUTCDateTimeAndAdd(this.filters.dateTo, 24, 'h')
+        }`,
+        `op=${agentid}`,
+        `a=StatsDetails`
+      ])
+      axios
+        .get("addonmodules.php?" + params)
+        .then((response) => {
+          if (response.data) {
+            this.data = response.data.data;
+          }
+        })
+        .catch((e) => {
+          console.log(e);
+          //window.location = 'login.php'
+        })
+        .finally(() => {
+        });
+    },
   },
   mounted() {
-   // console.log(`mounted for ${this.agent}`);
-    //this.getStats()
+    this.getStatsDetails(this.row.data.agent)
   },
   computed: {
-
   },
   data() {
     return {

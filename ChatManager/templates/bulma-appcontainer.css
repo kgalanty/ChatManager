@@ -271,7 +271,7 @@ fieldset[disabled] .appcontainer .file-name, fieldset[disabled] .appcontainer .s
 }
 .appcontainer html {
   background-color: white;
-  font-size: 16px;
+  font-size: 14px;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
   min-width: 300px;

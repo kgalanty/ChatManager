@@ -26,8 +26,13 @@ class Stats extends API
         $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-' . (date('j') < 16 ? 15 : 't') . '\T23:59:59.000000\Z');
         if($_GET['a'] == 'StatsDetails')
         {
-            return StatsHelper::Details(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
+            $data['data'] = StatsHelper::getTagsFrequency(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
+            return $data;  
         }
+        // if($_GET['a'] == 'StatsDetails')
+        // {
+        //     return StatsHelper::Details(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
+        // }
         $threads = StatsHelper::getStats( ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
         $cm_stayed_requests = StatsHelper::getPointsFromCancellations(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
         //calculate how many points per agent have to be substracted, as 'upgrade' tag should count as 1 in one thread 
@@ -35,6 +40,8 @@ class Stats extends API
         //This is returned and substracted on frontend. Raw query for speed gain
         $threads_upgrade_points = StatsHelper::getDecrementPoints( ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
         $o = StatsHelper::CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests);
+
+        
         return ['data' => $o];
     }
     public function post()

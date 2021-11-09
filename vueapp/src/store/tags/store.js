@@ -29,7 +29,6 @@ const tagsStore = {
                 context.commit('setTags', response.data.data)
                 return
               }
-              console.log(response.data)
             })
         }
       }

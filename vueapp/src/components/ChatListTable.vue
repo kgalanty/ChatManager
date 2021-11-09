@@ -358,7 +358,7 @@ export default {
         if (e.tag == "duplicate" && e.approved == 1 && this.isAgent()) {
           return true;
         }
-      });
+      }) || (row.agent!=this.aid && this.isAgent())
     },
 
     editModal(item) {
@@ -448,6 +448,7 @@ export default {
   computed: {
     ...mapState("chat", ["chats", "chatsPage", "chatsLoading"]),
     ...mapState("chatcolumns", ["filters"]),
+    ...mapState(['aid'])
   },
   data() {
     return {
