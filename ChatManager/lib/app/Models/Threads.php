@@ -22,7 +22,7 @@ class Threads extends Model
     }
     public function customer()
     {
-        return $this->belongsTo(Customers::class, 'users', 'client_id');
+        return $this->hasMany(Customers::class, 'client_id', 'users');
     }
     public function pendingReviews()
     {
@@ -40,12 +40,20 @@ class Threads extends Model
     {
         return $this->belongsTo(Order::class, 'orderid', 'id');
     }
+    public function sameorder()
+    {
+        return $this->hasMany($this, 'orderid', 'orderid');
+    }
+    public function reviewduplicatedorders()
+    {
+        return $this->hasOne(ReviewDuplicatedOrder::class, 'threadid', 'id');
+    }
     public function agentdata()
     {
         return $this->belongsTo(Admin::class, 'agent', 'id')->select('id', 'firstname', 'lastname');
     }
-    // public function scopeID($query, $serverid)
-    // {
-    //     return $query->where('id', $serverid);
-    // }
+    public function scopeOrder($query, $order)
+    {
+        return $query->where('orderid', $order);
+    }
 }

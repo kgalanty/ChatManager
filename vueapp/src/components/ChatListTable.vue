@@ -80,6 +80,7 @@
             >{{ props.row.threadid }}</b-button
           >
         </b-tooltip>
+         <b-tag v-if="props.row.pending_reviews_count>0" type="is-info">Pending Reviews: {{props.row.pending_reviews_count}}</b-tag>
       </b-table-column>
       <b-table-column
         field="tags"
@@ -258,6 +259,12 @@
 .is-latefollowup {
   background: rgb(252, 186, 186) !important;
 }
+.is-reviewpending
+{
+  background-color: #ffffff;
+background-size: 50px 50px;
+background-image: repeating-linear-gradient(45deg, #ffdfdf 0, #ffdfdf 5px, #ffffff 0, #ffffff 50%);
+}
 .is-lackorder {
   background: rgb(255, 255, 255) !important;
   background: linear-gradient(
@@ -430,6 +437,7 @@ export default {
     // }
   },
   mounted() {
+    this.getPermissions();
     this.loadChats().catch((e) => {
       this.$buefy.dialog.alert({
         title: "Error",
@@ -443,7 +451,7 @@ export default {
         onConfirm: () => window.location.reload(),
       });
     });
-    this.getPermissions();
+    
   },
   computed: {
     ...mapState("chat", ["chats", "chatsPage", "chatsLoading"]),

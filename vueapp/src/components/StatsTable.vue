@@ -2,7 +2,7 @@
   <article id="statstable">
     <div class="tile">
       <div class="tile is-2 is-child">
-        <b-field label="Operator" style="width: 95%; padding: 9px">
+        <b-field label="Operator" style="width: 95%; padding: 9px" v-if="isAdmin()">
           <b-select
             placeholder="Select an operator"
             :loading="loading.operators"
@@ -233,9 +233,10 @@ import axios from "axios";
 import requestsMixin from "../mixins/requestsMixin";
 import StatsDetails from "@/components/StatsDetails";
 import notificationsMixin from '../mixins/notificationsMixin';
+import memberMixin from '../mixins/memberMixin';
 export default {
   name: "StatsTable",
-  mixins: [dateMixin, requestsMixin, notificationsMixin],
+  mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin],
   components: { StatsDetails },
   methods: {
     // ...mapActions("chat", ["loadPendingChats", "loadChats"]),

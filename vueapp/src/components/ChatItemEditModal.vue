@@ -6,6 +6,27 @@
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
       <section class="modal-card-body">
+        <b-message
+          title="Duplicated Order ID detected"
+          type="is-warning"
+          has-icon
+          :closable="false"
+          v-if="(item.sameorder_count && item.sameorder_count > 0) && !hideMessage"
+        >
+          This chat has duplicated order ID with
+          {{ item.sameorder_count - 1 }} other chats. You need to change it manually or 
+          confirm it's correct as it is - to close this message and remove the chat from
+          'Pending Review' Table.
+
+          <section>
+            <b-button  style="margin:5px;" type="is-info" @click="ConfirmDuplicatedChat(item.id)">
+              Confirm this chat</b-button
+            >
+            <b-button  style="margin:5px;" type="is-link" @click="ConfirmDuplicatedAllChats(item.orderid)"
+              >Confirm all chats with the same order ID</b-button
+            >
+          </section>
+        </b-message>
         <b-tabs type="is-toggle" expanded v-model="activeTab">
           <b-tab-item label="Customer" icon="account-box">
             <b-field label="Client Name">
@@ -27,6 +48,7 @@
                 expanded
                 type="number"
               ></b-input>
+
               <b-button
                 style="float: left"
                 icon-right="magnify"
@@ -35,6 +57,10 @@
                 @click="checkOrder(false)"
               />
             </b-field>
+            <span v-if="orderwaschanged && isAgent()" style="color: purple">
+              Your change will be reviewed by supervisor and accepted or
+              rejected.
+            </span>
             <!-- btable with order suggestions -->
             <b-collapse
               :open="false"
@@ -317,15 +343,12 @@
               <b-icon icon="message-draw"></b-icon>
               <span>
                 Review
-                <b-tag rounded type="is-info" v-if="isAdmin()">
+                <b-tag rounded type="is-info">
                   {{ reviewRequests.length }}
                 </b-tag>
               </span>
             </template>
-            <b-message
-              type="is-warning"
-              has-icon
-              v-if="reviewStatus == 1"
+            <b-message type="is-warning" has-icon v-if="reviewStatus == 1"
               >This thread has pending reviews.</b-message
             >
             <div class="notification is-primary">
@@ -357,12 +380,16 @@
               :data="reviewRequests"
               narrowed
               :per-page="5"
-             
             >
               <template #empty>
                 <div class="has-text-centered">No entries</div>
               </template>
-              <b-table-column field="pending" label="Seen" v-slot="props" width="50">
+              <b-table-column
+                field="pending"
+                label="Seen"
+                v-slot="props"
+                width="50"
+              >
                 <b-icon
                   icon="close"
                   v-if="props.row.pending == 1"
@@ -376,7 +403,12 @@
                   type="is-success"
                 ></b-icon>
               </b-table-column>
-              <b-table-column field="date" label="Performed by" v-slot="props" width="200">
+              <b-table-column
+                field="date"
+                label="Performed by"
+                v-slot="props"
+                width="200"
+              >
                 <b-tag type="is-primary">
                   {{ props.row.doer.firstname }}
                   {{ props.row.doer.lastname }}</b-tag
@@ -388,7 +420,12 @@
               <b-table-column field="date" label="Date" v-slot="props">
                 {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
               </b-table-column>
-              <b-table-column field="pending" label="Actions" v-slot="props" :visible="isAdmin()">
+              <b-table-column
+                field="pending"
+                label="Actions"
+                v-slot="props"
+                :visible="isAdmin()"
+              >
                 <b-button
                   type="is-success"
                   size="is-small"
@@ -429,15 +466,23 @@ import { tagsMixin } from "../mixins/tagsMixin";
 import memberMixin from "../mixins/memberMixin";
 import requestMixin from "../mixins/requestsMixin";
 import notificationsMixin from "../mixins/notificationsMixin";
+import { pendingReviewActionsMixin } from "../mixins/pendingReviewActionsMixin";
 
 export default {
   name: "ChatItemEditModal",
   props: ["item"],
-  mixins: [dateMixin, tagsMixin, memberMixin, notificationsMixin, requestMixin],
+  mixins: [
+    dateMixin,
+    tagsMixin,
+    memberMixin,
+    notificationsMixin,
+    requestMixin,
+    pendingReviewActionsMixin,
+  ],
   components: { ChatItemLogs },
   computed: {
     reviewTabHeader() {
-      if (this.reviewStatus == 1 && this.isAdmin()) {
+      if (this.reviewStatus == 1) {
         return "reviewTabHeader";
       }
       return "";
@@ -482,7 +527,8 @@ export default {
         })
         .then((response) => {
           this.loading.orderSuggestionTable = false;
-          if (response.data == "success") {
+          if (response.data.result == "success") {
+            this.selectedOrder = response.data.orderid;
             this.loadOrdersSuggestions();
             this.notifySuccess("Order suggestion approved");
           } else {
@@ -654,7 +700,7 @@ export default {
       return new Promise((resolve) => {
         this.$api
           .post(`addonmodules.php?${params}`, {
-            order: this.selectedOrder,
+            order: parseInt(this.selectedOrder),
             a: "CheckOrderID",
             threadid: this.item.id,
           })
@@ -713,7 +759,7 @@ export default {
       var cannotofferReason = this.cannotofferCustom
         ? this.cannotofferCustom
         : this.cannotoffer;
-      let newagent = this.selectedAgent ? this.selectedAgent.id : ''
+      let newagent = this.selectedAgent ? this.selectedAgent.id : "";
       this.$api
         .post(`addonmodules.php?${params}`, {
           id: this.item.id,
@@ -726,7 +772,7 @@ export default {
           agent: newagent,
         })
         .then((response) => {
-          if (response.data == "success") {
+          if (response.data.result == "success") {
             this.$emit("close");
             this.loadChats();
             this.$buefy.toast.open({
@@ -736,11 +782,15 @@ export default {
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
-              message: response.data,
+              message: response.data.msg,
               type: "is-warning",
             });
+            console.log(response.data.orderid);
+            if (response.data.orderid) {
+              this.selectedOrder = response.data.orderid;
+            }
           }
-          this.loading.loadingSaveBtn = false;
+          this.loading.saveLoadingBtn = false;
         });
     },
     addtag() {
@@ -877,21 +927,22 @@ export default {
     this.domain = this.item.domain;
     this.selectedOrder = this.item.orderid;
     this.notes = this.item.notes;
-    this.agent =
-      this.item.agentdata ? this.item.agentdata?.firstname + " " + this.item.agentdata?.lastname : ''
+    this.agent = this.item.agentdata
+      ? this.item.agentdata?.firstname + " " + this.item.agentdata?.lastname
+      : "";
 
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
     this.orderchangesuggestions = [];
     this.loadOrdersSuggestions();
     this.HasCustomOfferCheck();
-    this.getPermissions().then(() => {
-      if (this.isAdmin()) {
-        // this.loadTagsHistory();
-        this.loadReviews();
-      }
-      this.loadReviewStatus();
-    });
+    // this.getPermissions().then(() => {
+    // if (this.isAdmin()) {
+    // this.loadTagsHistory();
+    this.loadReviews();
+    // }
+    this.loadReviewStatus();
+    //});
     //clear Logs tab to prevent showing logs from previously loaded thread to show when new logs are being loaded
     this.clearLogs();
     this.$nextTick(() => {
@@ -914,8 +965,8 @@ export default {
         }
       }
       if (val == 2) {
-         this.loadReviews()
-         if(this.reviewStatus < 0) this.loadReviewStatus();
+        this.loadReviews();
+        if (this.reviewStatus < 0) this.loadReviewStatus();
       }
     },
     selectedOrder(prev, val) {

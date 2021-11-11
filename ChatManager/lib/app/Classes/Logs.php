@@ -106,7 +106,7 @@ class Logs
     public static function submitOrderReview(int $order, int $doer, int $threadid)
     {
         $admin = Admin::find($doer);
-        $desc = $admin->firstname . ' ' . $admin->lastname . ' suggested this order id: '.$order.' for the thread. It\'s approval pending.';
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' suggested this order id: '.$order.' for the thread. It\'s pending for approval.';
         self::log($threadid, 'Thread', $doer, $desc);
     }
     public static function DeclineOrderReview( $ApproveOrderReview, int $doer)
@@ -114,5 +114,11 @@ class Logs
         $admin = Admin::find($doer);
         $desc = $admin->firstname . ' ' . $admin->lastname . ' declined order id '. $ApproveOrderReview->orderid.' submitted by '.$ApproveOrderReview->doer->firstname.' '.$ApproveOrderReview->doer->lastname.'.';
         self::log($ApproveOrderReview->threadid, 'Thread', $doer, $desc);
+    }
+    public static function AcceptDuplicateOrder(int $threadid, int $doer)
+    {
+        $admin = Admin::find($doer);
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' marked duplicated order id as reviewed.';
+        self::log($threadid, 'Thread', $doer, $desc);
     }
 }

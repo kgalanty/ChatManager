@@ -40,7 +40,7 @@ class Orders extends API
                         if (Threads::where('id', $reviewOrder->threadid)->update(['orderid' => $reviewOrder->orderid])) {
                             ReviewOrder::where('threadid', $reviewOrder->threadid)->delete();
                             Logs::ApproveOrderReview($reviewOrder, $_SESSION['adminid']);
-                            return 'success';
+                            return ['result'=>'success', 'orderid' => $reviewOrder->orderid];
                         } else {
                             return 'Something went wrong when updating order id';
                         }

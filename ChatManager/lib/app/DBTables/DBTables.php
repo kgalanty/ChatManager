@@ -11,6 +11,7 @@ class DBTables
     const FollowUp = self::Prefix.'followup';
     const Logs = self::Prefix.'logs';
     const ReviewOrders = self::Prefix.'revieworders';
+    const ReviewDuplicatedOrders = self::Prefix.'reviewduplicatedorders';
     const ReviewThreads = self::Prefix.'reviewthreads';
     const TagHistory = self::Prefix.'taghistory';
     const Tags = self::Prefix.'tags';

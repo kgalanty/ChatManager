@@ -7,6 +7,7 @@ use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
+use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 
 class StatsHelper
 {
@@ -40,22 +41,39 @@ class StatsHelper
             ->leftJoin('tblorders as o', 'o.id', '=', 't.orderid')
             ->leftJoin('tblinvoices as inv', 'inv.id', '=', 'o.invoiceid')
             ->whereBetween('t.date', [$params['datefrom'], $params['dateto']])
-            ->where(function ($query) {
-                $query->whereIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])->where('inv.status', 'Paid');
-            })
-            ->orWhere(function ($query) {
-                $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])->whereNull('inv.id');
-            })
-            ->where('tg.approved', 1);
+            ->where(function ($q)
+            {
+            
+               $q->where(function ($query) {
+                    $query->whereIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])
+                    ->where('tg.approved', 1)
+                    ->where('inv.status', 'Paid');
+                });
+                $q->orWhere(function ($query) {
+                    $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])
+                    ->where('tg.approved', 1)
+                    ;
+                });
+            });
+            
         if (AuthControl::isAgent()) {
-            $threads = $threads->where('a.id', $_SESSION['adminid']);
-        } elseif ($params['op'] != '') {
-            $threads = $threads->where('a.id', intval(trim($params['op'])));
+            $threads = $threads->where('t.agent', $_SESSION['adminid']);
+        } elseif (AuthControl::isAdmin() && $params['op'] != '') {
+            $threads = $threads->where('t.agent', intval(trim($params['op'])));
         }
-        $threads = $threads->whereNotIn('t.agent', AdminGroupsConsts::AGENT_DISALLOWED)->groupBy('t.agent')
+        if(AuthControl::isAdmin())
+        {
+            $threads = $threads->whereNotIn('t.agent', AdminGroupsConsts::AGENT_DISALLOWED);
+        }
+        $threads = $threads
+            ->groupBy('t.agent')
             ->groupBy('tg.tag')
             ->selectRaw('t.agent, a.firstname, a.lastname, a.id as adminid, tg.tag, count(t.id) as count')
             ->get();
+        // if($_SESSION['adminid'] == 230)
+        // {
+        //     var_dump($threads);die;
+        // }
         return $threads;
     }
     public static function getPointsFromCancellations(?array $params)
@@ -64,7 +82,7 @@ class StatsHelper
             ->whereBetween('date', [$params['datefrom'], $params['dateto']]);
         if (AuthControl::isAgent()) {
             $query = $query->where('cr.agent', $_SESSION['adminid']);
-        } elseif ($params['op'] != '') {
+        } elseif (AuthControl::isAdmin() && $params['op'] != '') {
             $query = $query->where('cr.agent', intval(trim($params['op'])));
         }
         $query = $query->where('cr.action', 'stayed')
@@ -88,7 +106,7 @@ class StatsHelper
             ';
         if (AuthControl::isAgent()) {
             $q .= 'and agent = ' . $_SESSION['adminid'];
-        } elseif ($params['op'] != '') {
+        } elseif (AuthControl::isAdmin() && $params['op'] != '') {
             $q .= ' and ad.id = ' . intval(trim($params['op']));
         }
         $q .= ' group by t.id, t.agent having c > 1) as x

@@ -3,11 +3,16 @@ export default {
   methods: {
     colorRows(row) {
       //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
+      if(this.colorPendingReviews(row)) return 'is-reviewpending'
       if (this.colorLatefollowup(row)) return "is-latefollowup";
       if (this.colorDirectsale(row)) return "is-directsale";
       if (this.colorCannotoffer(row.tags)) return "is-cannotoffer";
       if (this.colorDuplicate(row.tags)) return "is-duplicate";
       if (this.colorUpgradeWcbPaid(row)) return "is-upgrade";
+    },
+    colorPendingReviews(row)
+    {
+      return row.pending_reviews_count > 0
     },
     colorDirectConvertedSaleLackOrder(row)
     {
@@ -15,7 +20,7 @@ export default {
         if ((e.tag == "directsale" && e.approved == 1) || (e.tag == "convertedsale" && e.approved == 1)) {
           return true;
         }
-      }) && !row?.order && row.agent != 0
+      }) && !row?.orderid && row.agent != 0
     },
     colorDuplicate(tags) {
       return tags.find((e) => {

@@ -83,7 +83,7 @@
       <b-table-column field="date" label="Domain" v-slot="props" width="160">
         {{ props.row.domain }}
       </b-table-column>
-      <b-table-column field="date" label="Location" v-slot="props" width="30">
+      <!-- <b-table-column field="date" label="Location" v-slot="props" width="30">
         {{
           props.row.customer.geolocation
             ? JSON.parse(props.row.customer.geolocation).country_code
@@ -92,7 +92,7 @@
       </b-table-column>
       <b-table-column field="date" label="IP" v-slot="props" width="160">
         {{ props.row.customer.ip }}
-      </b-table-column>
+      </b-table-column> -->
       <b-table-column label="Follow up" width="160" v-slot="props">
         <TableFollowUp
           :row="props.row"
@@ -108,7 +108,16 @@
       >
         {{ props.row.orderid }}
       </b-table-column>
-      <b-table-column label="Extra Points" width="160" v-slot="props" ><TablePoints :row="props.row" /></b-table-column>
+      <b-table-column label="Extra Points" width="160" v-slot="props" > <TablePoints v-if="props.row.agent != 0"
+          :tags="props.row.tags"
+          :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''"
+        /></b-table-column>
+              <b-table-column field="date" label="Reason" v-slot="props" width="60">
+                <b-tag v-if="props.row.sameorder_count && props.row.sameorder_count > 1" type="is-info">Duplicate Order ID</b-tag>
+                <b-tag v-if="props.row.revieworder_count && props.row.revieworder_count > 0" type="is-warning">Pending Order ID Changes: {{ props.row.revieworder_count }}</b-tag>
+                <b-tag v-if="isPendingTag(props.row.tags)" type="is-warning">Pending Tags</b-tag>
+     
+      </b-table-column>
       <b-table-column field="date" label="Edit" v-slot="props" width="60">
         <b-button
           type="is-primary"
@@ -117,6 +126,7 @@
           ></b-button
         >
       </b-table-column>
+
     </b-table>
   </article>
 </template>
@@ -161,7 +171,12 @@ export default {
       });
       return true;
     },
-
+    isPendingTag(tags)
+    {
+      return tags.find(e=> {
+        return e.approved == 0 || e.proposed_deletion == 1
+      }) || false
+    },
     editModal(item) {
       const modal = this.$buefy.modal.open({
         parent: this,

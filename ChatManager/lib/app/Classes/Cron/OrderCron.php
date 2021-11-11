@@ -44,11 +44,13 @@ class OrderCron
                 $join->where('ii.type', '=', 'Hosting');
             })
             ->join('tblhosting as h', 'h.id', '=', 'ii.relid')
-            ->leftJoin('chat_threads as t', 't.orderid', '=', 'o.id')
+            // ->leftJoin('chat_threads as t', 't.orderid', '=', 'o.id')
+            // ->leftJoin('chat_tags as tg', 'tg.t_id', '=', 't.id')
             ->where('i.status', 'Paid')
-            ->where('lcchatid', $thread->chatid)
+            ->where('co.lcchatid', $thread->chatid)
+            //->orderByRaw("FIELD(tag, 'wcb') DESC")
             ->first(['h.domain', 'co.ordernumber as orderid']);
-        if ($potentiallyCompletedOrder) {
+        if ($potentiallyCompletedOrder && Threads::order($potentiallyCompletedOrder->orderid)->count() == 0) {
             $thread->orderid = $potentiallyCompletedOrder->orderid;
             $thread->domain = $potentiallyCompletedOrder->domain;
             Threads::where('id', $thread->id)

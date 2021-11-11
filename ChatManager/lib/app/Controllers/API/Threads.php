@@ -47,13 +47,13 @@ class Threads extends APIProtected
         $customoffer = trim($this->input['customoffer']);
         $agent = trim($this->input['agent']);
         if ($itemid) {
-            $thread = ThreadsModel::where('id', $itemid);
+            $thread = ThreadsModel::with('customer')->where('id', $itemid);
         } else {
-            return 'No thread id was given.';
+            return ['result' => 'error', 'msg'=>'No thread id was given.'];
         }
         $threaddata = $thread->first();
         $update = [];
-        if ($name && $name != $threaddata->customer->name ) {
+        if ($name && $name != $threaddata->customer->name && $name != $threaddata->name ) {
             $update['name'] = $name;
         }
         if ($email && ($email != $threaddata->customer->email || ($threaddata->email && $threaddata->email != $email))) {
@@ -65,7 +65,7 @@ class Threads extends APIProtected
         if ((int)$order != (int)$threaddata->orderid) {
             if(AuthControl::isAgent())
             {
-                
+                if(!$order) return ['result' => 'error', 'msg'=>'You cannot remove order id', 'orderid' => $threaddata->orderid];
                 if(ReviewOrder::where('threadid', $itemid)->where('orderid', $order)->count() == 0)
                 {
                     ReviewOrder::insert([
@@ -79,7 +79,7 @@ class Threads extends APIProtected
             }
             if(AuthControl::isAdmin())
             {
-                $update['orderid'] = (int)$order;
+                $update['orderid'] = $order ? (int)$order : '';
             }
         }
         elseif(strlen($order) == 0)
@@ -96,15 +96,15 @@ class Threads extends APIProtected
             $update['agent'] = $agent;
         }
        
-        Logs::updateThread($itemid, $_SESSION['adminid'], $update, $threaddata);
+        Logs::updateThread($itemid, $_SESSION['adminid'], $this->input, $threaddata);
 
         // order: this.selectedOrder,
         // notes: this.notes,
         // customoffer: this.customoffer,
         if (count($update) > 0) {
             ThreadsModel::where('id', $itemid)->update($update);
-            return 'success';
+            return ['result' => 'success'];
         }
-        return 'Nothing has been changed';
+        return ['result'=>'error', 'msg'=>'Nothing has been changed'];
     }
 }

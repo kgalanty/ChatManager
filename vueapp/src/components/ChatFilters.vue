@@ -101,11 +101,12 @@ article > .panel-heading {
 //import HelloWorld from '@/components/HelloWorld.vue'
 import { mapActions, mapState } from "vuex";
 import { dateMixin } from '../mixins/dateMixin.js';
+import notificationsMixin from '../mixins/notificationsMixin.js';
 import requestsMixin from "../mixins/requestsMixin.js";
 import { tagsMixin } from "../mixins/tagsMixin.js";
 export default {
   name: "ChatFilters",
-  mixins: [tagsMixin, requestsMixin, dateMixin],
+  mixins: [tagsMixin, requestsMixin, dateMixin, notificationsMixin],
   components: {
     //HelloWorld
   },
@@ -208,13 +209,38 @@ export default {
       searchtext: "",
     };
   },
+  //  watch: {
+  //   dateFrom(n, o) {
+  //     if (!this.isDateAfter(n, this.filters.dateTo)) {
+  //       this.filters.dateFrom = new Date(o);
+  //       this.notifyWarning('Date is after "Date To". Restored previous date.')
+  //     }
+  //   },
+  //   dateTo(n, o) {
+  //     if (!this.isDateAfter(this.filters.dateFrom,n)) {
+  //       this.notifyWarning('Date is before "Date From". Restored previous date.')
+  //       this.filters.dateTo = new Date(o);
+  //     }
+  //   },
+  // },
   watch: {
-    dateFrom(val) {
+    dateFrom(val, old) {
+       if (this.dateTo != null && old!= null && val != null && !this.isDateAfter(val, this.dateTo)) {
+        this.dateFrom = new Date(old);
+        this.notifyWarning('Date is after "Date To". Restored previous date.')
+        return
+      }
+
       var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
       this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
       this.loadChats();
     },
-    dateTo(val) {
+    dateTo(val, old) {
+       if (this.dateFrom != null && old != null && val != null && !this.isDateAfter(this.dateFrom,val)) {
+        this.notifyWarning('Date is before "Date From". Restored previous date.')
+        this.dateTo = new Date(old)
+        return
+      }
       var datetoparsed = val !== null ? this.createUTCDateTimeAndAdd(val, 24, 'h') : null;
       this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
       this.loadChats();

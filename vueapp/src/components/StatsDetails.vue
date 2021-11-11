@@ -3,8 +3,6 @@
     <strong>Tags Frequency:</strong>
     <ul v-show="data && data.length==0">
       <li><b-skeleton width="30%" animated></b-skeleton></li>
-      <li><b-skeleton width="30%" animated></b-skeleton></li>
-      <li><b-skeleton width="30%" animated></b-skeleton></li>
       </ul>
     <ul class="block-list is-outlined is-dark">
       <li
