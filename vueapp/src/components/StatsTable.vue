@@ -1,6 +1,6 @@
 <template>
   <article id="statstable">
-    <div class="tile">
+    <div class="tile statsfilters">
       <div class="tile is-2 is-child">
         <b-field label="Operator" style="width: 95%; padding: 9px" v-if="isAdmin()">
           <b-select
@@ -21,6 +21,7 @@
       <div class="tile is-2 is-child">
         <b-field label="Date [From]" style="width: 95%; padding: 9px">
           <b-datepicker
+           :max-date="filters.dateTo"
             v-model="filters.dateFrom"
             placeholder="Click to select..."
             icon="calendar-today"
@@ -28,6 +29,7 @@
             icon-right-clickable
             @icon-right-click="filters.dateFrom = null"
             @input="loadStats"
+            :date-formatter="dateFieldFormatter"
           >
           </b-datepicker>
         </b-field>
@@ -35,6 +37,7 @@
       <div class="tile is-2 is-child">
         <b-field label="Date [to]" style="width: 95%; padding: 9px">
           <b-datepicker
+           :min-date="filters.dateFrom"
             v-model="filters.dateTo"
             placeholder="Click to select..."
             icon="calendar-today"
@@ -42,6 +45,7 @@
             icon-right-clickable
             @input="loadStats"
             @icon-right-click="filters.dateTo = null"
+            :date-formatter="dateFieldFormatter"
           >
           </b-datepicker>
         </b-field>
@@ -52,7 +56,7 @@
       class="btable"
       :data="stats.data"
       bordered
-      striped
+      
       narrowed
       :total="stats.total"
       :loading="this.loading.stats"
@@ -112,6 +116,14 @@
         {{ props.row.convertedsale }}
       </b-table-column>
       <b-table-column
+        field="uupgrade"
+        label="Upgrades"
+        v-slot="props"
+        width="100"
+      >
+        {{ props.row.upgrade }}
+      </b-table-column>
+      <b-table-column
         field="date"
         label="Total Sales"
         v-slot="props"
@@ -119,7 +131,7 @@
         header-class="stats-sticky-column"
         cell-class="stats-sticky-column"
       >
-        {{ props.row.directsale + props.row.convertedsale }}
+        {{ props.row.directsale + props.row.convertedsale + props.row.upgrade }}
       </b-table-column>
       <b-table-column field="date" label="Upsell" v-slot="props" width="100">
         {{ props.row.upsell }}
@@ -128,29 +140,12 @@
         {{ props.row.cycle }}
       </b-table-column>
       <b-table-column field="date" label="Stayed" v-slot="props" width="100">
-        {{ props.row.stayed }}
+        {{ props.row.data.cm_points ? props.row.data.cm_points : 0 }}
       </b-table-column>
       <b-table-column field="vps/ds" label="VPS/DS" v-slot="props" width="100">
         {{ props.row["vps/ds"] ? props.row["vps/ds"] : 0 }}
       </b-table-column>
-      <b-table-column
-        header-class="stats-sticky-column"
-        cell-class="stats-sticky-column"
-        field="date"
-        label="Conversion without points"
-        v-slot="props"
-        width="100"
-      >
-        {{
-          props.row.directsale + props.row.wcb > 0
-            ? returnPercents(
-                ((props.row.directsale + props.row.convertedsale) * 100) /
-                  (props.row.directsale + props.row.wcb)
-              )
-            : "0 %"
-        }}
-      </b-table-column>
-      <b-table-column
+     <b-table-column
         field="date"
         label="Total Points"
         v-slot="props"
@@ -165,9 +160,28 @@
           props.row.cycle +
           props.row["vps/ds"] -
           props.row.decrementpoints +
-          props.row.data.cm_points
+          props.row.data.cm_points +
+          props.row.upgrade
         }}
       </b-table-column>
+      <b-table-column
+        header-class="stats-sticky-column"
+        cell-class="stats-sticky-column"
+        field="date"
+        label="Conversion without points"
+        v-slot="props"
+        width="100"
+      >
+        {{
+          props.row.directsale + props.row.wcb > 0
+            ? returnPercents(
+                ((props.row.directsale + props.row.convertedsale + props.row.upgrade) * 100) /
+                  (props.row.directsale + props.row.wcb)
+              )
+            : "0 %"
+        }}
+      </b-table-column>
+  
       <b-table-column
         header-class="stats-sticky-column"
         cell-class="stats-sticky-column"
@@ -183,6 +197,8 @@
                   props.row.convertedsale +
                   props.row.upsell +
                   props.row.cycle +
+                  props.row.data.cm_points +
+                  props.row.upgrade +
                   props.row["vps/ds"]) *
                   100) /
                   (props.row.directsale + props.row.wcb)
@@ -199,14 +215,7 @@
   color: rgb(0, 0, 0) !important;
 }
 </style>
-<style scoped>
-#statstable {
-  background: #acc6ff;
-  color: white;
-  padding: 5px;
-  border-radius: 5px;
-}
-</style>
+
 <style >
 .btable {
   font-size: 13px;
@@ -302,7 +311,7 @@ export default {
       const dateTo = this.filters.dateTo
         ? this.createUTCDateTimeAndAdd(this.filters.dateTo, "1", "d")
         : this.createUTCDatetime(
-            this.moment().add(1, "months").format("YYYY-MM-01")
+            this.moment().endOf('month').format("YYYY-MM-DD")
           );
       this.setDateFilters(dateFrom, dateTo);
       const params = this.generateParamsForRequest("Stats", [

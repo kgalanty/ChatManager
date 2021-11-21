@@ -1,5 +1,5 @@
 <template>
-  <div class="columns is-desktop">
+  <div class="columns is-desktop columnsvisibility">
     <div class="column" v-for="(column, index) in filters" :key="index">
       <b-checkbox v-model="column.display">
         {{ column.title }}
@@ -8,6 +8,10 @@
   </div>
 </template>
 <style>
+.columnsvisibility
+{
+  font-size:0.8rem;
+}
 .dropdown-content > a {
   text-align: left !important;
 }
@@ -16,14 +20,7 @@
 .btable {
   font-size: 13px;
 }
-article > .panel-heading {
-  background: rgb(165, 197, 255);
-  background: linear-gradient(
-    180deg,
-    rgba(165, 197, 255, 1) 0%,
-    rgba(40, 127, 207, 1) 100%
-  );
-}
+
 .tile {
   margin-bottom: 10px;
 }

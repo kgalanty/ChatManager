@@ -11,6 +11,8 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Models\Followup as FollowupModel;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 use WHMCS\Module\Addon\ChatManager\app\Models\Order;
+use WHMCS\Module\Addon\ChatManager\app\Models\Invoice;
+use WHMCS\Module\Addon\ChatManager\app\Models\TagHistory;
 class Threads extends Model
 {
     public $timestamps = false;
@@ -19,6 +21,18 @@ class Threads extends Model
     public function tags()
     {
         return $this->hasMany(Tags::class, 't_id', 'id');
+    }
+    public function tagshistory()
+    {
+        return $this->hasMany(TagHistory::class, 'thread_id', 'id');
+    }
+    public function reviewthread()
+    {
+        return $this->hasMany(ReviewThread::class, 'threadid', 'id');
+    }
+    public function logs()
+    {
+        return $this->hasMany(Logs::class, 'itemid', 'id')->where('itemclass', 'Thread');
     }
     public function customer()
     {
@@ -39,6 +53,10 @@ class Threads extends Model
     public function order()
     {
         return $this->belongsTo(Order::class, 'orderid', 'id');
+    }
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class, 'orderid', 'id');
     }
     public function sameorder()
     {

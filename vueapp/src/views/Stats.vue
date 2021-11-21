@@ -13,15 +13,7 @@
   </div>
 </template>
 <style scoped>
-.panel-heading
-{
-  padding-left: 0px !important; margin-bottom: 5px;
-}
 
-article > .panel-heading {
-  background: rgb(226 226 226);
-  
-}
 </style>
 <script>
 // @ is an alias to /src
@@ -31,16 +23,21 @@ article > .panel-heading {
 // import PendingChatListTable from '../components/PendingChatListTable.vue'
 // import ChatFilters from '../components/ChatFilters.vue'
  import StatsTable from '@/components/StatsTable.vue'
+ import { mapActions } from "vuex";
 import "buefy/dist/buefy.css";
 export default {
+  
   name: "Stats",
   components: {
     StatsTable
   },
   methods: {
-  
+   ...mapActions({
+      getPermissions: "getPermissions",
+    }),
   },
   mounted() {
+    this.getPermissions()
   },
   computed: {
   },

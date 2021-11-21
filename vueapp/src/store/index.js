@@ -18,7 +18,8 @@ export default new Vuex.Store({
     // chatsPerPage: 25,
     // filters: { dateFrom: null, dateTo: null },
     aid: 0,
-    groupMember: 0
+    groupMember: 0,
+    darkstyle: false
 
   },
   mutations: {
@@ -26,9 +27,18 @@ export default new Vuex.Store({
       state.groupMember = val.results.perm
       state.aid = val.results.aid
     },
+    setDarkstyle(state, val)
+    {
+      state.darkstyle = Boolean(val)
+    }
 
   },
   actions: {
+    switchStyle(context, payload)
+    {
+      window.localStorage.setItem('darktheme', payload)
+      context.commit('setDarkstyle', payload)
+    },
     getPermissions(context) {
       return new Promise((resolve, reject) => {
         if(context.state.groupMember > 0 )

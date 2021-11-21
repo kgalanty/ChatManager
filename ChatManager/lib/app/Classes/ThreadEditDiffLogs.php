@@ -16,22 +16,29 @@ class ThreadEditDiffLogs
         'name' => 'ClientName',
         'email' => 'ClientEmail',
         'domain' => 'Domain',
-        'orderid' => 'Order',
+        'order' => 'Order',
         'notes' => 'Notes',
         'agent' => 'Agent'
     ];
     public static function process($itemid, $doer, $update, $threaddata)
     {
+ 
         if (is_array($update)) {
             $log = [];
             foreach ($update as $field => $updatedItem) {
                 $fieldController = 'WHMCS\\Module\\Addon\\ChatManager\\app\\Classes\\ThreadEditFields\\'.self::FIELDSMAP[$field];
+                
                 if(class_exists($fieldController))
                 {
                     $log[] = $fieldController::handle($updatedItem, $threaddata);
                 }   
             }
+            if($_SESSION['adminid'] == 230)
+            {
+             // var_dump($log, $update, $threaddata);die;
+            }
             $log = array_filter($log, function($v) { return $v != null; });
+        
             if(count($log))
             {
                 return implode(', ', $log);

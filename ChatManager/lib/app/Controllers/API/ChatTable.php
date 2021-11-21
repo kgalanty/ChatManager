@@ -8,6 +8,7 @@ use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
+use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 
 class ChatTable extends API
 {
@@ -16,7 +17,7 @@ class ChatTable extends API
         if ($_GET['pending'] == 1) {
             if (AuthControl::isAdmin()) {
                 $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
-                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup', 'revieworder', 'agentdata'])
+                $result = Threads::with(['tags', 'customer', 'pendingReviews', 'followup', 'revieworder', 'agentdata', 'invoice'])
                     ->withCount(['revieworder', 'sameorder'])
                     ->has('pendingReviews')
                     ->orWhereHas('tags', function ($query) {
@@ -89,7 +90,8 @@ class ChatTable extends API
         $operator = $_GET['operator'] != '' ? intval(trim($_GET['operator'])) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
-        $result = Threads::with(['followup', 'order.invoice', 'agentdata'])->withCount(['pendingReviews'])
+        $result = Threads::with(['followup', 'order.invoice', 'agentdata', 'invoice'])
+            ->withCount(['pendingReviews', 'revieworder'])
             ->with(['tags', 'customer']);
         if ($_GET['datefrom']) {
             $result->whereBetween('date', [$_GET['datefrom'], $dateTo]);
@@ -109,6 +111,17 @@ class ChatTable extends API
                 });
             }
         }
+        // $result->orWhere(function($qq)
+        // {
+        //     $qq->whereHas('invoice', function($q)
+        //     {
+        //         $q->where('status', 'Paid');
+        //     })
+        //     ->whereHas('tags', function ($query)  {
+        //         $query->where('tag', 'upgrade');
+        //     });
+        // });
+        
         if ($_GET['q']) {
             $q = trim($_GET['q']);
             $result->where(function ($query) use ($q) {
@@ -153,5 +166,24 @@ class ChatTable extends API
     }
     public function post()
     {
+        $threadid = $this->input['tid'];
+        $action = $this->input['a'];
+        
+        if($action == 'DelThread' && AuthControl::isAdmin()) {
+            if($threadid)
+            {
+                $t = Threads::findOrFail($threadid);
+                $t->tags()->delete();
+                $t->tagshistory()->delete();
+                $t->reviewthread()->delete();
+                $t->revieworder()->delete();
+                $t->logs()->delete();
+                $t->delete();
+                return 'success';
+                //Tags::where('t_id', )
+            }
+            return 'Cannot find given Chat ID';
+        }
+        return 'Cannot found method or you have no permissions to run it';
     }
 }

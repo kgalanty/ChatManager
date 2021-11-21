@@ -32,7 +32,7 @@
         >
           <b-tag type="is-info">{{ props.row.doer.firstname }} {{ props.row.doer.lastname }}</b-tag>
         </b-table-column>
-        <b-table-column
+        <!-- <b-table-column
           field="threadid"
           label="Item type"
           v-slot="props"
@@ -40,7 +40,7 @@
           centered 
         >
           {{ props.row.itemclass }}
-        </b-table-column>
+        </b-table-column> -->
        
         <b-table-column
           field="date"

@@ -6,15 +6,14 @@
   >
     <span
       class="is-family-sans-serif"
-      style="float: left; margin-top: 20px; font-size: 20px"
+      style="float: left; margin-top: 10px; font-size: 20px"
       >Pending for Review:</span
     >
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
     <b-table
       class="btable"
       :data="pendingchats.data"
-      bordered
-      striped
+      
       narrowed
       :total="pendingchats.total"
       paginated
@@ -23,10 +22,10 @@
       pagination-position="top"
       :row-class="colorRows"
     >
-      <b-table-column field="date" label="Date" v-slot="props" width="100">
+      <b-table-column field="date" label="Date" v-slot="props" width="160">
         {{ parseDateTime(props.row.date) }}
       </b-table-column>
-      <b-table-column field="date" label="Operator" v-slot="props">
+      <b-table-column field="date" label="Operator" v-slot="props" width="200">
         {{ props.row.agentdata.firstname }} {{ props.row.agentdata.lastname }}
       </b-table-column>
       <b-table-column
@@ -47,7 +46,7 @@
           >
         </b-tooltip>
       </b-table-column>
-      <b-table-column field="tags" label="Tags" v-slot="props">
+      <b-table-column field="tags" label="Tags" v-slot="props"  width="260">
         <b-taglist>
           <span
             :key="index"
@@ -61,7 +60,7 @@
           >
         </b-taglist>
       </b-table-column>
-      <b-table-column field="date" label="All Chats" v-slot="props">
+      <b-table-column field="date" label="All Chats" v-slot="props"  width="100">
         <b-button
           type="is-primary"
           size="is-small"
@@ -72,15 +71,17 @@
           >All Chats</b-button
         >
       </b-table-column>
-      <b-table-column field="date" label="Name" v-slot="props" width="160">
+      <b-table-column field="name" label="Name" v-slot="props" width="160">
         <span v-if="props.row.name">{{ props.row.name }}</span
         ><span v-else>{{ props.row.customer.name }}</span>
       </b-table-column>
-      <b-table-column field="date" label="E-mail" v-slot="props">
-        <span v-if="props.row.email" class="emailTable">{{ props.row.email }}</span
+      <b-table-column field="email" label="E-mail" v-slot="props" width="160">
+        <span v-if="props.row.email" class="emailTable">{{
+          props.row.email
+        }}</span
         ><span v-else class="emailTable"> {{ props.row.customer.email }}</span>
       </b-table-column>
-      <b-table-column field="date" label="Domain" v-slot="props" width="160">
+      <b-table-column field="domain" label="Domain" v-slot="props" width="160">
         {{ props.row.domain }}
       </b-table-column>
       <!-- <b-table-column field="date" label="Location" v-slot="props" width="30">
@@ -93,7 +94,7 @@
       <b-table-column field="date" label="IP" v-slot="props" width="160">
         {{ props.row.customer.ip }}
       </b-table-column> -->
-      <b-table-column label="Follow up" width="160" v-slot="props">
+      <b-table-column label="Follow up" width="100" v-slot="props">
         <TableFollowUp
           :row="props.row"
           afterClickAction="loadPendingChats"
@@ -108,7 +109,22 @@
       >
         {{ props.row.orderid }}
       </b-table-column>
-      <b-table-column label="Extra Points" width="160" v-slot="props" > <TablePoints v-if="props.row.agent != 0"
+      <b-table-column field="date" label="Reason" v-slot="props" width="60">
+        <b-tag
+          v-if="props.row.sameorder_count && props.row.sameorder_count > 1"
+          type="is-info"
+          >Duplicate Order ID</b-tag
+        >
+        <b-tag
+          v-if="props.row.revieworder_count && props.row.revieworder_count > 0"
+          type="is-link"
+          >Pending Order ID Changes: {{ props.row.revieworder_count }}</b-tag
+        >
+        <b-tag v-if="isPendingTag(props.row.tags)" type="is-warning"
+          >Pending Tags</b-tag
+        >
+      </b-table-column>
+      <!-- <b-table-column label="Extra Points" width="160" v-slot="props" > <TablePoints v-if="props.row.agent != 0"
           :tags="props.row.tags"
           :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''"
         /></b-table-column>
@@ -117,16 +133,14 @@
                 <b-tag v-if="props.row.revieworder_count && props.row.revieworder_count > 0" type="is-warning">Pending Order ID Changes: {{ props.row.revieworder_count }}</b-tag>
                 <b-tag v-if="isPendingTag(props.row.tags)" type="is-warning">Pending Tags</b-tag>
      
-      </b-table-column>
+      </b-table-column> -->
       <b-table-column field="date" label="Edit" v-slot="props" width="60">
         <b-button
           type="is-primary"
           icon-left="pencil"
           @click="editModal(props.row)"
-          ></b-button
-        >
+        ></b-button>
       </b-table-column>
-
     </b-table>
   </article>
 </template>
@@ -155,14 +169,14 @@ import "buefy/dist/buefy.css";
 import ChatItemEditModal from "./ChatItemEditModal.vue";
 import TableFollowUp from "./TableFollowUp.vue";
 import tablecolorrowsMixin from "../mixins/tablecolorrowsMixin";
-import TablePoints from "./TablePoints.vue";
 import tableHelper from "../mixins/tableHelper";
 export default {
   name: "PendingChatListTable",
   mixins: [tablecolorrowsMixin, tableHelper],
-  components: { TableFollowUp, TablePoints },
+  components: { TableFollowUp },
   methods: {
     ...mapActions("chat", ["loadPendingChats", "loadChats"]),
+     ...mapState(["darkstyle"]),
     isEditActive(row) {
       row.tags.find((e) => {
         if (e.tag == "duplicate" && e.approved == 1) {
@@ -171,11 +185,12 @@ export default {
       });
       return true;
     },
-    isPendingTag(tags)
-    {
-      return tags.find(e=> {
-        return e.approved == 0 || e.proposed_deletion == 1
-      }) || false
+    isPendingTag(tags) {
+      return (
+        tags.find((e) => {
+          return e.approved == 0 || e.proposed_deletion == 1;
+        }) || false
+      );
     },
     editModal(item) {
       const modal = this.$buefy.modal.open({

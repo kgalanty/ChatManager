@@ -62,7 +62,7 @@ class Threads extends APIProtected
         //if ($domain) {
             $update['domain'] = $domain;
        // }
-        if ((int)$order != (int)$threaddata->orderid) {
+        if ($order != $threaddata->orderid) {
             if(AuthControl::isAgent())
             {
                 if(!$order) return ['result' => 'error', 'msg'=>'You cannot remove order id', 'orderid' => $threaddata->orderid];
@@ -77,9 +77,9 @@ class Threads extends APIProtected
                     Logs::submitOrderReview($order, $_SESSION['adminid'], $itemid);
                 }
             }
-            if(AuthControl::isAdmin())
+            elseif(AuthControl::isAdmin())
             {
-                $update['orderid'] = $order ? (int)$order : '';
+                $update['orderid'] = ($order && is_numeric($order)) ? (int)$order : null;
             }
         }
         elseif(strlen($order) == 0)
@@ -95,14 +95,15 @@ class Threads extends APIProtected
         if ($agent && AuthControl::isAdmin()) {
             $update['agent'] = $agent;
         }
-       
+     
         Logs::updateThread($itemid, $_SESSION['adminid'], $this->input, $threaddata);
 
         // order: this.selectedOrder,
         // notes: this.notes,
         // customoffer: this.customoffer,
         if (count($update) > 0) {
-            ThreadsModel::where('id', $itemid)->update($update);
+            $t=ThreadsModel::where('id', $itemid)->update($update);
+           
             return ['result' => 'success'];
         }
         return ['result'=>'error', 'msg'=>'Nothing has been changed'];

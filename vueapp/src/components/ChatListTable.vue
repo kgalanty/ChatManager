@@ -1,8 +1,18 @@
 <template>
-  <article style="padding: 2px" id="chatlisttable">
+  <article
+    style="
+      padding: 2px;
+      background: rgb(66 65 118);
+      color: #c1bbe3;
+      padding: 5px;
+      border-radius: 5px;
+      margin-top: 5px;
+    "
+    id="chatlisttable"
+  >
     <span
       class="is-family-sans-serif"
-      style="float: left; margin-top: 20px; font-size: 20px"
+      style="float: left; margin-top: 10px; font-size: 20px"
       >Chats:
       <b-tag rounded type="is-primary" v-if="$store.state.chat.chats.total">{{
         $store.state.chat.chats.total
@@ -20,7 +30,6 @@
       class="btable"
       :data="chats.data"
       bordered
-      striped
       narrowed
       :detailed="isAdmin()"
       :total="chats.total"
@@ -58,9 +67,17 @@
         width="160"
         :visible="filters['operator'].display"
       >
-       <b-icon style="color: red;margin: 0 auto;display: block;" icon="close-thick" size="is-medium" v-if="props.row.agent==0">
+        <b-icon
+          style="color: red; margin: 0 auto; display: block"
+          icon="close-thick"
+          size="is-medium"
+          v-if="props.row.agent == 0"
+        >
         </b-icon>
-        <span v-if="props.row.agentdata">{{ props.row.agentdata.firstname }} {{ props.row.agentdata.lastname }}</span>
+        <span v-if="props.row.agentdata"
+          >{{ props.row.agentdata.firstname }}
+          {{ props.row.agentdata.lastname }}</span
+        >
       </b-table-column>
       <b-table-column
         field="threadid"
@@ -80,7 +97,9 @@
             >{{ props.row.threadid }}</b-button
           >
         </b-tooltip>
-         <b-tag v-if="props.row.pending_reviews_count>0" type="is-info">Pending Reviews: {{props.row.pending_reviews_count}}</b-tag>
+        <b-tag v-if="props.row.pending_reviews_count > 0" type="is-info"
+          >Pending Reviews: {{ props.row.pending_reviews_count }}</b-tag
+        >
       </b-table-column>
       <b-table-column
         field="tags"
@@ -125,6 +144,7 @@
         field="date"
         label="Name"
         v-slot="props"
+        width="160"
         :visible="filters['name'].display"
       >
         <span v-if="props.row.name">{{ props.row.name }}</span
@@ -134,6 +154,7 @@
         field="email"
         label="E-mail"
         v-slot="props"
+        width="250"
         :visible="filters['email'].display"
       >
         <span class="emailTable" v-if="props.row.email">{{
@@ -175,7 +196,6 @@
         width="100"
         v-slot="props"
         :visible="filters['followup'].display"
-        
       >
         <TableFollowUp
           class="cellcenter"
@@ -191,8 +211,14 @@
         v-slot="props"
         cell-class="centernoblock"
         :visible="filters['orderid'].display"
+        centered
       >
-        <b-icon style="color: red;margin: 0 auto;display: block;" icon="close-thick" size="is-medium" v-if="colorDirectConvertedSaleLackOrder(props.row)">
+        <b-icon
+          style="color: red; margin: 0 auto; display: block"
+          icon="close-thick"
+          size="is-medium"
+          v-if="colorDirectConvertedSaleLackOrder(props.row)"
+        >
         </b-icon>
         {{ props.row.orderid }}
       </b-table-column>
@@ -201,9 +227,12 @@
         label="Extra Points"
         v-slot="props"
         :visible="filters['extrapoints'].display"
+        width="100"
       >
-        <TablePoints v-if="props.row.agent != 0"
+        <TablePoints
+          v-if="props.row.agent != 0"
           :tags="props.row.tags"
+          :invoice="props.row.order == null && props.row.invoice"
           :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''"
         />
       </b-table-column>
@@ -224,17 +253,14 @@
     </b-table>
   </article>
 </template>
-<style scoped>
-</style>
 <style >
 .extrapointscolumn,
 .cellcenter {
-  display:block;
+  display: block;
   text-align: center;
 }
-.centernoblock
-{
-   text-align: center;
+.centernoblock {
+  text-align: center;
 }
 .emailTable {
   overflow-wrap: anywhere !important;
@@ -256,57 +282,21 @@
 #chatlisttable th {
   border: 0;
 }
-.is-latefollowup {
-  background: rgb(252, 186, 186) !important;
-}
-.is-reviewpending
-{
-  background-color: #ffffff;
-background-size: 50px 50px;
-background-image: repeating-linear-gradient(45deg, #ffdfdf 0, #ffdfdf 5px, #ffffff 0, #ffffff 50%);
-}
-.is-lackorder {
-  background: rgb(255, 255, 255) !important;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(250, 138, 0, 1) 100%
-  ) !important;
-}
-.is-cannotoffer {
-  background: rgb(254, 255, 190) !important;
-}
-.is-duplicate {
-  background: rgb(219, 219, 219) !important;
-}
-.is-directsale {
-  background: rgb(170, 255, 184) !important;
-  color: #000;
-}
-.is-upgrade {
-  background: rgb(204 255 215) !important;
-}
+
 .btable {
-  font-size: 13px;
+  font-size: 0.9rem;
   padding: -20px;
 }
 .btable th {
   background: white;
-
-  font-size: 14px;
+  font-size: 0.6rem;
   color: white !important;
   text-transform: uppercase;
   text-align: center !important;
 }
-article > .panel-heading {
-  background: rgb(165, 197, 255);
-  background: linear-gradient(
-    180deg,
-    rgba(165, 197, 255, 1) 0%,
-    rgba(40, 127, 207, 1) 100%
-  );
-}
+
 </style>
+
 <script>
 /* eslint-disable vue/no-unused-components */
 // @ is an alias to /src
@@ -338,6 +328,7 @@ export default {
         component: AddEntryModal,
         hasModalCard: true,
         props: {},
+        customClass: this.darkstyle ? 'darktheme' : 'lighttheme',
         events: {
           runedition(item) {
             const editmodal = that.$buefy.modal.open({
@@ -345,7 +336,7 @@ export default {
               component: ChatItemEditModal,
               hasModalCard: true,
               props: { item },
-
+              customClass: that.darkstyle ? 'darktheme' : 'lighttheme',
               trapFocus: true,
               width: "auto",
             });
@@ -361,11 +352,14 @@ export default {
     },
 
     isEditActive(row) {
-      return row.tags.find((e) => {
-        if (e.tag == "duplicate" && e.approved == 1 && this.isAgent()) {
-          return true;
-        }
-      }) || (row.agent!=this.aid && this.isAgent())
+      return (
+        row.tags.find((e) => {
+          if (e.tag == "duplicate" && e.approved == 1 && this.isAgent()) {
+            return true;
+          }
+        }) ||
+        (row.agent != this.aid && this.isAgent())
+      );
     },
 
     editModal(item) {
@@ -376,6 +370,7 @@ export default {
         props: { item },
         trapFocus: true,
         width: "auto",
+        customClass: this.darkstyle ? 'darktheme' : 'lighttheme'
       });
       modal.$on("close", () => {
         this.loadChats();
@@ -438,25 +433,24 @@ export default {
   },
   mounted() {
     this.getPermissions();
-    this.loadChats().catch((e) => {
-      this.$buefy.dialog.alert({
-        title: "Error",
-        message: e,
-        type: "is-danger",
-        hasIcon: true,
-        icon: "close-circle",
-        ariaRole: "alertdialog",
-        ariaModal: true,
-        confirmText: "Reload",
-        onConfirm: () => window.location.reload(),
-      });
-    });
-    
+    // this.loadChats().catch((e) => {
+    //   this.$buefy.dialog.alert({
+    //     title: "Error",
+    //     message: e,
+    //     type: "is-danger",
+    //     hasIcon: true,
+    //     icon: "close-circle",
+    //     ariaRole: "alertdialog",
+    //     ariaModal: true,
+    //     confirmText: "Reload",
+    //     onConfirm: () => window.location.reload(),
+    //   });
+    // });
   },
   computed: {
     ...mapState("chat", ["chats", "chatsPage", "chatsLoading"]),
     ...mapState("chatcolumns", ["filters"]),
-    ...mapState(['aid'])
+    ...mapState(["aid", "darkstyle"]),
   },
   data() {
     return {

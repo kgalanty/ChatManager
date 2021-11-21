@@ -40,6 +40,7 @@ class StatsHelper
             ->join('tbladmins as a', 'a.id', '=', 't.agent')
             ->leftJoin('tblorders as o', 'o.id', '=', 't.orderid')
             ->leftJoin('tblinvoices as inv', 'inv.id', '=', 'o.invoiceid')
+            ->leftJoin('tblinvoices as inv2', 'inv2.id', '=', 't.orderid')
             ->whereBetween('t.date', [$params['datefrom'], $params['dateto']])
             ->where(function ($q)
             {
@@ -50,8 +51,14 @@ class StatsHelper
                     ->where('inv.status', 'Paid');
                 });
                 $q->orWhere(function ($query) {
-                    $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])
+                    $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale', 'upgrade'])
                     ->where('tg.approved', 1)
+                    ;
+                });
+                $q->orWhere(function ($query) {
+                    $query->whereIn('tg.tag', ['upgrade'])
+                    ->where('tg.approved', 1)
+                    ->where('inv2.status', 'Paid')
                     ;
                 });
             });
@@ -70,10 +77,10 @@ class StatsHelper
             ->groupBy('tg.tag')
             ->selectRaw('t.agent, a.firstname, a.lastname, a.id as adminid, tg.tag, count(t.id) as count')
             ->get();
-        // if($_SESSION['adminid'] == 230)
-        // {
-        //     var_dump($threads);die;
-        // }
+        if($_SESSION['adminid'] == 230)
+        {
+            //var_dump($threads);die;
+        }
         return $threads;
     }
     public static function getPointsFromCancellations(?array $params)

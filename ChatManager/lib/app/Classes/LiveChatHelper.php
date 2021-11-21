@@ -29,10 +29,9 @@ class LiveChatHelper
         $this->datefrom = $datefrom;
         //$agents = $LiveChatAPI->agents->getArchives(['filters' => []]);
     }
-    public function findChatByID(string $tid) : array
+    public function findChatByID(string $tid): array
     {
-        if(Threads::where('threadid', $tid)->count() > 0)
-        {
+        if (Threads::where('threadid', $tid)->count() > 0) {
             return ['result' => 'This Thread ID already exists. Try with another one.'];
         }
 
@@ -60,7 +59,7 @@ class LiveChatHelper
         }
 
         $this->results = $this->api->agents->getArchives($params);
-       // echo('<pre>');var_dump($this->results); die;
+        // echo('<pre>');var_dump($this->results); die;
         $this->runParseStore();
         if ($this->results->next_page_id) {
             $this->readRecentChats([], $this->results->next_page_id);
@@ -75,13 +74,28 @@ class LiveChatHelper
 
     public static function getUserById(string $id, array $users)
     {
-        foreach($users as $user)
-        {
-            if($user->id == $id)
-            {
+        foreach ($users as $user) {
+            if ($user->id == $id) {
                 return $user;
             }
         }
         return null;
+    }
+    public static function getAgentByPersonalTags($chatitem, $admins)
+    {
+        $intersection = array_intersect(AdminGroupsConsts::TAGSAGENTMAP, $chatitem->thread->tags);
+        if (
+            count($intersection) > 0 &&
+            in_array('sales', $chatitem->thread->tags) &&
+            (in_array('wcb', $chatitem->thread->tags) || in_array('directsale', $chatitem->thread->tags))
+        ) {
+            return array_search(array_values($intersection)[0], AdminGroupsConsts::TAGSAGENTMAP);
+        }
+        $agent = 0;
+        foreach ($chatitem->thread->user_ids as $agent_id) {
+
+            $agent = $admins[$agent_id] ? $admins[$agent_id]->id : $agent;
+        }
+        return $agent;
     }
 }

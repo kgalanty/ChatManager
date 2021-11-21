@@ -11,18 +11,30 @@
           type="is-warning"
           has-icon
           :closable="false"
-          v-if="(item.sameorder_count && item.sameorder_count > 0) && !hideMessage"
+          v-if="
+            item.sameorder_count &&
+            item.sameorder_count > 1 &&
+            !hideMessage &&
+            isAdmin()
+          "
         >
           This chat has duplicated order ID with
-          {{ item.sameorder_count - 1 }} other chats. You need to change it manually or 
-          confirm it's correct as it is - to close this message and remove the chat from
-          'Pending Review' Table.
+          {{ item.sameorder_count - 1 }} other chats. You need to change it
+          manually or confirm it's correct as it is - to close this message and
+          remove the chat from 'Pending Review' Table.
 
           <section>
-            <b-button  style="margin:5px;" type="is-info" @click="ConfirmDuplicatedChat(item.id)">
+            <b-button
+              style="margin: 5px"
+              type="is-info"
+              @click="ConfirmDuplicatedChat(item.id)"
+            >
               Confirm this chat</b-button
             >
-            <b-button  style="margin:5px;" type="is-link" @click="ConfirmDuplicatedAllChats(item.orderid)"
+            <b-button
+              style="margin: 5px"
+              type="is-link"
+              @click="ConfirmDuplicatedAllChats(item.orderid)"
               >Confirm all chats with the same order ID</b-button
             >
           </section>
@@ -41,7 +53,17 @@
             <b-field label="Domain">
               <b-input v-model="domain" placeholder="Fill domain"></b-input>
             </b-field>
-            <b-field label="Order">
+
+            <b-field label="Invoice ID" v-if="showinvoiceinsteadoforder">
+              <b-input
+                v-model="selectedOrder"
+                placeholder="Fill invoice number"
+                expanded
+                type="number"
+              ></b-input>
+            </b-field>
+
+            <b-field label="Order" v-if="!showinvoiceinsteadoforder">
               <b-input
                 v-model="selectedOrder"
                 placeholder="Fill order number"
@@ -453,6 +475,13 @@
           @click="save"
           :loading="loading.saveLoadingBtn"
         />
+        <b-button
+          label="Delete"
+          type="is-danger"
+          style="margin-left: auto; order: 2"
+          @click="delThread"
+          v-if="isAdmin()"
+        />
       </footer>
     </div>
   </form>
@@ -467,6 +496,7 @@ import memberMixin from "../mixins/memberMixin";
 import requestMixin from "../mixins/requestsMixin";
 import notificationsMixin from "../mixins/notificationsMixin";
 import { pendingReviewActionsMixin } from "../mixins/pendingReviewActionsMixin";
+import { cannotofferMixin } from "../mixins/cannotofferMixin";
 
 export default {
   name: "ChatItemEditModal",
@@ -478,6 +508,7 @@ export default {
     notificationsMixin,
     requestMixin,
     pendingReviewActionsMixin,
+    cannotofferMixin,
   ],
   components: { ChatItemLogs },
   computed: {
@@ -490,6 +521,15 @@ export default {
     tagsList() {
       return this.$store.state.tags.tags;
     },
+    showinvoiceinsteadoforder() {
+      return (
+        this.item.tags.find((e) => {
+          if (e.tag == "upgrade" && e.approved == 1) {
+            return true;
+          }
+        }) || false
+      );
+    },
   },
   methods: {
     ...mapActions({
@@ -499,6 +539,40 @@ export default {
       loadTags: "tags/loadTags",
       clearLogs: "chatlogs/clearLogs",
     }),
+    delThread() {
+      this.$buefy.dialog.prompt({
+        message: `You are about to delete this chat and all related data. This action cannot be undone (you can later reimport this chat manually). Are you sure you wish to proceed?`,
+        title: "Delete confirmation",
+        hasIcon: true,
+        icon: "alert-circle",
+        type: "is-danger",
+        inputAttrs: {
+          placeholder: "type YES here",
+          maxlength: 3,
+        },
+        trapFocus: true,
+        onConfirm: (value) => {
+          if (value === "YES") {
+            const params = this.generateParamsForRequest("ChatTable", []);
+            this.$api
+              .post(`addonmodules.php?${params}`, {
+                a: "DelThread",
+                tid: this.item.id,
+              })
+              .then(() => {
+                this.$emit("close");
+                this.notifySuccess("Chat is deleted");
+              })
+              .catch((error) => {
+                throw error;
+              })
+              .finally(() => {});
+          } else {
+            this.notifyDanger('To delete the chat, you had to type "YES"');
+          }
+        },
+      });
+    },
     getAgents: debounce(function (name) {
       this.loading.isFetchingAgents = true;
       const params = this.generateParamsForRequest("Agents", [
@@ -785,7 +859,6 @@ export default {
               message: response.data.msg,
               type: "is-warning",
             });
-            console.log(response.data.orderid);
             if (response.data.orderid) {
               this.selectedOrder = response.data.orderid;
             }
@@ -1028,27 +1101,7 @@ export default {
       email: null,
       domain: null,
       notes: "",
-      cannotofferReasons: [
-        "Pricing ( Reseller/Starter Shared)",
-        "Accepting Bitcoins/Cryptocurrencies",
-        "Django ( on Shared*)",
-        ".js (on Shared*)",
-        "Python (on Shared*)",
-        "Crystal Reports (on Shared*)",
-        "Java (on Shared*)",
-        "Gambling websites",
-        "Root access (shared/cloud*)",
-        "IP range/multiple IPs",
-        "Unlimited Inodes shared/cloud",
-        "Storage size",
-        "Unmanaged VPS",
-        "Mongo DB",
-        "Dedicated IP (shared/cloud)",
-        "Over 1 GB database shared/cloud",
-        "Mailbox sizes (too small for shared/cloud)",
-        "MVC access on Win shared",
-        "Other",
-      ],
+
       loadingCheckBtn: false,
       // OrderStatusField: undefined,
       HasCustomOffer: false,
@@ -1105,5 +1158,14 @@ section.tab-content {
   color: #4a4a4a;
   max-width: 100%;
   position: relative;
+}
+</style>
+<style lang="scss">
+.darktheme {
+  .modal-card-head,
+  .modal-card {
+    background: #3f3f3f !important;
+    color: white !important;
+  }
 }
 </style>

@@ -78,6 +78,7 @@ class Logs
     public static function updateThread($itemid, $doer, $update, $threaddata)
     {
         $changes = ThreadEditDiffLogs::process($itemid, $doer, $update, $threaddata);
+
         if ($changes) {
             $admin = Admin::find($doer);
             $desc = $admin->firstname . ' ' . $admin->lastname . ' has updated chat ' . $threaddata->threadid . ': ' . $changes;
@@ -120,5 +121,17 @@ class Logs
         $admin = Admin::find($doer);
         $desc = $admin->firstname . ' ' . $admin->lastname . ' marked duplicated order id as reviewed.';
         self::log($threadid, 'Thread', $doer, $desc);
+    }
+    public static function LogTagsAdd(int $threadid, int $doer, array $tags = [])
+    {
+        $doer = $doer != 0 ? $doer : 1;
+        $admin = Admin::find($doer);
+        
+        foreach($tags as $tag)
+        {
+            $desc = $doer < 2 ? 'Added by cron' : $admin->firstname . ' ' . $admin->lastname . ' added the tag "'.$tag['tag'].'" by adding chat manually';
+            self::log($threadid, 'Thread', $doer, $desc);
+        }
+       
     }
 }

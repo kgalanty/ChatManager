@@ -1,5 +1,5 @@
 <template>
-  <div class="tile">
+  <div class="tile mainfilters">
     <div class="tile is-2 is-child">
       <b-field label="Search" style="width: 95%">
         <b-input
@@ -48,6 +48,7 @@
     <div class="tile is-2 is-child">
       <b-field label="Date [From]" style="width: 95%">
         <b-datepicker
+          :max-date="dateTo"
           v-model="dateFrom"
           rounded
           placeholder="Click to select..."
@@ -55,6 +56,7 @@
           :icon-right="'close-circle'"
           icon-right-clickable
           @icon-right-click="dateFrom = null"
+          :date-formatter="dateFieldFormatter"
         >
         </b-datepicker>
       </b-field>
@@ -62,6 +64,7 @@
     <div class="tile is-2 is-child">
       <b-field label="Date [to]" style="width: 95%">
         <b-datepicker
+          :min-date="dateFrom"
           v-model="dateTo"
           rounded
           placeholder="Click to select..."
@@ -69,6 +72,7 @@
           :icon-right="'close-circle'"
           icon-right-clickable
           @icon-right-click="dateTo = null"
+          :date-formatter="dateFieldFormatter"
         >
         </b-datepicker>
       </b-field>
@@ -76,22 +80,18 @@
   </div>
 </template>
 <style>
+.mainfilters {
+  font-size: 1.8rem !important;
+}
 .dropdown-content > a {
   text-align: left !important;
 }
 </style>
 <style scoped>
-.btable {
-  font-size: 13px;
+.mainfilters {
+  font-size: 2.8rem;
 }
-article > .panel-heading {
-  background: rgb(165, 197, 255);
-  background: linear-gradient(
-    180deg,
-    rgba(165, 197, 255, 1) 0%,
-    rgba(40, 127, 207, 1) 100%
-  );
-}
+
 .tile {
   margin-bottom: 10px;
 }
@@ -100,13 +100,14 @@ article > .panel-heading {
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import { mapActions, mapState } from "vuex";
-import { dateMixin } from '../mixins/dateMixin.js';
-import notificationsMixin from '../mixins/notificationsMixin.js';
+import { dateMixin } from "../mixins/dateMixin.js";
+import notificationsMixin from "../mixins/notificationsMixin.js";
 import requestsMixin from "../mixins/requestsMixin.js";
 import { tagsMixin } from "../mixins/tagsMixin.js";
+import errorMixin from "../mixins/errorsMixin";
 export default {
   name: "ChatFilters",
-  mixins: [tagsMixin, requestsMixin, dateMixin, notificationsMixin],
+  mixins: [tagsMixin, requestsMixin, dateMixin, notificationsMixin, errorMixin],
   components: {
     //HelloWorld
   },
@@ -114,12 +115,16 @@ export default {
     doSearch() {
       this.$store.commit("chat/setQuery", this.searchtext);
 
-      this.loadChats();
+      this.loadChats().catch((e) => {
+        this.showError(e);
+      });
     },
     TagsChanged() {
       // this.$store.commit("chat/setFilter", { tags: this.tags });
       this.setTagsFilter(this.tags);
-      this.loadChats();
+      this.loadChats().catch((e) => {
+        this.showError(e);
+      });
     },
     getFilteredTags(text) {
       this.filteredTags = this.$store.state.tags.tags.filter((option) => {
@@ -141,11 +146,11 @@ export default {
               throw error;
             })
             .finally(() => {
-              resolve()
+              resolve();
               this.loadingOperator = false;
             });
         }
-        resolve()
+        resolve();
       });
     },
     ...mapActions({
@@ -175,22 +180,30 @@ export default {
     },
   },
   mounted() {
-    if(this.filters.tags)
-    {
-      this.tags = this.filters.tags
+    if (this.filters.tags) {
+      this.tags = this.filters.tags;
     }
-    if(this.filters.dateFrom)
-    {
-      this.dateFrom = new Date(this.filters.dateFrom)
+    if (this.filters.dateFrom) {
+      this.dateFrom = new Date(this.filters.dateFrom);
+    } else {
+      // let dayToday = this.moment().utc().format('DD')
+      // if(dayToday < 16)
+      //{
+      let dateGeneral = new Date();
+      this.dateFrom = new Date(
+        dateGeneral.getUTCFullYear(),
+        dateGeneral.getUTCMonth(),
+        dateGeneral.getUTCDate()
+      );
+      //}
     }
-    if(this.filters.dateTo)
-    {
-      this.dateTo = new Date(this.filters.dateTo)
+    if (this.filters.dateTo) {
+      this.dateTo = new Date(this.filters.dateTo);
     }
     if (this.filters.operator) {
       this.loadOperators().then(() => {
-          this.operator = this.filters.operator
-      })
+        this.operator = this.filters.operator;
+      });
     }
   },
   computed: {
@@ -224,31 +237,48 @@ export default {
   //   },
   // },
   watch: {
-    dateFrom(val, old) {
-       if (this.dateTo != null && old!= null && val != null && !this.isDateAfter(val, this.dateTo)) {
-        this.dateFrom = new Date(old);
-        this.notifyWarning('Date is after "Date To". Restored previous date.')
-        return
-      }
+    dateFrom(val) {
+      // if (
+      //   this.dateTo != null &&
+      //   old != null &&
+      //   val != null &&
+      //   !this.isDateAfter(val, this.dateTo)
+      // ) {
+      //   this.dateFrom = new Date(old);
+      //   this.notifyWarning('Date is after "Date To". Restored previous date.');
+      //   return;
+      // }
 
       var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
       this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
-      this.loadChats();
+      this.loadChats().catch((e) => {
+        this.showError(e);
+      });
     },
-    dateTo(val, old) {
-       if (this.dateFrom != null && old != null && val != null && !this.isDateAfter(this.dateFrom,val)) {
-        this.notifyWarning('Date is before "Date From". Restored previous date.')
-        this.dateTo = new Date(old)
-        return
-      }
-      var datetoparsed = val !== null ? this.createUTCDateTimeAndAdd(val, 24, 'h') : null;
+    dateTo(val) {
+      // if (
+      //   this.dateFrom != null &&
+      //   old != null &&
+      //   val != null &&
+      //   !this.isDateAfter(this.dateFrom, val)
+      // ) {
+      //   this.notifyWarning(
+      //     'Date is before "Date From". Restored previous date.'
+      //   );
+      //   this.dateTo = new Date(old);
+      //   return;
+      // }
+      var datetoparsed =
+        val !== null ? this.createUTCDateTimeAndAdd(val, 24, "h") : null;
       this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
-      this.loadChats();
+      //this.loadChats();
     },
     operator(val) {
       this.setOperatorFilter(val);
       //this.$store.commit("chat/setFilter", { operator: val });
-      this.loadChats();
+      this.loadChats().catch((e) => {
+        this.showError(e);
+      });
     },
   },
 };

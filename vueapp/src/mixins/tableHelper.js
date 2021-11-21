@@ -72,10 +72,10 @@ export default {
           });
       })
     },
-    calculatePointsFromTags(tags, invoiceStatus) {
+    calculatePointsFromTags(tags, invoiceStatus, invoice) {
       let n = 0
       var upgradeMarker = false
-      if(invoiceStatus != 'Paid') return ''
+      if(invoiceStatus != 'Paid' && !invoice) return ''
       for (let i of tags) {
         if(parseInt(i.approved) !== 1) continue
        
@@ -86,7 +86,7 @@ export default {
         if (i.tag == "vps/ds") n++
         if (i.tag == "upgrade") upgradeMarker = true
       }
-      if(upgradeMarker) return 1
+      if(upgradeMarker && invoice.status == 'Paid') return 1
       return n > 0 ? n : ''
     }
   }

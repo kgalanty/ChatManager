@@ -1,3 +1,4 @@
+import moment from "moment";
 
 export const dateMixin = {
     methods: {
@@ -22,6 +23,9 @@ export const dateMixin = {
         {
             return this.moment(firstdate).isValid() && this.moment(seconddate).isValid() ? 
             this.moment(seconddate).isAfter(firstdate) ||  this.moment(seconddate).isSame(firstdate)  : false
+        },
+        dateFieldFormatter(today){
+            return moment(today).format('DD.MM.YYYY')
         }
     }
 }

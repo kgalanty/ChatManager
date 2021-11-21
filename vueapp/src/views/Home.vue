@@ -24,15 +24,9 @@
   </div>
 </template>
 <style scoped>
-.panel-heading
-{
-  padding-left: 0px !important; margin-bottom: 5px;
-}
 
-article > .panel-heading {
-  background: rgb(226 226 226);
-  
-}
+
+
 </style>
 <script>
 // @ is an alias to /src
