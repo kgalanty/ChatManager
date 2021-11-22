@@ -1,7 +1,7 @@
 <?php
 
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
-
+use WHMCS\Module\Addon\ChatManager\app\Models\Service;
 use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
@@ -12,5 +12,8 @@ class Order extends Model
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Invoice', 'invoiceid', 'id');
     }
-
+    public function service()
+    {
+        return $this->hasMany(Service::class, 'orderid', 'id');
+    }
 }

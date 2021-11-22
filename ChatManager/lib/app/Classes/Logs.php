@@ -129,7 +129,7 @@ class Logs
         
         foreach($tags as $tag)
         {
-            $desc = $doer < 2 ? 'Added by cron' : $admin->firstname . ' ' . $admin->lastname . ' added the tag "'.$tag['tag'].'" by adding chat manually';
+            $desc = $doer < 2 ? 'Added '.$tag['tag'].' by cron' : $admin->firstname . ' ' . $admin->lastname . ' added the tag "'.$tag['tag'].'" by adding chat manually';
             self::log($threadid, 'Thread', $doer, $desc);
         }
        

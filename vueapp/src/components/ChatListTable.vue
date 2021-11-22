@@ -6,7 +6,7 @@
       color: #c1bbe3;
       padding: 5px;
       border-radius: 5px;
-      margin-top: 5px;
+      margin-top: -5px;
     "
     id="chatlisttable"
   >

@@ -2,20 +2,17 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.4",
-            build: "2021-11-19 18:26 UTC",
-            logmessage: `Recent Changes: <ul><li>
-            - Added posibility to remove chat (for admins). This is testing functionality.
-            </li>
-            <li>
-            - Fixed directly opening stats by url
-            </li>
-            <li>
-            - Fixed cron assigning an Operator based on personal tag when paired with one of 'directsale'/'wcb' tag
-            </li>
-            <li>
-            - Adjusted some colors by the way of implementing dark mode. When it's done, current colors will become 'bright' side :)
-            </li>
+            packageversion: "1.0.5",
+            build: "2021-11-22 14:07 UTC",
+            logmessage: `<strong>Recent Changes:</strong><ul>
+            <li>- Fixed reading red table chats after leaving Edit Modal</li>
+            <li>- Added new tab "Orders" with orders with no chat assigned (only Admins)</li>
+            <li>- Small style adjustments</li>
+            <li><strong>Older log:</strong></li>
+            <li>- Added posibility to remove chat (for admins). This is testing functionality.</li>
+            <li>- Fixed directly opening stats by url</li>
+            <li>- Fixed cron assigning an Operator based on personal tag when paired with one of 'directsale'/'wcb' tag</li>
+            <li>- Adjusted some colors by the way of implementing dark mode. When it's done, current colors will become 'bright' side :)</li>
             </ul>`
             // logmessage: `Recent Changes: <ul><li>
             // - Reordered columns in stats (Total Points & Conversion w/o points)

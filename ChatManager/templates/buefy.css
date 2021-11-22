@@ -2354,7 +2354,7 @@ fieldset[disabled] .button.is-primary.is-inverted.is-outlined {
 }
 
 .button.is-link {
-  background-color: #7957d5;
+  background-color: #2927a2;
   border-color: transparent;
   color: white;
 }
@@ -15095,7 +15095,7 @@ MIT (https://github.com/Wikiki/bulma-steps/blob/master/LICENSE)
 }
 
 .table-wrapper:not(:last-child) {
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 @media screen and (max-width: 1023px) {

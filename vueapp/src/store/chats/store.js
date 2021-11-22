@@ -64,9 +64,9 @@ const chatsStore = {
           `pending=1`,
           // `page=${context.state.chatsPage}`,
           // `perpage=${context.state.chatsPerPage}`,
-          `datefrom=${context.state.filters.dateFrom ?? ''}`,
-          `dateto=${context.state.filters.dateTo ?? ''}`,
-          `tz=`,
+          // `datefrom=${context.state.filters.dateFrom ?? ''}`,
+          // `dateto=${context.state.filters.dateTo ?? ''}`,
+          // `tz=`,
          
         ].join("&");
   

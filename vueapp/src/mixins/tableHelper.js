@@ -24,8 +24,17 @@ export default {
       return email;
     },
     showAllChats(customerid) {
-      window.open("https://my.livechatinc.com/archives/?query=" + customerid);
+      this.OpenExternalPage("https://my.livechatinc.com/archives/?query=" + customerid)
+      
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
+    },
+    OpenAA(link)
+    {
+      this.OpenExternalPage('https://my.tmdhosting.com/admin/'+link)
+    },
+    OpenExternalPage(link)
+    {
+      window.open(link)
     },
     showfollowup(row) {
       return row.tags.find((e) => {
