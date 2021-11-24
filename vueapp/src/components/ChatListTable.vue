@@ -6,7 +6,6 @@
       color: #c1bbe3;
       padding: 5px;
       border-radius: 5px;
-      margin-top: -5px;
     "
     id="chatlisttable"
   >
@@ -44,7 +43,9 @@
       scrollable
     >
       <template #empty v-if="chatsLoading === false"
-        >No entries for given criteria.</template
+        ><p>No entries for given criteria. Try to loosen the filters.</p>
+        <p><b-button type="is-link" @click="clearTagsDates">Clear Tags & Dates</b-button></p>
+        </template
       >
       <template #detail="props" v-if="isAdmin()">
         <article style="text-align: left">
@@ -320,7 +321,16 @@ export default {
       loadChats: "chat/loadChats",
       loadPendingChats: "chat/loadPendingChats",
       getPermissions: "getPermissions",
+      setTagsFilter: "chat/setTagsFilter",
     }),
+    clearTagsDates()
+    {
+      this.$store.commit("chat/setFilter", { dateFrom: null, dateTo: null,  });
+      this.setTagsFilter([])
+      this.loadChats().catch((e) => {
+        this.showError(e);
+      });
+    },
     OpenNewChatModal() {
       let that = this;
       this.$buefy.modal.open({

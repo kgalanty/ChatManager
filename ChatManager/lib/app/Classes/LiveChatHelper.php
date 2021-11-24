@@ -41,7 +41,6 @@ class LiveChatHelper
     }
     public function readRecentChats(array $filtersSet = [], string $pageid = null)
     {
-        $_SESSION['cmcount'] = 0;
         if ($this->datefrom !== null) {
             $filters['from'] = $this->datefrom;
         } else {

@@ -17,4 +17,5 @@ class DBTables
     const Tags = self::Prefix.'tags';
     const Threads = self::Prefix.'threads';
     const OrdersChats = self::Prefix.'completedorders';
+    const StaffOnline = self::Prefix.'staffonline';
 }

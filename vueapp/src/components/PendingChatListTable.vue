@@ -1,7 +1,7 @@
 <template>
   <article
     id="pendingchatlisttable"
-    style="background: #f14668; color: white; padding: 5px; border-radius: 5px"
+    style="background: #f14668; color: white; padding: 5px; border-radius: 5px;margin-bottom:10px;"
     v-if="pendingchats && pendingchats.data && pendingchats.data.length > 0"
   >
     <span
@@ -104,10 +104,17 @@
       <b-table-column
         field="orderid"
         label="Order ID"
-        width="160"
+        width="170"
         v-slot="props"
+        centered
       >
-        {{ props.row.orderid }}
+         <b-tag type="is-info" v-if="props.row.orderid">{{ props.row.orderid }}</b-tag>
+        <span v-if="Array.isArray(props.row.revieworder) && props.row.revieworder.length > 0" >
+          <b-taglist attached style="display:block;">
+            <b-tag type="is-danger">+</b-tag>
+          <b-tag v-for="item in props.row.revieworder" :key="item.id">{{ item.orderid }}</b-tag>
+          </b-taglist>
+        </span>
       </b-table-column>
       <b-table-column field="date" label="Reason" v-slot="props" width="60">
         <b-tag

@@ -2,9 +2,16 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.5",
-            build: "2021-11-22 14:07 UTC",
-            logmessage: `<strong>Recent Changes:</strong><ul>
+            packageversion: "1.0.7",
+            build: "2021-11-24 21:18 UTC",
+            logmessage: `<strong>1.0.7:</strong><ul>
+            <li>- Added styling for pending orders in red table</li>
+            <li>- New functionality on the footer showing staff online in Chat Manager in recent 20 minutes</li>
+            <li>- Added new log entry when thread is imported by cron</li>
+            <li>- Fixed counting added entries count by cron in WHMCS logs</li>
+            <li><strong>1.0.6:</strong></li>
+            <li>- Quick hotfix of margins between tables and headers</li>
+            <li><strong>1.0.5:</strong></li>
             <li>- Fixed reading red table chats after leaving Edit Modal</li>
             <li>- Added new tab "Orders" with orders with no chat assigned (only Admins)</li>
             <li>- Small style adjustments</li>

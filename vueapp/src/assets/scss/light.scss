@@ -1,4 +1,5 @@
 .lighttheme {
+  background-color: rgb(204, 205, 223); 
     .panel-heading {
       font-size:0.8rem;
       padding-left: 0px;
@@ -59,8 +60,9 @@
         margin-top:-5px;
         border-radius: 5px;
       }
-      .footerclass
+      .chatlistheader
       {
-          font-size:0.9rem;
+        margin-bottom: 0;
       }
+
   }

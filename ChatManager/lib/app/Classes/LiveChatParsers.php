@@ -48,9 +48,10 @@ class LiveChatParsers
                     ['chatitem' => $chatitem, 'customer' => $customer]
                 ));
 
-                $_SESSION['cmcount'] += count($insertRow);
+                $_SESSION['cmcount'] += 1;
                 $id = DB::table(DBTables::Threads)->insertGetId($insertRow);
                 //echo('<pre>'); var_dump($insertRow, $id, $chatitem, count($list)); die;
+                Logs::AddThreadByCron($id);
                 self::parseTags($id, $chatitem->thread->tags);
             }
 

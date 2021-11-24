@@ -13,7 +13,7 @@
       <p class="panel-heading">Filters</p>
       <ChatFilters />
       <p
-        class="panel-heading"
+        class="panel-heading chatlistheader"
       >
         Chats list
       </p>

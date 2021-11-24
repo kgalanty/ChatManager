@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddEntryModal.vue renders a modal 1`] = `
+<form action="">
+  <div class="modal-card" style="width: 95vw;">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Add chat</p> <button type="button" class="delete"></button>
+    </header>
+    <section class="modal-card-body">
+      <b-message-stub active="true" closable="true" type="is-info" hasicon="true" duration="2000">
+        Insert chat ID. We will read it from LiveChat. You will then be able
+        to review and edit all data.
+      </b-message-stub>
+      <!---->
+      <b-field-stub type="" label="Thread ID" message="" addons="true">
+        <b-input-stub usehtml5validation="true" statusicon="true" value="" type="text" hascounter="true" customclass="" placeholder="Fill Thread ID. This cannot be edited later."></b-input-stub>
+      </b-field-stub>
+    </section>
+    <footer class="modal-card-foot">
+      <b-button-stub label="Close" nativetype="button" tag="button"></b-button-stub>
+      <b-button-stub type="is-primary" label="Proceed" iconright="content-save" nativetype="button" tag="button"></b-button-stub>
+    </footer>
+  </div>
+</form>
+`;

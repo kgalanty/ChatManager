@@ -2,7 +2,7 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 
-use WHMCS\Module\Addon\ChatManager\app\Controllers\APIProtected;
+use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
@@ -10,13 +10,14 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewDuplicatedOrder;
 
-class DuplicateReview extends APIProtected
+class DuplicateReview extends API
 {
     public function get()
     {
     }
     public function post()
     {
+        if(!AuthControl::isAdmin()) return;
         $threadid = $this->input['threadid'];
         $action = $this->input['a'];
         $order = $this->input['orderid'];

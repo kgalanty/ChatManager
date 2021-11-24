@@ -25,6 +25,7 @@
       <router-link to="/orders" v-if="isAdmin()">Orders</router-link>
     </div>
     <router-view />
+    <StaffOnline />
     <Footer />
   </div>
 </template>
@@ -36,6 +37,7 @@ import '@/assets/scss/light.scss'
 import '@/assets/scss/dark.scss'
 import '@/assets/scss/global.scss'
 import memberMixin from './mixins/memberMixin';
+import StaffOnline from '@/components/StaffOnline'
 export default {
   name: "App",
    mixins: [
@@ -43,6 +45,7 @@ export default {
   ],
   components: {
     Footer,
+    StaffOnline
   },
   data() {
     return {

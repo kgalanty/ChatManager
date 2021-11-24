@@ -9,7 +9,7 @@ const chatsStore = {
       pendingChatsLoading: true,
       pendingchats: [],
       chatsPerPage: 25,
-      filters: { dateFrom: null, dateTo: null, operator: null },
+      filters: { dateFrom: null, dateTo: null, operator: null, tags: '' },
       query: ''
     }),
     mutations: {
@@ -89,6 +89,7 @@ const chatsStore = {
       loadChats(context) {
         return new Promise((resolve, reject) => {
           context.commit('setChatsLoading', true)
+          let tags = context.state.filters.tags ? context.state.filters.tags.join(',') : ''
           const params = [
             `module=ChatManager`,
             `c=ChatTable`,
@@ -97,7 +98,7 @@ const chatsStore = {
             `perpage=${context.state.chatsPerPage}`,
             `datefrom=${context.state.filters.dateFrom ?? ''}`,
             `dateto=${context.state.filters.dateTo ?? ''}`,
-            `tags=${context.state.filters.tags ? context.state.filters.tags : ''}`,
+            `tags=${tags}`,
             `operator=${context.state.filters.operator ? context.state.filters.operator : ''}`,
             `tz=`,
             `q=${context.state.query}`

@@ -8,6 +8,7 @@ import chatcolumnsStore from './chatcolumns/store'
 import chatsStore from './chats/store'
 import tagsStore from './tags/store'
 import OrdersStore from './orders/store'
+import StaffOnline from './staffonline/store'
 Vue.use(Vuex)
 Vue.use(Buefy)
 
@@ -74,6 +75,7 @@ export default new Vuex.Store({
     chatlogs: chatsLogStore,
     chatcolumns: chatcolumnsStore,
     tags: tagsStore,
-    orderschats: OrdersStore
+    orderschats: OrdersStore,
+    staffonline: StaffOnline
   }
 })

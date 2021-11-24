@@ -1160,12 +1160,3 @@ section.tab-content {
   position: relative;
 }
 </style>
-<style lang="scss">
-.darktheme {
-  .modal-card-head,
-  .modal-card {
-    background: #3f3f3f !important;
-    color: white !important;
-  }
-}
-</style>

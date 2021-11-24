@@ -8,7 +8,7 @@ trait AuthMid
 {
     public function checkPermission()
     {
-        if(AuthControl::isAdmin() || AuthControl::isAgent() || !in_array($_SESSION['adminid'], AdminGroupsConsts::AGENT_DISALLOWED))
+        if($_SESSION['adminpw'] && !in_array($_SESSION['adminid'], AdminGroupsConsts::AGENT_DISALLOWED) && (AuthControl::isAdmin() || AuthControl::isAgent()))
         {
             return true;
         }

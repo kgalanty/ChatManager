@@ -23,7 +23,7 @@
           type="is-info"
           placeholder="Start typing"
           @typing="getFilteredTags"
-          @input="TagsChanged"
+         
           :open-on-focus="true"
         >
         </b-taginput>
@@ -208,14 +208,56 @@ export default {
   },
   computed: {
     ...mapState("chat", ["filters"]),
+    tags: {
+      get() {
+        return this.$store.state.chat.filters.tags
+          ? this.$store.state.chat.filters.tags
+          : [];
+      },
+      set(v) {
+        this.setTagsFilter(v);
+        this.loadChats().catch((e) => {
+          this.showError(e);
+        });
+      },
+    },
+    dateFrom: {
+      get() {
+        return this.$store.state.chat.filters.dateFrom
+          ? new Date(this.$store.state.chat.filters.dateFrom)
+          : null;
+      },
+      set(v) {
+        let datefromparsed = v !== null ? this.createUTCDatetime(v) : null;
+        this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
+        this.loadChats().catch((e) => {
+          this.showError(e);
+        });
+      },
+    },
+    dateTo: {
+      get() {
+        return this.$store.state.chat.filters.dateTo
+          ? new Date(this.$store.state.chat.filters.dateTo)
+          : null;
+      },
+      set(v) {
+        let datefromparsed =
+          v !== null ? this.createUTCDateTimeAndAdd(v, 24, "h") : null;
+        this.$store.commit("chat/setFilter", { dateTo: datefromparsed });
+        this.loadChats().catch((e) => {
+          this.showError(e);
+        });
+      },
+    },
   },
   data() {
     return {
-      dateFrom: null,
-      dateTo: null,
+      // dateFrom: null,
+      // dateTo: null,
       tagsinput: [],
       filteredTags: [],
-      tags: [],
+      // tags: [],
       loadingOperator: false,
       operators: [],
       operator: "",
@@ -237,42 +279,42 @@ export default {
   //   },
   // },
   watch: {
-    dateFrom(val) {
-      // if (
-      //   this.dateTo != null &&
-      //   old != null &&
-      //   val != null &&
-      //   !this.isDateAfter(val, this.dateTo)
-      // ) {
-      //   this.dateFrom = new Date(old);
-      //   this.notifyWarning('Date is after "Date To". Restored previous date.');
-      //   return;
-      // }
+    // dateFrom(val) {
+    //   // if (
+    //   //   this.dateTo != null &&
+    //   //   old != null &&
+    //   //   val != null &&
+    //   //   !this.isDateAfter(val, this.dateTo)
+    //   // ) {
+    //   //   this.dateFrom = new Date(old);
+    //   //   this.notifyWarning('Date is after "Date To". Restored previous date.');
+    //   //   return;
+    //   // }
 
-      var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
-      this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
-      this.loadChats().catch((e) => {
-        this.showError(e);
-      });
-    },
-    dateTo(val) {
-      // if (
-      //   this.dateFrom != null &&
-      //   old != null &&
-      //   val != null &&
-      //   !this.isDateAfter(this.dateFrom, val)
-      // ) {
-      //   this.notifyWarning(
-      //     'Date is before "Date From". Restored previous date.'
-      //   );
-      //   this.dateTo = new Date(old);
-      //   return;
-      // }
-      var datetoparsed =
-        val !== null ? this.createUTCDateTimeAndAdd(val, 24, "h") : null;
-      this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
-      //this.loadChats();
-    },
+    //   var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
+    //   this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
+    //   this.loadChats().catch((e) => {
+    //     this.showError(e);
+    //   });
+    // },
+    // dateTo(val) {
+    // if (
+    //   this.dateFrom != null &&
+    //   old != null &&
+    //   val != null &&
+    //   !this.isDateAfter(this.dateFrom, val)
+    // ) {
+    //   this.notifyWarning(
+    //     'Date is before "Date From". Restored previous date.'
+    //   );
+    //   this.dateTo = new Date(old);
+    //   return;
+    // }
+    // var datetoparsed =
+    //   val !== null ? this.createUTCDateTimeAndAdd(val, 24, "h") : null;
+    // this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
+    //this.loadChats();
+    // },
     operator(val) {
       this.setOperatorFilter(val);
       //this.$store.commit("chat/setFilter", { operator: val });

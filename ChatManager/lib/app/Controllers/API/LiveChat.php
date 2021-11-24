@@ -2,14 +2,14 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 
-use WHMCS\Module\Addon\ChatManager\app\Controllers\APIProtected;
+use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
 use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatHelper;
 
-class LiveChat extends APIProtected
+class LiveChat extends API
 {
     public function get()
     {

@@ -6,6 +6,10 @@ namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 class DateTimeHelper
 {
     //moment().format('Z')
+    public static function NowUTC()
+    {
+        return gmdate('Y-m-d H:i:s');
+    }
     public static function subDate(string $timezone = '+03:00', \DateInterval $interval = null): \DateTime
     {
         if ($interval === null) {

@@ -129,9 +129,14 @@ class Logs
         
         foreach($tags as $tag)
         {
-            $desc = $doer < 2 ? 'Added '.$tag['tag'].' by cron' : $admin->firstname . ' ' . $admin->lastname . ' added the tag "'.$tag['tag'].'" by adding chat manually';
+            $desc = $doer < 2 ? 'Added `'.$tag['tag'].'` by cron' : $admin->firstname . ' ' . $admin->lastname . ' added the tag "'.$tag['tag'].'" by adding chat manually';
             self::log($threadid, 'Thread', $doer, $desc);
         }
        
+    }
+    public static function AddThreadByCron(int $threadid)
+    {
+        $desc = 'Added by cron';
+        self::log($threadid, 'Thread', 1, $desc);
     }
 }
