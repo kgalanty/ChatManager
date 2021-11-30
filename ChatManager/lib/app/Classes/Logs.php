@@ -104,17 +104,37 @@ class Logs
         $desc = $admin->firstname . ' ' . $admin->lastname . ' approved order id '. $ApproveOrderReview->orderid.' submitted by '.$ApproveOrderReview->doer->firstname.' '.$ApproveOrderReview->doer->lastname.($pendingOrderCount>0 ? ' and declined other '.$pendingOrderCount : '');
         self::log($ApproveOrderReview->threadid, 'Thread', $doer, $desc);
     }
+    public static function ApproveInvoiceReview($ApproveInvoiceReview, int $doer)
+    {
+        $admin = Admin::find($doer);
+        $pendingOrderCount = ReviewOrder::where('threadid', $ApproveInvoiceReview->threadid)->count() -1;
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' approved invoice id '. $ApproveInvoiceReview->orderid.' submitted by '.$ApproveInvoiceReview->doer->firstname.' '.$ApproveInvoiceReview->doer->lastname.($pendingOrderCount>0 ? ' and declined other '.$pendingOrderCount : '');
+        self::log($ApproveInvoiceReview->threadid, 'Thread', $doer, $desc);
+ 
+    }
+    public static function submitInvoiceReview(int $invoiceid, int $doer, int $threadid)
+    {
+        $admin = Admin::find($doer);
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' suggested new invoice id: '.$invoiceid.' for the thread.';
+        self::log($threadid, 'Thread', $doer, $desc);
+    }
     public static function submitOrderReview(int $order, int $doer, int $threadid)
     {
         $admin = Admin::find($doer);
-        $desc = $admin->firstname . ' ' . $admin->lastname . ' suggested this order id: '.$order.' for the thread. It\'s pending for approval.';
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' suggested new order id: '.$order.' for the thread.';
         self::log($threadid, 'Thread', $doer, $desc);
     }
-    public static function DeclineOrderReview( $ApproveOrderReview, int $doer)
+    public static function DeclineOrderReview( $OrderReview, int $doer)
     {
         $admin = Admin::find($doer);
-        $desc = $admin->firstname . ' ' . $admin->lastname . ' declined order id '. $ApproveOrderReview->orderid.' submitted by '.$ApproveOrderReview->doer->firstname.' '.$ApproveOrderReview->doer->lastname.'.';
-        self::log($ApproveOrderReview->threadid, 'Thread', $doer, $desc);
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' declined order id '. $OrderReview->orderid.' submitted by '.$OrderReview->doer->firstname.' '.$OrderReview->doer->lastname.'.';
+        self::log($OrderReview->threadid, 'Thread', $doer, $desc);
+    }
+    public static function DeclineInvoiceReview( $OrderReview, int $doer)
+    {
+        $admin = Admin::find($doer);
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' declined invoice id '. $OrderReview->orderid.' submitted by '.$OrderReview->doer->firstname.' '.$OrderReview->doer->lastname.'.';
+        self::log($OrderReview->threadid, 'Thread', $doer, $desc);
     }
     public static function AcceptDuplicateOrder(int $threadid, int $doer)
     {
@@ -137,6 +157,21 @@ class Logs
     public static function AddThreadByCron(int $threadid)
     {
         $desc = 'Added by cron';
+        self::log($threadid, 'Thread', 1, $desc);
+    }
+    public static function AddOrderInCron(int $order, int $threadid)
+    {
+        $desc = 'Order ID set by cron: '.$order;
+        self::log($threadid, 'Thread', 1, $desc);
+    }
+    public static function duplicatedPendingOrder(int $threadid, int $orderid)
+    {
+        $desc = 'Removed duplicated pending order: '.$orderid;
+        self::log($threadid, 'Thread', 1, $desc);
+    }
+    public static function SetClientDataWhenEmpty(int $threadid)
+    {
+        $desc = 'Set client name and email based on the profile of related order';
         self::log($threadid, 'Thread', 1, $desc);
     }
 }

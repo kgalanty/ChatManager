@@ -9,7 +9,7 @@ class ReviewOrder extends Model
 {
     public $timestamps = false;
     protected $table = DBTables::ReviewOrders;
-    protected $fillable = ['threadid', 'sender', 'created_at'];
+    protected $fillable = ['threadid', 'invoice','sender', 'created_at'];
     public function doer()
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'sender', 'id');

@@ -9,7 +9,7 @@ const chatsStore = {
       pendingChatsLoading: true,
       pendingchats: [],
       chatsPerPage: 25,
-      filters: { dateFrom: null, dateTo: null, operator: null, tags: '' },
+      filters: { dateFrom: null, dateTo: null, operator: null, tags: '', extags:'' },
       query: ''
     }),
     mutations: {
@@ -42,6 +42,10 @@ const chatsStore = {
       setTagsFilter(context,payload)
       {
         context.commit("setFilter", { tags: payload });
+      },
+      setExTagsFilter(context,payload)
+      {
+        context.commit("setFilter", { extags: payload });
       },
       setDateFromFilter(context,payload)
       {
@@ -89,7 +93,10 @@ const chatsStore = {
       loadChats(context) {
         return new Promise((resolve, reject) => {
           context.commit('setChatsLoading', true)
+          context.commit('setChats', {})
+          let replaceChars = encodeURIComponent('#')
           let tags = context.state.filters.tags ? context.state.filters.tags.join(',') : ''
+          let extags = context.state.filters.extags ? context.state.filters.extags.join(',') : ''
           const params = [
             `module=ChatManager`,
             `c=ChatTable`,
@@ -98,7 +105,8 @@ const chatsStore = {
             `perpage=${context.state.chatsPerPage}`,
             `datefrom=${context.state.filters.dateFrom ?? ''}`,
             `dateto=${context.state.filters.dateTo ?? ''}`,
-            `tags=${tags}`,
+            `tags=${tags.replace('#', replaceChars)}`,
+            `extags=${extags.replace('#', replaceChars)}`,
             `operator=${context.state.filters.operator ? context.state.filters.operator : ''}`,
             `tz=`,
             `q=${context.state.query}`

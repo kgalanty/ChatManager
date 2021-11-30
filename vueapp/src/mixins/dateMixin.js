@@ -5,6 +5,9 @@ export const dateMixin = {
         parseDateTime(dateTime) {
             return this.moment().utc(dateTime).format("YYYY-MM-DD HH:mm:ss");
         },
+        parseDate(date) {
+            return this.moment(date).format("YYYY-MM-DD");
+        },
         parseDateTimeFromUTCtoLocal(dateTime) {
             return this.moment.utc(dateTime, 'YYYY-MM-DD HH:mm:ss').local().format("YYYY-MM-DD HH:mm:ss");
         },

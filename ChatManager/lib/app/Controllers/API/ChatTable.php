@@ -87,6 +87,7 @@ class ChatTable extends API
         $dateTo = $_GET['dateto'] != '' ? $_GET['dateto'] : gmdate('Y-m-d\TH:i:s.000000\Z');
         //$myemail = Admin::where('id', $_SESSION['adminid'])->value('email');
         $tags = $_GET['tags'];
+        $extags = $_GET['extags'];
         $operator = $_GET['operator'] != '' ? intval(trim($_GET['operator'])) : '';
         //$myemail = 'emiliya.sergieva@tmdhosting.com';
 
@@ -107,7 +108,18 @@ class ChatTable extends API
                 $result->whereHas('tags', function ($query) use ($tag) {
                     //$query->whereIn('tag', explode(',', $tags));
 
-                    $query->where('tag', $tag);
+                    $query->where('tag',$tag)->where('approved', 1);
+                });
+            }
+        }
+        if($extags)
+        {
+            $tagsExploded = explode(',', $extags);
+            foreach ($tagsExploded as $tag) {
+                $result->whereDoesntHave('tags', function ($query) use ($tag) {
+                    //$query->whereIn('tag', explode(',', $tags));
+
+                    $query->where('tag',$tag)->where('approved', 1);
                 });
             }
         }

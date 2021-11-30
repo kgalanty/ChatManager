@@ -18,7 +18,8 @@ class ThreadEditDiffLogs
         'domain' => 'Domain',
         'order' => 'Order',
         'notes' => 'Notes',
-        'agent' => 'Agent'
+        'agent' => 'Agent',
+        'invoice' => 'Invoice'
     ];
     public static function process($itemid, $doer, $update, $threaddata)
     {

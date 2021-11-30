@@ -11,7 +11,7 @@
     ><b-field>
       <b-tag
         type="is-info"
-        style="font-size: 14px"
+        style="font-size: 0.7rem"
         v-if="row.followup && row.followup.length == 1"
       >
         <b-icon icon="alarm" size="is-small"></b-icon>
@@ -26,7 +26,12 @@
     </b-field>
   </span>
 </template>
-<style>
+<style scoped>
+.button
+{
+  display:block;
+      margin: 0 auto;
+}
 </style>
 <script>
 // @ is an alias to /src

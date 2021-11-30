@@ -37,10 +37,16 @@ class Orders extends API
                 if ($id) {
                     $reviewOrder = ReviewOrder::with('doer')->where('id', $id)->first();
                     if ($reviewOrder) {
-                        if (Threads::where('id', $reviewOrder->threadid)->update(['orderid' => $reviewOrder->orderid])) {
+                        $fieldToUpdate = $reviewOrder->invoice == 1 ? 'invoiceid' : 'orderid';
+                        $fieldToRemove = $reviewOrder->invoice == 1 ? 'orderid' :  'invoiceid';
+                        if (Threads::where('id', $reviewOrder->threadid)->update([$fieldToUpdate => $reviewOrder->orderid, $fieldToRemove => ''])) {
                             ReviewOrder::where('threadid', $reviewOrder->threadid)->delete();
-                            Logs::ApproveOrderReview($reviewOrder, $_SESSION['adminid']);
-                            return ['result'=>'success', 'orderid' => $reviewOrder->orderid];
+                            if ($reviewOrder->invoice == 1) {
+                                Logs::ApproveInvoiceReview($reviewOrder, $_SESSION['adminid']);
+                            } else {
+                                Logs::ApproveOrderReview($reviewOrder, $_SESSION['adminid']);
+                            }
+                            return ['result' => 'success', 'orderid' => $reviewOrder->orderid];
                         } else {
                             return 'Something went wrong when updating order id';
                         }
@@ -54,7 +60,11 @@ class Orders extends API
                 if ($id) {
                     $reviewOrder = ReviewOrder::with('doer')->where('id', $id)->first();
                     if ($reviewOrder) {
-                        Logs::DeclineOrderReview($reviewOrder, $_SESSION['adminid']);
+                        if ($reviewOrder->invoice == 1) {
+                            Logs::DeclineInvoiceReview($reviewOrder, $_SESSION['adminid']);
+                        } else {
+                            Logs::DeclineOrderReview($reviewOrder, $_SESSION['adminid']);
+                        }
                         ReviewOrder::where('id', $id)->delete();
                         return 'success';
                     }

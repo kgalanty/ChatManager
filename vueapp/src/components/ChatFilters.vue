@@ -12,7 +12,7 @@
         </b-input>
       </b-field>
     </div>
-    <div class="tile is-3 is-child">
+    <div class="tile is-2 is-child">
       <b-field label="Tags" style="width: 95%">
         <b-taginput
           v-model="tags"
@@ -29,7 +29,24 @@
         </b-taginput>
       </b-field>
     </div>
-    <div class="tile is-3 is-child">
+    <div class="tile is-2 is-child">
+      <b-field label="Exclude Tags" style="width: 95%">
+        <b-taginput
+          v-model="extags"
+          :data="filteredTags"
+          autocomplete
+          field="tag.tag"
+          icon="label"
+          type="is-info"
+          placeholder="Start typing"
+          @typing="getFilteredTags"
+         
+          :open-on-focus="true"
+        >
+        </b-taginput>
+      </b-field>
+    </div>
+    <div class="tile is-2 is-child">
       <b-field label="Operator" style="width: 95%">
         <b-select
           placeholder="Select an operator"
@@ -51,6 +68,7 @@
           :max-date="dateTo"
           v-model="dateFrom"
           rounded
+          :first-day-of-week="1"
           placeholder="Click to select..."
           icon="calendar-today"
           :icon-right="'close-circle'"
@@ -67,12 +85,14 @@
           :min-date="dateFrom"
           v-model="dateTo"
           rounded
+         position="is-bottom-left"
           placeholder="Click to select..."
           icon="calendar-today"
           :icon-right="'close-circle'"
           icon-right-clickable
           @icon-right-click="dateTo = null"
           :date-formatter="dateFieldFormatter"
+          :first-day-of-week="1"
         >
         </b-datepicker>
       </b-field>
@@ -119,13 +139,7 @@ export default {
         this.showError(e);
       });
     },
-    TagsChanged() {
-      // this.$store.commit("chat/setFilter", { tags: this.tags });
-      this.setTagsFilter(this.tags);
-      this.loadChats().catch((e) => {
-        this.showError(e);
-      });
-    },
+
     getFilteredTags(text) {
       this.filteredTags = this.$store.state.tags.tags.filter((option) => {
         return option.toString().toLowerCase().indexOf(text.toLowerCase()) >= 0;
@@ -156,6 +170,7 @@ export default {
     ...mapActions({
       loadChats: "chat/loadChats",
       setTagsFilter: "chat/setTagsFilter",
+      setExTagsFilter: 'chat/setExTagsFilter',
       setOperatorFilter: "chat/setOperatorFilter",
     }),
     clearField(field) {
@@ -178,6 +193,10 @@ export default {
     parseDateTime(dateTime) {
       return this.moment(dateTime).format("YYYY-MM-DD HH:DD:SS");
     },
+    subOneDay(date)
+    {
+        return this.moment(date).subtract(1, 'd').format("YYYY-MM-DD")
+    }
   },
   mounted() {
     if (this.filters.tags) {
@@ -221,6 +240,19 @@ export default {
         });
       },
     },
+      extags: {
+      get() {
+        return this.$store.state.chat.filters.extags
+          ? this.$store.state.chat.filters.extags
+          : [];
+      },
+      set(v) {
+        this.setExTagsFilter(v);
+        this.loadChats().catch((e) => {
+          this.showError(e);
+        });
+      },
+    },
     dateFrom: {
       get() {
         return this.$store.state.chat.filters.dateFrom
@@ -238,7 +270,7 @@ export default {
     dateTo: {
       get() {
         return this.$store.state.chat.filters.dateTo
-          ? new Date(this.$store.state.chat.filters.dateTo)
+          ? new Date(this.subOneDay(this.$store.state.chat.filters.dateTo))
           : null;
       },
       set(v) {

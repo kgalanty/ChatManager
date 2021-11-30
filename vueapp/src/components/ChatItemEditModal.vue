@@ -53,17 +53,17 @@
             <b-field label="Domain">
               <b-input v-model="domain" placeholder="Fill domain"></b-input>
             </b-field>
-
-            <b-field label="Invoice ID" v-if="showinvoiceinsteadoforder">
+              <span style="color:#c3c3c3;">Order <b-switch v-model="takeInvoice"></b-switch> Invoice</span>
+            <b-field label="Invoice ID" v-if="takeInvoice">
               <b-input
-                v-model="selectedOrder"
+                v-model="invoiceid"
                 placeholder="Fill invoice number"
                 expanded
                 type="number"
               ></b-input>
             </b-field>
 
-            <b-field label="Order" v-if="!showinvoiceinsteadoforder">
+            <b-field label="Order" v-if="!takeInvoice">
               <b-input
                 v-model="selectedOrder"
                 placeholder="Fill order number"
@@ -110,12 +110,12 @@
                 </template>
                 <b-table-column
                   field="orderid"
-                  label="Suggestion of matching order ID"
+                  label="Suggestion"
                   v-slot="props"
                   width="100"
                   centered
                 >
-                  {{ props.row.orderid }}
+                  {{ props.row.orderid }} <span v-if="props.row.invoice == 1">(Invoice ID)</span>
                 </b-table-column>
                 <b-table-column
                   field="doer"
@@ -152,9 +152,9 @@
                 >
                   <p style="display: inline-block; margin: 2px">
                     <b-tooltip
-                      label="By accepting, you will set order ID and remove other suggestions"
+                      label="By accepting, you will set order ID (or invoice id) and remove other suggestions"
                       ><b-button
-                        @click="acceptOrderSuggestion(props.row.id)"
+                        @click="acceptOrderSuggestion(props.row.id, props.row.invoice)"
                         type="is-link"
                         icon-right="check"
                         size="is-small"
@@ -164,7 +164,7 @@
                   <p style="display: inline-block">
                     <b-button
                       type="is-danger"
-                      @click="declineOrderSuggestion(props.row.id)"
+                      @click="declineOrderSuggestion(props.row.id, props.row.invoice)"
                       icon-right="close"
                       size="is-small"
                     ></b-button>
@@ -591,7 +591,7 @@ export default {
           this.loading.isFetchingAgents = false;
         });
     }, 500),
-    acceptOrderSuggestion(suggestionid) {
+    acceptOrderSuggestion(suggestionid, isInvoice) {
       this.loading.orderSuggestionTable = true;
       const params = this.generateParamsForRequest("Orders");
       this.$api
@@ -602,15 +602,24 @@ export default {
         .then((response) => {
           this.loading.orderSuggestionTable = false;
           if (response.data.result == "success") {
-            this.selectedOrder = response.data.orderid;
+            if(isInvoice)
+            {
+              this.invoiceid = response.data.orderid
+              this.takeInvoice = true
+            }
+            else
+            {
+              this.selectedOrder = response.data.orderid
+              this.takeInvoice = false
+            }
             this.loadOrdersSuggestions();
-            this.notifySuccess("Order suggestion approved");
+            this.notifySuccess((isInvoice==1 ? 'Invoice' : 'Order') + " suggestion approved");
           } else {
             this.notifyWarning(response.data);
           }
         });
     },
-    declineOrderSuggestion(suggestionid) {
+    declineOrderSuggestion(suggestionid, isInvoice) {
       this.loading.orderSuggestionTable = true;
       const params = this.generateParamsForRequest("Orders");
       this.$api
@@ -622,7 +631,7 @@ export default {
           this.loading.orderSuggestionTable = false;
           if (response.data == "success") {
             this.loadOrdersSuggestions();
-            this.notifySuccess("Order suggestion rejected");
+            this.notifySuccess((isInvoice==1 ? 'Invoice' : 'Order') + " suggestion rejected");
           } else {
             this.notifyWarning(response.data);
           }
@@ -810,23 +819,23 @@ export default {
           });
       });
     },
-    async save() {
+     save() {
       this.loading.saveLoadingBtn = true;
-      if (this.selectedOrder && this.orderwaschanged) {
-        const checkorder = await this.checkOrder(true);
-        if (checkorder != "success") {
-          this.notifyWarning(
-            "This order id is already assigned to another thread."
-          );
-          // this.$buefy.toast.open({
-          //   container: ".modal-card",
-          //   message: "This order id is already assigned to another thread.",
-          //   type: "is-warning",
-          // });
-          this.loading.saveLoadingBtn = false;
-          return;
-        }
-      }
+      // if (this.selectedOrder && this.orderwaschanged) {
+      //   const checkorder = await this.checkOrder(true);
+      //   if (checkorder != "success") {
+      //     this.notifyWarning(
+      //       "This order id is already assigned to another thread."
+      //     );
+      //     // this.$buefy.toast.open({
+      //     //   container: ".modal-card",
+      //     //   message: "This order id is already assigned to another thread.",
+      //     //   type: "is-warning",
+      //     // });
+      //     this.loading.saveLoadingBtn = false;
+      //     return;
+      //   }
+      // }
       const params = this.generateParamsForRequest("Threads");
       this.loading.loadingSaveBtn = true;
 
@@ -841,6 +850,8 @@ export default {
           email: this.email,
           domain: this.domain,
           order: this.selectedOrder,
+          invoiceid: this.invoiceid,
+          takeinvoice: this.takeInvoice,
           notes: this.notes,
           customoffer: cannotofferReason,
           agent: newagent,
@@ -998,12 +1009,16 @@ export default {
     this.name = this.item.name ? this.item.name : this.item.customer.name;
     this.email = this.item.email ? this.item.email : this.item.customer.email;
     this.domain = this.item.domain;
-    this.selectedOrder = this.item.orderid;
+    this.selectedOrder = this.item.orderid != 0 && this.item.orderid != '' ? this.item.orderid : '';
     this.notes = this.item.notes;
     this.agent = this.item.agentdata
       ? this.item.agentdata?.firstname + " " + this.item.agentdata?.lastname
       : "";
-
+    this.invoiceid = this.item.invoiceid
+    if(this.invoiceid)
+    {
+      this.takeInvoice = true
+    }
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
     this.orderchangesuggestions = [];
@@ -1078,6 +1093,7 @@ export default {
         isFetchingAgents: false,
         orderSuggestionTable: false,
       },
+      takeInvoice: false,
       activeTab: 0,
       selectedAgent: "",
       filteredAgentArray: [],
@@ -1087,6 +1103,7 @@ export default {
       commmentReview: "",
       tags: [],
       order: "",
+      invoiceid: '',
       clients: [],
       tagslog: [],
       selectedClient: null,

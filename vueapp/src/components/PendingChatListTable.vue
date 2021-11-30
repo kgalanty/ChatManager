@@ -103,16 +103,21 @@
       </b-table-column>
       <b-table-column
         field="orderid"
-        label="Order ID"
+        label="Order/Inv ID"
         width="170"
         v-slot="props"
         centered
       >
+      <b-taglist attached v-if="props.row.invoiceid" style="display:block;margin-bottom:0 ;">
+        <b-tag type="is-danger">I</b-tag>
+        <b-tag :type="props.row.invoice.status=='Paid' ? 'is-success' : 'is-link'"><b-tooltip label="This is invoice ID. Green means Paid.">{{props.row.invoiceid}}</b-tooltip></b-tag>
+      </b-taglist>
          <b-tag type="is-info" v-if="props.row.orderid">{{ props.row.orderid }}</b-tag>
-        <span v-if="Array.isArray(props.row.revieworder) && props.row.revieworder.length > 0" >
-          <b-taglist attached style="display:block;">
-            <b-tag type="is-danger">+</b-tag>
-          <b-tag v-for="item in props.row.revieworder" :key="item.id">{{ item.orderid }}</b-tag>
+        <span v-if="Array.isArray(props.row.revieworder) 
+        && props.row.revieworder.length > 0" >
+          <b-taglist attached style="display:block" >
+            <b-tag type="is-danger">+</b-tag> 
+          <b-tag v-for="item in props.row.revieworder" :key="item.id" ><span style="display:inline-block;font-weight:bold" v-if="item.invoice==1">I</span> {{ item.orderid }}</b-tag>
           </b-taglist>
         </span>
       </b-table-column>

@@ -17,7 +17,7 @@ class Threads extends Model
 {
     public $timestamps = false;
     protected $table = DBTables::Threads;
-    protected $fillable = ['chatid', 'threadid', 'users', 'domain','agent', 'date', 'created_at'];
+    protected $fillable = ['chatid', 'threadid', 'users', 'domain','name', 'email', 'orderid', 'invoiceid','agent', 'date', 'notes','created_at'];
     public function tags()
     {
         return $this->hasMany(Tags::class, 't_id', 'id');
@@ -56,7 +56,7 @@ class Threads extends Model
     }
     public function invoice()
     {
-        return $this->belongsTo(Invoice::class, 'orderid', 'id');
+        return $this->belongsTo(Invoice::class, 'invoiceid', 'id');
     }
     public function sameorder()
     {
@@ -70,7 +70,7 @@ class Threads extends Model
     {
         return $this->belongsTo(Admin::class, 'agent', 'id')->select('id', 'firstname', 'lastname');
     }
-    public function scopeOrder($query, $order)
+    public function scopeOrderOf($query, $order)
     {
         return $query->where('orderid', $order);
     }

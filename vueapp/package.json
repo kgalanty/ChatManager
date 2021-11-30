@@ -13,6 +13,7 @@
     "buefy": "^0.9.9",
     "bulma": "0.8.1",
     "core-js": "^3.6.5",
+    "flush-promises": "^1.0.2",
     "moment": "^2.29.1",
     "node-sass": "4.14.1",
     "vue": "^2.6.11",

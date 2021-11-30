@@ -84,7 +84,7 @@
         field="threadid"
         label="Chat ID"
         v-slot="props"
-        width="160"
+        width="50"
         :visible="filters['chatid'].display"
       >
         <b-tooltip label="Click to open chat in LiveChat (new window)">
@@ -167,6 +167,7 @@
         field="domain"
         label="Domain"
         v-slot="props"
+        width="180"
         :visible="filters['domain'].display"
       >
         {{ props.row.domain }}
@@ -187,6 +188,7 @@
       <b-table-column
         field="customer.ip"
         label="IP"
+        width="150"
         v-slot="props"
         :visible="filters['ip'].display"
         >{{ props.row.customer.ip }}</b-table-column
@@ -194,7 +196,7 @@
       <b-table-column
         field=""
         label="Follow up"
-        width="100"
+        width="50"
         v-slot="props"
         :visible="filters['followup'].display"
       >
@@ -207,13 +209,22 @@
       </b-table-column>
       <b-table-column
         field="orderid"
-        label="Order ID"
+        label="Order/Inv ID"
         width="100"
         v-slot="props"
         cell-class="centernoblock"
         :visible="filters['orderid'].display"
         centered
       >
+
+      <b-taglist attached v-if="props.row.invoiceid" style="display:block;margin-bottom:0 ;">
+        <b-tag type="is-danger">I</b-tag>
+        <b-tag :type="props.row.invoice && props.row.invoice.status=='Paid' ? 'is-success' : 'is-link'">
+          <b-tooltip label="This is invoice ID. Green means Paid.">
+            {{props.row.invoiceid}}
+            </b-tooltip>
+          </b-tag>
+      </b-taglist>
         <b-icon
           style="color: red; margin: 0 auto; display: block"
           icon="close-thick"
@@ -221,7 +232,7 @@
           v-if="colorDirectConvertedSaleLackOrder(props.row)"
         >
         </b-icon>
-        {{ props.row.orderid }}
+       <b-tag type="is-info" v-if="props.row.orderid">{{ props.row.orderid }}</b-tag>
       </b-table-column>
       <b-table-column
         field="tags"
@@ -233,8 +244,8 @@
         <TablePoints
           v-if="props.row.agent != 0"
           :tags="props.row.tags"
-          :invoice="props.row.order == null && props.row.invoice"
-          :invoiceStatus="props.row.order ? props.row.order.invoice.status : ''"
+          :invoice="props.row.invoice"
+          :invoiceStatus="props.row.order ? props.row.order.invoice.status : (props.row.invoice ? props.row.invoice.status : '')"
         />
       </b-table-column>
       <b-table-column
@@ -394,47 +405,7 @@ export default {
     parseDateTime(dateTime) {
       return this.moment(dateTime).format("YYYY-MM-DD HH:mm:SS");
     },
-    showfollowup(row) {
-      return row.tags.find((e) => {
-        if (e.tag == "wcb" && e.approved == 1 && row.orderid == null) {
-          return true;
-        }
-      });
-    },
-    calcFollowUp(row) {
-      if (row.followup.length > 0) {
-        var now = this.moment.utc(
-          row.followup[row.followup.length - 1].followupdate
-        );
-        // var dur = this.moment(now).utc().fromNow()
-        // var duration = this.moment.duration(now.diff(end))
-        var result = this.moment.utc(now).fromNow();
-        return result;
-      }
-      return "None";
-    },
-    followup(row) {
-      const params = this.generateParamsForRequest("FollowUp");
-      this.$api
-        .post(`addonmodules.php?${params}`, {
-          threadid: row.id,
-        })
-        .then((response) => {
-          if (response.data.result == "success") {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: "Entry marked",
-              type: "is-success",
-            });
-          } else {
-            this.$buefy.toast.open({
-              container: ".modal-card",
-              message: response.data.result,
-              type: "is-warning",
-            });
-          }
-        });
-    },
+
     // resetFilters()
     // {
     //   this.$store.commit("chat/setFilter", { dateFrom: null, dateTo: null, operator: null });

@@ -20,7 +20,7 @@
           {{ error }}
         </b-notification>
 
-        <b-field label="Thread ID"   :type="threadid.type"
+        <b-field label="Thread ID" :type="threadid.type"
             :message="threadid.msg">
           <b-input
             v-model="threadid.value"

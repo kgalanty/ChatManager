@@ -29,10 +29,7 @@ class Stats extends API
             $data['data'] = StatsHelper::getTagsFrequency(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
             return $data;  
         }
-        // if($_GET['a'] == 'StatsDetails')
-        // {
-        //     return StatsHelper::Details(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
-        // }
+      
         $threads = StatsHelper::getStats( ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
         $cm_stayed_requests = StatsHelper::getPointsFromCancellations(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
         //calculate how many points per agent have to be substracted, as 'upgrade' tag should count as 1 in one thread 
@@ -40,6 +37,26 @@ class Stats extends API
         //This is returned and substracted on frontend. Raw query for speed gain
         $threads_upgrade_points = StatsHelper::getDecrementPoints( ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
         $o = StatsHelper::CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests);
+        
+        if(count($o) > 0)
+        {
+        $sum = [];
+        foreach($o as $item)
+        {
+            foreach($item as $prop=>$v)
+            {
+                if($prop == 'data') {
+                    $sum['data']['cm_points'] = $sum['data']['cm_points'] ? $sum['data']['cm_points']+$v['cm_points'] : $v['cm_points'];
+                }
+                else
+                {
+                    $sum[$prop] = $sum[$prop] ? $sum[$prop]+$v : $v;
+                }
+            }
+        }
+        $sum['data']['agent_name'] = 'TEAM';
+    $o[] = $sum;    
+    }
 
         
         return ['data' => $o];

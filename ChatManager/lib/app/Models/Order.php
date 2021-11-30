@@ -3,6 +3,7 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Models;
 use WHMCS\Module\Addon\ChatManager\app\Models\Service;
 use Illuminate\Database\Eloquent\Model;
+use WHMCS\Module\Addon\ChatManager\app\Models\Client;
 class Order extends Model
 {
     public $timestamps = false;
@@ -15,5 +16,9 @@ class Order extends Model
     public function service()
     {
         return $this->hasMany(Service::class, 'orderid', 'id');
+    }
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'userid', 'id');
     }
 }

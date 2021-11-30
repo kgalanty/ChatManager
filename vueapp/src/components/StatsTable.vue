@@ -46,6 +46,7 @@
             @input="loadStats"
             @icon-right-click="filters.dateTo = null"
             :date-formatter="dateFieldFormatter"
+           
           >
           </b-datepicker>
         </b-field>
@@ -56,7 +57,7 @@
       class="btable"
       :data="stats.data"
       bordered
-      
+       :row-class="colorSum"
       narrowed
       :total="stats.total"
       :loading="this.loading.stats"
@@ -64,9 +65,12 @@
       detailed
       detail-transition="fade"
     >
-      <template #empty>No entries yet.</template>
-      <template #detail="props">
-        <article style="text-align: left">
+      <template #empty >
+        <div  style="background: white !important; color:black;">
+        No entries yet.</div>
+        </template>
+      <template #detail="props" >
+        <article style="text-align: left" v-if="props.row.data.agent_id">
           <StatsDetails :row="props.row" :filters="filters" />
         </article>
       </template>
@@ -211,12 +215,10 @@
 </template>
 <style>
 .stats-sticky-column {
-  background: #ffebb8 !important;
-  color: rgb(0, 0, 0) !important;
+  background: #ffebb8;
+  color: rgb(0, 0, 0) ;
 }
-</style>
 
-<style >
 .btable {
   font-size: 13px;
 }
@@ -229,6 +231,12 @@
 #pendingchatlisttable th span {
   margin: 0 auto;
   text-align: center;
+}
+.is-sum td
+{
+  background:rgb(79, 63, 107) !important;
+  color:white !important;
+  z-index:3;
 }
 </style>
 <script>
@@ -248,6 +256,10 @@ export default {
   mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin],
   components: { StatsDetails },
   methods: {
+    colorSum(row) {
+      //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
+      if(!row.data.agent_id && this.stats.total > 0) return 'is-sum'
+    },
     // ...mapActions("chat", ["loadPendingChats", "loadChats"]),
     // isEditActive(row) {
     //   row.tags.find((e) => {
