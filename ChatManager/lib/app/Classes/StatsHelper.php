@@ -166,7 +166,7 @@ class StatsHelper
         foreach ($r as $agent_email => $rr) {
 
             $rr['decrementpoints'] = $threads_upgrade_points[$agent_email] ? (int)$threads_upgrade_points[$agent_email]->s - 1 : 0;
-            //$rr['cm_points'] = $cm_points[$agent_email] ? $cm_points[$agent_email]->stayed : 0;
+            $rr['cm_points'] = $cm_points[$agent_email] ? $cm_points[$agent_email]->stayed : 0;
             $o[] = $rr;
         }
         return $o;

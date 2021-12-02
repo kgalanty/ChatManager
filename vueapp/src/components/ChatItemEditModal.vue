@@ -53,7 +53,9 @@
             <b-field label="Domain">
               <b-input v-model="domain" placeholder="Fill domain"></b-input>
             </b-field>
-              <span style="color:#c3c3c3;">Order <b-switch v-model="takeInvoice"></b-switch> Invoice</span>
+            <span style="color: #c3c3c3"
+              >Order <b-switch v-model="takeInvoice"></b-switch> Invoice</span
+            >
             <b-field label="Invoice ID" v-if="takeInvoice">
               <b-input
                 v-model="invoiceid"
@@ -94,7 +96,7 @@
                   <b-icon
                     :icon="!props.open ? 'menu-down' : 'menu-up'"
                   ></b-icon>
-                  {{ !props.open ? "Pending Order Sugestions" : "Hide" }}
+                  {{ !props.open ? "Pending Order/Invoice Sugestions" : "Hide" }}
                 </a>
               </template>
               <b-table
@@ -115,7 +117,8 @@
                   width="100"
                   centered
                 >
-                  {{ props.row.orderid }} <span v-if="props.row.invoice == 1">(Invoice ID)</span>
+                  {{ props.row.orderid }}
+                  <span v-if="props.row.invoice == 1">(Invoice ID)</span>
                 </b-table-column>
                 <b-table-column
                   field="doer"
@@ -154,7 +157,9 @@
                     <b-tooltip
                       label="By accepting, you will set order ID (or invoice id) and remove other suggestions"
                       ><b-button
-                        @click="acceptOrderSuggestion(props.row.id, props.row.invoice)"
+                        @click="
+                          acceptOrderSuggestion(props.row.id, props.row.invoice)
+                        "
                         type="is-link"
                         icon-right="check"
                         size="is-small"
@@ -164,7 +169,9 @@
                   <p style="display: inline-block">
                     <b-button
                       type="is-danger"
-                      @click="declineOrderSuggestion(props.row.id, props.row.invoice)"
+                      @click="
+                        declineOrderSuggestion(props.row.id, props.row.invoice)
+                      "
                       icon-right="close"
                       size="is-small"
                     ></b-button>
@@ -602,18 +609,17 @@ export default {
         .then((response) => {
           this.loading.orderSuggestionTable = false;
           if (response.data.result == "success") {
-            if(isInvoice)
-            {
-              this.invoiceid = response.data.orderid
-              this.takeInvoice = true
-            }
-            else
-            {
-              this.selectedOrder = response.data.orderid
-              this.takeInvoice = false
+            if (isInvoice) {
+              this.invoiceid = response.data.orderid;
+              this.takeInvoice = true;
+            } else {
+              this.selectedOrder = response.data.orderid;
+              this.takeInvoice = false;
             }
             this.loadOrdersSuggestions();
-            this.notifySuccess((isInvoice==1 ? 'Invoice' : 'Order') + " suggestion approved");
+            this.notifySuccess(
+              (isInvoice == 1 ? "Invoice" : "Order") + " suggestion approved"
+            );
           } else {
             this.notifyWarning(response.data);
           }
@@ -631,7 +637,9 @@ export default {
           this.loading.orderSuggestionTable = false;
           if (response.data == "success") {
             this.loadOrdersSuggestions();
-            this.notifySuccess((isInvoice==1 ? 'Invoice' : 'Order') + " suggestion rejected");
+            this.notifySuccess(
+              (isInvoice == 1 ? "Invoice" : "Order") + " suggestion rejected"
+            );
           } else {
             this.notifyWarning(response.data);
           }
@@ -670,27 +678,13 @@ export default {
         })
         .then((response) => {
           if (response.data == "success") {
-            // this.$emit("close")
-            //this.loadChats()
             if (this.isAdmin()) {
               this.loadReviews();
             }
             this.loadReviewStatus();
             this.notifySuccess("Comment sent to review successfuly");
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: "Chat sent to review successfuly",
-            //   type: "is-success",
-            // });
-            //this.getTags();
-            //this.loadTagsHistory()
           } else {
             this.notifyWarning(response.data);
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: response.data,
-            //   type: "is-warning",
-            // });
           }
           this.loading.sendReviewLoadingBtn = false;
         });
@@ -704,20 +698,10 @@ export default {
         })
         .then((response) => {
           if (response.data.data == "success") {
-            // this.$emit("close")
-            //this.loadChats()
             var msg = "";
             if (this.isAdmin()) msg = "Tag has been deleted successfuly.";
             else msg = "You proposed the tag to be deleted.";
             this.notifySuccess(msg);
-            // this.$buefy.notification.open({
-            //         message: msg,
-            //         type: 'is-success',
-            //         duration: 5000,
-            //         autoClose: true,
-            //         closable: false
-            //     })
-
             this.getTags();
             this.loadTagsHistory();
             this.HasCustomOfferCheck();
@@ -735,23 +719,11 @@ export default {
         })
         .then((response) => {
           if (response.data.data == "success") {
-            // this.$emit("close")
-            //this.loadChats()
             this.notifySuccess("You declined deletion of tag");
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: "You approved the tag",
-            //   type: "is-success",
-            // });
             this.getTags();
             this.loadTagsHistory();
           } else {
             this.notifyWarning(response.data);
-            // this.$buefy.toast.open({
-            //   container: ".modal-card",
-            //   message: response.data,
-            //   type: "is-warning",
-            // });
           }
         });
     },
@@ -789,15 +761,9 @@ export default {
           })
           .then((response) => {
             if (response.data == "success") {
-              // this.$emit("close")
-              //this.loadChats()
+           
               if (!onlyreturn) {
                 this.notifySuccess("This Order is new.");
-                // this.$buefy.toast.open({
-                //   container: ".modal-card",
-                //   message: "This Order is new.",
-                //   type: "is-success",
-                // });
               }
               this.loadingCheckBtn = false;
               resolve("success");
@@ -805,12 +771,6 @@ export default {
             } else {
               if (!onlyreturn) {
                 this.notifyWarning(response.data);
-                // this.$buefy.toast.open({
-                //   container: ".modal-card",
-                //   message: response.data,
-                //   type: "is-warning",
-                //   duration: 5000,
-                // });
               }
               resolve(response.data);
               this.loadingCheckBtn = false;
@@ -819,7 +779,7 @@ export default {
           });
       });
     },
-     save() {
+    save() {
       this.loading.saveLoadingBtn = true;
       // if (this.selectedOrder && this.orderwaschanged) {
       //   const checkorder = await this.checkOrder(true);
@@ -907,9 +867,10 @@ export default {
         });
     },
     getTags() {
+      const params = this.generateParamsForRequest("Tags", [`a=GetTagsSingleThread`,`threadid=${this.item.id}`]);
       this.$api
         .get(
-          `addonmodules.php?module=ChatManager&c=Tags&json=1&a=GetTagsSingleThread&threadid=${this.item.id}`
+          `addonmodules.php?${params}`
         )
         .then(({ data }) => {
           this.tags = data.data;
@@ -1009,15 +970,17 @@ export default {
     this.name = this.item.name ? this.item.name : this.item.customer.name;
     this.email = this.item.email ? this.item.email : this.item.customer.email;
     this.domain = this.item.domain;
-    this.selectedOrder = this.item.orderid != 0 && this.item.orderid != '' ? this.item.orderid : '';
+    this.selectedOrder =
+      this.item.orderid != 0 && this.item.orderid != ""
+        ? this.item.orderid
+        : "";
     this.notes = this.item.notes;
     this.agent = this.item.agentdata
       ? this.item.agentdata?.firstname + " " + this.item.agentdata?.lastname
       : "";
-    this.invoiceid = this.item.invoiceid
-    if(this.invoiceid)
-    {
-      this.takeInvoice = true
+    this.invoiceid = this.item.invoiceid;
+    if (this.invoiceid) {
+      this.takeInvoice = true;
     }
     this.tags = this.item.tags;
     this.cannotoffer = this.item.customoffer;
@@ -1103,7 +1066,7 @@ export default {
       commmentReview: "",
       tags: [],
       order: "",
-      invoiceid: '',
+      invoiceid: "",
       clients: [],
       tagslog: [],
       selectedClient: null,

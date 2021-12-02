@@ -1,12 +1,18 @@
-
 export default {
     data() {
         return {
-            packageversion: "1.0.12",
-            build: "2021-11-30 00:21 UTC",
+            packageversion: "1.0.14",
+            build: "2021-12-02 10:41 UTC",
             logmessage: `
             <ul>
-            <li><strong>1.0.12</strong>
+            <li><strong>1.0.14</strong></li>
+            <li>- Added Logs tab for admins which aggregates all logs across the module and display in one place</li>
+            <li>- Adjusted some text labels</li>
+            <li>- Deleting unassigned orders now works</li>
+            <li><strong>1.0.13</strong></li>
+            <li>- Fixed showing Country and IP in main table</li>
+            <li>- Added functionality to inform when new version is published. When new version is detected on the server, you will see a notification asking to refresh page</li>
+            <li><strong>1.0.12</strong></li>
             <li>- Removed checkpoint for duplicated order id when saving chat in modal</li>
             <li>- Adjusted tags margins and filter fields width</li>
             <li>- Added invoice id switch in the modal. Now you can explicitly set invoice id instead of order id</li>
@@ -69,4 +75,24 @@ export default {
             // </ul>`
         };
     },
+    methods: {
+        verifyVer(apiappver) {
+           if(apiappver != this.packageversion)
+           {
+               return true
+           }
+           return false
+        },
+        appVerInconsistencyWarn()
+        {
+            this.$buefy.toast.open({
+                container: ".modal-card",
+                message:
+                  "New version available. Please refresh the page when possible.",
+                type: "is-success",
+                indefinite: true,
+                position: "is-bottom",
+              });
+        }
+    }
 }

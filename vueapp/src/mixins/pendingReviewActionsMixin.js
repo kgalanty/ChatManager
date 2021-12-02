@@ -1,4 +1,4 @@
-
+import requestsMixin from './requestsMixin'
 export const pendingReviewActionsMixin = {
     data() {
         return {
@@ -25,7 +25,7 @@ export const pendingReviewActionsMixin = {
 
         },
         ConfirmDuplicatedAllChats(orderid) {
-            const params = [`module=ChatManager`, `c=DuplicateReview`, `json=1`].join("&");
+            const params = requestsMixin.methods.generateParamsForRequest('DuplicateReview')
             this.$api
                 .post(`addonmodules.php?${params}`, {
                     orderid: orderid,

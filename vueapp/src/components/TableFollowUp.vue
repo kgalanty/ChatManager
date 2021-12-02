@@ -36,7 +36,6 @@
 <script>
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
-import { mapActions } from "vuex";
 import tableHelper from "../mixins/tableHelper";
 export default {
   name: "TableFollowUp",
@@ -44,11 +43,7 @@ export default {
   mixins: [tableHelper],
   props: ["row", "afterClickAction"],
   methods: {
-    ...mapActions({
-      loadChats: "chat/loadChats",
-      loadPendingChats: "chat/loadPendingChats",
-      getPermissions: "getPermissions",
-    }),
+
     click() {
       this.loading = true;
       this.disabled = true;

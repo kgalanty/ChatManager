@@ -4,6 +4,7 @@ namespace WHMCS\Module\Addon\ChatManager\app\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Logs extends Model
 {
@@ -22,8 +23,14 @@ class Logs extends Model
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'doer', 'id');
     }
-    public function tag()
+    public function relateditem()
     {
-        return $this->hasOne('\WHMCS\Module\Addon\ChatManager\app\Models\Tags', 't_id', 'itemid');
+        Relation::morphMap([
+            'Thread' => 'WHMCS\Module\Addon\ChatManager\app\Models\Threads',
+            'Tag' => 'WHMCS\Module\Addon\ChatManager\app\Models\Tags',
+        ]);
+        //return  $this->belongsTo(Threads::class, 'itemid', 'id')->where('itemclass', 'Thread');
+        return $this->morphTo(null, 'itemclass', 'itemid');
     }
+
 }

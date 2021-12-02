@@ -1,4 +1,5 @@
 import axios from 'axios'
+import requestsMixin from '../../mixins/requestsMixin'
 const chatsLogStore =
 {
   namespaced: true,
@@ -27,22 +28,13 @@ const chatsLogStore =
     },
     loadLogs(context, payload) {
       context.commit('setLoading', true)
-      const params = [
-        `module=ChatManager`,
-        `c=LogsHistory`,
-        `json=1`,
-        `itemid=${payload.itemid}`
-      ].join("&");
-
+      const params = requestsMixin.methods.generateParamsForRequest('LogsHistory', [`itemid=${payload.itemid}`])
       //context.commit('setChatsPage', payload.chatsPage)
       axios
         .get('addonmodules.php?' + params)
         .then((response) => {
           if (response) {
-
             context.commit('setLogs', response.data)
-
-
           }
         })
         .catch((e) => {

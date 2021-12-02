@@ -65,7 +65,7 @@
         field="date"
         label="Operator"
         v-slot="props"
-        width="160"
+        width="120"
         :visible="filters['operator'].display"
       >
         <b-icon
@@ -176,12 +176,13 @@
         field="customer.geolocation"
         label="Location"
         v-slot="props"
-        width="60"
+        width="50"
+        centered
         :visible="filters['location'].display"
       >
         {{
-          props.row.customer.geolocation
-            ? JSON.parse(props.row.customer.geolocation).country_code
+          props.row.customer && props.row.customer[0].geolocation
+            ? JSON.parse(props.row.customer[0].geolocation).country_code
             : ""
         }}
       </b-table-column>
@@ -190,13 +191,14 @@
         label="IP"
         width="150"
         v-slot="props"
+        centered
         :visible="filters['ip'].display"
-        >{{ props.row.customer.ip }}</b-table-column
+        >{{ props.row.customer[0].ip }}</b-table-column
       >
       <b-table-column
         field=""
         label="Follow up"
-        width="50"
+        width="40"
         v-slot="props"
         :visible="filters['followup'].display"
       >
@@ -210,13 +212,12 @@
       <b-table-column
         field="orderid"
         label="Order/Inv ID"
-        width="100"
+        width="80"
         v-slot="props"
         cell-class="centernoblock"
         :visible="filters['orderid'].display"
         centered
       >
-
       <b-taglist attached v-if="props.row.invoiceid" style="display:block;margin-bottom:0 ;">
         <b-tag type="is-danger">I</b-tag>
         <b-tag :type="props.row.invoice && props.row.invoice.status=='Paid' ? 'is-success' : 'is-link'">
@@ -239,7 +240,7 @@
         label="Extra Points"
         v-slot="props"
         :visible="filters['extrapoints'].display"
-        width="100"
+        width="80"
       >
         <TablePoints
           v-if="props.row.agent != 0"
@@ -252,8 +253,9 @@
         field="date"
         label="Edit"
         v-slot="props"
-        width="70"
+        width="40"
         :visible="filters['edit'].display"
+        centered
       >
         <b-button
           type="is-primary"
@@ -294,10 +296,13 @@
 #chatlisttable th {
   border: 0;
 }
-
+.table{
+  overflow:hidden;
+}
 .btable {
   font-size: 0.9rem;
   padding: -20px;
+  
 }
 .btable th {
   background: white;

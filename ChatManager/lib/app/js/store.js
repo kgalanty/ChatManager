@@ -301,7 +301,6 @@ const store = new Vuex.Store({
             state.pages = { ...state.pages, ...pages }
         },
         setSorting(state, sorting) {
-            console.log(sorting)
             state.pages = { ...state.pages, ...sorting }
         },
         setStartFromDate(state, date)

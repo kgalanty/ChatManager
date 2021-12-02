@@ -130,7 +130,7 @@
         <b-tag
           v-if="props.row.revieworder_count && props.row.revieworder_count > 0"
           type="is-link"
-          >Pending Order ID Changes: {{ props.row.revieworder_count }}</b-tag
+          >Pending Order/Inv Changes: {{ props.row.revieworder_count }}</b-tag
         >
         <b-tag v-if="isPendingTag(props.row.tags)" type="is-warning"
           >Pending Tags</b-tag

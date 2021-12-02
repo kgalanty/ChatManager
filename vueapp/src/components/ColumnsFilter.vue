@@ -52,17 +52,6 @@ export default {
   },
   computed: {
     ...mapState([]),
-    // filters:
-    // {
-    //   get()
-    //   {
-    //     return this.$store.state.chatcolumns.filters
-    //   },
-    //   set(val)
-    //   {
-    //    console.log(val)
-    //   }
-    // }
   },
   data() {
     return {

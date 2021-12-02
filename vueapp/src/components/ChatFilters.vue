@@ -296,60 +296,9 @@ export default {
       searchtext: "",
     };
   },
-  //  watch: {
-  //   dateFrom(n, o) {
-  //     if (!this.isDateAfter(n, this.filters.dateTo)) {
-  //       this.filters.dateFrom = new Date(o);
-  //       this.notifyWarning('Date is after "Date To". Restored previous date.')
-  //     }
-  //   },
-  //   dateTo(n, o) {
-  //     if (!this.isDateAfter(this.filters.dateFrom,n)) {
-  //       this.notifyWarning('Date is before "Date From". Restored previous date.')
-  //       this.filters.dateTo = new Date(o);
-  //     }
-  //   },
-  // },
   watch: {
-    // dateFrom(val) {
-    //   // if (
-    //   //   this.dateTo != null &&
-    //   //   old != null &&
-    //   //   val != null &&
-    //   //   !this.isDateAfter(val, this.dateTo)
-    //   // ) {
-    //   //   this.dateFrom = new Date(old);
-    //   //   this.notifyWarning('Date is after "Date To". Restored previous date.');
-    //   //   return;
-    //   // }
-
-    //   var datefromparsed = val !== null ? this.createUTCDatetime(val) : null;
-    //   this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
-    //   this.loadChats().catch((e) => {
-    //     this.showError(e);
-    //   });
-    // },
-    // dateTo(val) {
-    // if (
-    //   this.dateFrom != null &&
-    //   old != null &&
-    //   val != null &&
-    //   !this.isDateAfter(this.dateFrom, val)
-    // ) {
-    //   this.notifyWarning(
-    //     'Date is before "Date From". Restored previous date.'
-    //   );
-    //   this.dateTo = new Date(old);
-    //   return;
-    // }
-    // var datetoparsed =
-    //   val !== null ? this.createUTCDateTimeAndAdd(val, 24, "h") : null;
-    // this.$store.commit("chat/setFilter", { dateTo: datetoparsed });
-    //this.loadChats();
-    // },
     operator(val) {
       this.setOperatorFilter(val);
-      //this.$store.commit("chat/setFilter", { operator: val });
       this.loadChats().catch((e) => {
         this.showError(e);
       });

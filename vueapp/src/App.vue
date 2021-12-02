@@ -23,6 +23,7 @@
       <router-link to="/">Chats</router-link>
       <router-link to="/stats">Statistics</router-link>
       <router-link to="/orders" v-if="isAdmin()">Orders</router-link>
+      <router-link to="/logs" v-if="isAdmin()">Logs</router-link>
     </div>
     <router-view />
     <StaffOnline />

@@ -67,7 +67,7 @@ export default {
     },
     getStatsDetails( agentid) {
       
-      const params = this.generateParamsForRequest('Stats',    [`datefrom=${
+      const params = this.generateParamsForRequest('Stats', [`datefrom=${
            this.createUTCDatetime(this.filters.dateFrom)
         }`,
         `dateto=${
