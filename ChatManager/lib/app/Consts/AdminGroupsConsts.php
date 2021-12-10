@@ -1,15 +1,6 @@
 <?php
 
-namespace WHMCS\Module\Addon\ChatManager\app\Classes;
-
-use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatConsts;
-use WHMCS\Module\Addon\ChatManager\app\Classes\DateTimeHelper;
-use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatParsers;
-use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
-use LiveChat\Api\Client as LiveChat;
-use WHMCS\Module\Addon\ChatManager\app\Classes\FindClientHelper;
-use WHMCS\Module\Addon\ChatManager\app\Classes\FindOrderHelper;
-use WHMCS\Database\Capsule as DB;
+namespace WHMCS\Module\Addon\ChatManager\app\Consts;
 
 class AdminGroupsConsts
 {
@@ -20,7 +11,7 @@ class AdminGroupsConsts
     Below is the list of Admin IDs disallowed from access the module
     */
     public const AGENT_DISALLOWED = [272];
-
+    public const CRON_ADMIN = 1;
     /*
     * * Admin ID => Tag
     * Used to display other operator's tags for operator whose tag is present - without edition permission

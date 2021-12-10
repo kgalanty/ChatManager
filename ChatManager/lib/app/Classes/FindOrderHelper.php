@@ -44,8 +44,7 @@ class FindOrderHelper
             ->value('h.domain');
         }
     }
-    public static function execute($currentCustomer,
-    $referenceDate)
+    public static function execute($currentCustomer, $referenceDate)
     {
         $orderNumber = DB::table('tblorders as o')
         ->where('o.userid', $currentCustomer->id)

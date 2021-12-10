@@ -3,8 +3,7 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Controllers;
 use WHMCS\Module\Addon\ChatManager\app\Middlewares\AuthMid;
 use WHMCS\Module\Addon\ChatManager\app\Middlewares\StaffOnline;
-//use WHMCS\Module\Addon\ChatManager\app\Classes\StatsRoleHelper; 
-use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
+
 abstract class API
 {
     use AuthMid, StaffOnline;

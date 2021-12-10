@@ -34,6 +34,7 @@
 }
 </style>
 <script>
+import { mapActions } from 'vuex';
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import tableHelper from "../mixins/tableHelper";
@@ -43,7 +44,9 @@ export default {
   mixins: [tableHelper],
   props: ["row", "afterClickAction"],
   methods: {
-
+    ...mapActions({
+      loadChats: "chat/loadChats",
+    }),
     click() {
       this.loading = true;
       this.disabled = true;

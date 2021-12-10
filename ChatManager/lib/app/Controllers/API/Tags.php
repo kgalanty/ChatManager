@@ -85,7 +85,7 @@ class Tags extends API
                     Tag::where('id', $tag_id)->update(['approved' => 1]);
                     $tag = Tag::where('id', $tag_id)->first();
                     TagsLog::Approve($tag->t_id, $tag->tag);
-                    Logs::AddTag($tag_id, $_SESSION['adminid'], $tag->tag);
+                    Logs::AddTag($tag->t_id, $_SESSION['adminid'], $tag->tag);
                     return ['data' => 'success'];
                 }
                 return ['data' => 'Invalid Tag ID'];
@@ -99,7 +99,7 @@ class Tags extends API
                     Tag::where('id', $tag_id)->update(['proposed_deletion' => 0]);
                     $tag = Tag::where('id', $tag_id)->first();
                     TagsLog::DeclineProposeDeletion($tag->t_id, $tag->tag);
-                    Logs::DeclineProposeTagDeletion( $tag_id, $_SESSION['adminid'], $tag->tag);
+                    Logs::DeclineProposeTagDeletion( $tag->t_id, $_SESSION['adminid'], $tag->tag);
                     return ['data' => 'success'];
                 }
                 return ['data' => 'Invalid Tag ID'];
@@ -113,7 +113,7 @@ class Tags extends API
                 if ($tag_id) {
                     TagsLog::Delete($tag->t_id, $tag->tag);
                     Tag::where('id', $tag_id)->delete();
-                    Logs::DelTag($tag_id, $_SESSION['adminid'], $tag->tag);
+                    Logs::DelTag($tag->t_id, $_SESSION['adminid'], $tag->tag);
                     return ['data' => 'success'];
                 }
                 return ['data' => 'Invalid Tag ID'];
@@ -121,7 +121,7 @@ class Tags extends API
             if (AuthControl::isAgent()) {
                 if ($tag_id) {
                     TagsLog::ProposeDeletion($tag->t_id, $tag->tag);
-                    Logs::ProposeDelTag($tag_id, $_SESSION['adminid'], $tag->tag);
+                    Logs::ProposeDelTag($tag->t_id, $_SESSION['adminid'], $tag->tag);
                     Tag::where('id', $tag_id)->update(['proposed_deletion' => 1]);
                     return ['data' => 'success'];
                 }

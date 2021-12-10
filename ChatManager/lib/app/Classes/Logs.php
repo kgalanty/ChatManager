@@ -10,10 +10,10 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads as ThreadsModel;
 use WHMCS\Module\Addon\ChatManager\app\Classes\ThreadEditDiffLogs;
-
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 class Logs
 {
-    private static function log($itemid, $itemclass, $doer, $desc = '')
+    private static function log(int $itemid, string $itemclass, int $doer, string $desc = '')
     {
         LogsModel::create(
             [
@@ -46,34 +46,34 @@ class Logs
         $admin = Admin::find($doer);
         $thread = ThreadsModel::find($itemid)->chatid;
         $desc = $admin->firstname . ' ' . $admin->lastname . ' propsed to add new tag ' . $tag . ' to chat ' . $thread;
-        self::log($itemid, 'Tag', $doer, $desc);
+        self::log($itemid, 'Thread', $doer, $desc);
     }
     public static function ProposeDelTag($itemid, $doer, $tag)
     {
         $admin = Admin::find($doer);
         $thread = ThreadsModel::find($itemid)->chatid;
         $desc = $admin->firstname . ' ' . $admin->lastname . ' proposed removal of tag ' . $tag . ' in chat ' . $thread;
-        self::log($itemid, 'Tag', $doer, $desc);
+        self::log($itemid, 'Thread', $doer, $desc);
     }
     public static function AddTag($itemid, $doer, $tag)
     {
         $admin = Admin::find($doer);
         $thread = ThreadsModel::find($itemid)->chatid;
         $desc = $admin->firstname . ' ' . $admin->lastname . ' approved new tag ' . $tag . ' to chat ' . $thread;
-        self::log($itemid, 'Tag', $doer, $desc);
+        self::log($itemid, 'Thread', $doer, $desc);
     }
     public static function DeclineProposeTagDeletion($itemid, $doer, $tag)
     {
         $admin = Admin::find($doer);
         $desc = $admin->firstname . ' ' . $admin->lastname . ' declined removal of tag ' . $tag;
-        self::log($itemid, 'Tag', $doer, $desc);
+        self::log($itemid, 'Thread', $doer, $desc);
     }
-    public static function DelTag($itemid, $doer, $tag)
+    public static function DelTag(int $itemid, int $doer, string $tag)
     {
         $admin = Admin::find($doer);
         $thread = ThreadsModel::find($itemid)->chatid;
         $desc = $admin->firstname . ' ' . $admin->lastname . ' deleted tag ' . $tag . ' in chat ' . $thread;
-        self::log($itemid, 'Tag', $doer, $desc);
+        self::log($itemid, 'Thread', $doer, $desc);
     }
     public static function updateThread($itemid, $doer, $update, $threaddata)
     {
@@ -121,7 +121,7 @@ class Logs
     public static function submitOrderReview(int $order, int $doer, int $threadid)
     {
         $admin = Admin::find($doer);
-        $desc = $admin->firstname . ' ' . $admin->lastname . ' suggested new order id: '.$order.' for the thread.';
+        $desc = $admin->firstname . ' ' . $admin->lastname . ' added new pending order id: '.$order.' for the thread.';
         self::log($threadid, 'Thread', $doer, $desc);
     }
     public static function DeclineOrderReview( $OrderReview, int $doer)
@@ -144,7 +144,7 @@ class Logs
     }
     public static function LogTagsAdd(int $threadid, int $doer, array $tags = [])
     {
-        $doer = $doer != 0 ? $doer : 1;
+        $doer = $doer != 0 ? $doer : AdminGroupsConsts::CRON_ADMIN;
         $admin = Admin::find($doer);
         
         foreach($tags as $tag)
@@ -157,21 +157,21 @@ class Logs
     public static function AddThreadByCron(int $threadid)
     {
         $desc = 'Added by cron';
-        self::log($threadid, 'Thread', 1, $desc);
+        self::log($threadid, 'Thread', AdminGroupsConsts::CRON_ADMIN, $desc);
     }
     public static function AddOrderInCron(int $order, int $threadid)
     {
         $desc = 'Order ID set by cron: '.$order;
-        self::log($threadid, 'Thread', 1, $desc);
+        self::log($threadid, 'Thread', AdminGroupsConsts::CRON_ADMIN, $desc);
     }
     public static function duplicatedPendingOrder(int $threadid, int $orderid)
     {
         $desc = 'Removed duplicated pending order: '.$orderid;
-        self::log($threadid, 'Thread', 1, $desc);
+        self::log($threadid, 'Thread', AdminGroupsConsts::CRON_ADMIN, $desc);
     }
     public static function SetClientDataWhenEmpty(int $threadid)
     {
         $desc = 'Set client name and email based on the profile of related order';
-        self::log($threadid, 'Thread', 1, $desc);
+        self::log($threadid, 'Thread', AdminGroupsConsts::CRON_ADMIN, $desc);
     }
 }

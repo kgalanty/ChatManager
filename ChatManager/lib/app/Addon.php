@@ -1,6 +1,8 @@
 <?php
 namespace WHMCS\Module\Addon\ChatManager\app;
 use WHMCS\Database\Capsule as DB;
+use WHMCS\Module\Addon\ChatManager\app\Consts\moduleVersion;
+
 class Addon
 {
     public static function config()
@@ -12,11 +14,23 @@ class Addon
             'description' => '',
             // Module author name
             'author' => 'TMD',
-            'version' => '1.0.0',
+            'version' => moduleVersion::VERSION,
         ];
     }
     public static function activate()
     {
+      DB::statement('
+      CREATE TABLE IF NOT EXISTS `chat_completedorders` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `lcvisitorid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        `lcchatid` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+        `ordernumber` int(11) NOT NULL,
+        `date` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+        PRIMARY KEY (`id`),
+        KEY `lc` (`lcvisitorid`),
+        KEY `o` (`ordernumber`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ');
         DB::statement('
        CREATE TABLE IF NOT EXISTS `chat_customers` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -36,8 +50,8 @@ CREATE TABLE IF NOT EXISTS `chat_followup` (
     `followupdate` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `doer` int(11) NOT NULL,
     PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-  CREATE TABLE IF NOT EXISTS `chat_logs` (
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  DB::statement(" CREATE TABLE IF NOT EXISTS `chat_logs` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `itemid` int(11) NOT NULL,
     `itemclass` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -45,8 +59,32 @@ CREATE TABLE IF NOT EXISTS `chat_followup` (
     `desc` text COLLATE utf8mb4_unicode_ci,
     `created_at` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-  CREATE TABLE IF NOT EXISTS `chat_reviewthreads` (
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  	
+    DB::statement("CREATE TABLE IF NOT EXISTS `chat_reviewduplicatedorders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `threadid` int(11) NOT NULL,
+  `doer` int(11) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `threadid` (`threadid`),
+  KEY `doer` (`doer`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+	
+DB::statement("CREATE TABLE IF NOT EXISTS `chat_revieworders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `orderid` int(11) NOT NULL,
+  `threadid` int(11) NOT NULL,
+  `invoice` char(1) COLLATE utf8mb4_unicode_ci DEFAULT '0',
+  `sender` int(11) NOT NULL,
+  `created_at` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `threadid` (`threadid`),
+  KEY `sender` (`sender`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+DB::statement("CREATE TABLE IF NOT EXISTS `chat_reviewthreads` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `threadid` int(11) NOT NULL,
     `sender` int(11) NOT NULL,
@@ -56,8 +94,16 @@ CREATE TABLE IF NOT EXISTS `chat_followup` (
     PRIMARY KEY (`id`),
     KEY `threadid` (`threadid`),
     KEY `sender` (`sender`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-  CREATE TABLE IF NOT EXISTS `chat_taghistory` (
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  	
+    DB::statement("CREATE TABLE IF NOT EXISTS `chat_staffonline` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `adminid` int(11) NOT NULL,
+  `date` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+
+DB::statement("CREATE TABLE IF NOT EXISTS `chat_taghistory` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `thread_id` int(11) NOT NULL,
     `tag` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -65,8 +111,8 @@ CREATE TABLE IF NOT EXISTS `chat_followup` (
     `action` varchar(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `created_at` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-  CREATE TABLE IF NOT EXISTS `chat_tags` (
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  DB::statement("CREATE TABLE IF NOT EXISTS `chat_tags` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `t_id` int(11) NOT NULL,
     `tag` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -75,8 +121,8 @@ CREATE TABLE IF NOT EXISTS `chat_followup` (
     PRIMARY KEY (`id`),
     KEY `t` (`t_id`),
     KEY `tag` (`tag`)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-  CREATE TABLE IF NOT EXISTS `chat_threads` (
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;");
+  DB::statement("CREATE TABLE IF NOT EXISTS `chat_threads` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `chatid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `threadid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,

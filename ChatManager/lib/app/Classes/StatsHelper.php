@@ -6,7 +6,7 @@ use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
-use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 
 class StatsHelper

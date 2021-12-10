@@ -2,12 +2,12 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 
-use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatConsts;
+use WHMCS\Module\Addon\ChatManager\app\Consts\LiveChatConsts;
 use WHMCS\Module\Addon\ChatManager\app\Classes\DateTimeHelper;
 use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatParsers;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 use LiveChat\Api\Client as LiveChat;
-use WHMCS\Database\Capsule as DB;
 
 class LiveChatHelper
 {

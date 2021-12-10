@@ -7,6 +7,8 @@ import Buefy from 'buefy'
 import axios from 'axios'
 import moment from 'moment'
 Vue.prototype.$api = axios
+//App version - must be consistent with backend API /consts/moduleVersion.php
+
 Vue.use(Buefy,
   {
     defaultContainerElement: '#app'

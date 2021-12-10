@@ -2,7 +2,7 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 
-use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 
 class AuthControl

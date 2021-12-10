@@ -55,15 +55,15 @@ class Threads extends API
         }
         $threaddata = $thread->first();
         $update = [];
-        if ($name && $name != $threaddata->customer->name && $name != $threaddata->name) {
+        if (($name != $threaddata->customer->name && $name != $threaddata->name) || (strlen($name) == 0 && ($name != $threaddata->customer->name || $name != $threaddata->name)  )) {
             $update['name'] = $name;
         }
-        if ($email && ($email != $threaddata->customer->email || ($threaddata->email && $threaddata->email != $email))) {
+        if ($email != $threaddata->customer->email || ($threaddata->email && $threaddata->email != $email)) {
             $update['email'] = $email;
         }
-        //if ($domain) {
+        if ($domain != $threaddata->domain) {
         $update['domain'] = $domain;
-        // }
+         }
         if (!$takeinvoice && $order != $threaddata->orderid) {
             if (AuthControl::isAgent()) {
                 if (!$order) return ['result' => 'error', 'msg' => 'You cannot remove order id', 'orderid' => $threaddata->orderid];

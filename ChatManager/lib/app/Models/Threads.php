@@ -8,7 +8,7 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 use WHMCS\Module\Addon\ChatManager\app\Models\Customers;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewThread;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
-use WHMCS\Module\Addon\ChatManager\app\Models\Followup as FollowupModel;
+use WHMCS\Module\Addon\ChatManager\app\Models\FollowUp as FollowupModel;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
 use WHMCS\Module\Addon\ChatManager\app\Models\Order;
 use WHMCS\Module\Addon\ChatManager\app\Models\Invoice;

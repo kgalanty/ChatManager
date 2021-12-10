@@ -4,7 +4,7 @@ namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 
 use WHMCS\Module\Addon\ChatManager\app\Models\TagHistory;
 use WHMCS\Database\Capsule as DB;
-
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 class TagsLog
 {
     public static function Add($threadid, $tag)
@@ -21,7 +21,7 @@ class TagsLog
             [
                 'thread_id' => $thread_id,
                 'tag' => $tag,
-                'doer' => $doer>0 ? $doer : $_SESSION['adminid'],
+                'doer' => $doer>0 ? $doer : ($_SESSION['adminid'] ? $_SESSION['adminid'] : AdminGroupsConsts::CRON_ADMIN),
                 'action' => $action,
                 'created_at' => gmdate('Y-m-d H:i:s')
             ]
