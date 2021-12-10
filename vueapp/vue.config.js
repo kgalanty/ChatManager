@@ -19,15 +19,15 @@ module.exports = {
     public: 'https://localhost:8080/',
     proxy: {
       "addonmodules.php": {
-       //  target: "https://ticketing.stage.tmdhosting.com/admin/",
+        //target: "https://ticketing.stage.tmdhosting.com/admin/",
         target: "https://my.tmdhosting.com/admin/",
         logLevel: "debug",
         // changeOrigin: true,
         secure: false,
         withCredentials: true,
-        cookieDomainRewrite: { "localhost": "my.tmdhosting.com" },
+       cookieDomainRewrite: { "localhost": "my.tmdhosting.com" },
        //cookieDomainRewrite: { "localhost": "ticketing.stage.tmdhosting.com" },
-        headers: { Cookie: 'WHMCSBaCqM4Y33YVw=5c55e3780418a8e84202b07963f83f22'},
+        headers: { Cookie: 'WHMCSBaCqM4Y33YVw=69fc186e1ba913d0e7e1a9ac3549fcbb'},
       }
     }
   }

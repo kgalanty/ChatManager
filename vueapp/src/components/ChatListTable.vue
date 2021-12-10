@@ -42,7 +42,7 @@
       :row-class="colorRows"
       scrollable
     >
-      <template #empty v-if="chatsLoading === false"
+      <template #empty v-if="chatsLoading === false" style="text-align:center"
         ><p>No entries for given criteria. Try to loosen the filters.</p>
         <p><b-button type="is-link" @click="clearTagsDates">Clear Tags & Dates</b-button></p>
         </template
@@ -267,7 +267,11 @@
     </b-table>
   </article>
 </template>
-<style >
+<style>
+.is-empty
+{
+  text-align:center;
+}
 .extrapointscolumn,
 .cellcenter {
   display: block;

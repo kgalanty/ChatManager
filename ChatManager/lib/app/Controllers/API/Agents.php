@@ -5,7 +5,7 @@ namespace WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Module\Addon\ChatManager\app\Controllers\API;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
-use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 class Agents extends API
 {
     public function get()

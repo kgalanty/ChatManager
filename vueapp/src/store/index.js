@@ -10,6 +10,8 @@ import tagsStore from './tags/store'
 import OrdersStore from './orders/store'
 import StaffOnline from './staffonline/store'
 import SystemLogs from './systemlogs/store'
+
+import requestsMixin from '@/mixins/requestsMixin'
 Vue.use(Vuex)
 Vue.use(Buefy)
 
@@ -49,11 +51,8 @@ export default new Vuex.Store({
           resolve()
           return
         }
-        const params = [
-          `module=ChatManager`,
-          `c=Auth`,
-          `json=1`,
-          `a=readPermissions`].join("&");
+       const params = requestsMixin.methods.generateParamsForRequest('Auth', [`a=readPermissions`])
+        
         axios
           .get('addonmodules.php?' + params)
           .then((response) => {

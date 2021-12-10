@@ -1,10 +1,19 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.14",
-            build: "2021-12-02 10:41 UTC",
+            packageversion: "1.0.16",
+            build: "2021-12-10 10:39 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.16</strong></li>
+            <li>- Fixed chats not refreshing after using 'follow up' button</li>
+            <li>- Fixed calculating points for 'upgrade' tags</li>
+            <li>- Reorganized constant classes on backend</li>
+            <li>- Fixed logs for tags not showing in main chat log</li>
+            <li>- Message about empty result is now centered</li>
+            <li><strong>1.0.15</strong></li>
+            <li>- Fixed x-mark in order id field showing when invoice id is set</li>
+            <li>- Fixed logging changes in chats and saving when certain fields were cleared</li>
             <li><strong>1.0.14</strong></li>
             <li>- Added Logs tab for admins which aggregates all logs across the module and display in one place</li>
             <li>- Adjusted some text labels</li>
@@ -16,16 +25,16 @@ export default {
             <li>- Removed checkpoint for duplicated order id when saving chat in modal</li>
             <li>- Adjusted tags margins and filter fields width</li>
             <li>- Added invoice id switch in the modal. Now you can explicitly set invoice id instead of order id</li>
-            <li>- Above is still in testing phase, let me know if there's any bug :)</li>
-            <li><strong>1.0.11</strong></li>
+            <li>- Above is still in testing phase, let me know if there's any bug :)</li></ul>`
+            // <li><strong>1.0.11</strong></li>
             
-            <li>- Aligned Follow up buttons to middle</li>
-            <li>- Adjusted width of some columns in both tables</li>
-            <li> <strong>1.0.10</strong></li>
-            <li>- Fixed calendars & dates</li>
-            <li>- Adjusted width of some columns</li>
-            <li>- Fixed calculating Follow ups upon applying filters</li>
-            <li>- Fixed matching cron</li></ul>`
+            // <li>- Aligned Follow up buttons to middle</li>
+            // <li>- Adjusted width of some columns in both tables</li>
+            // <li> <strong>1.0.10</strong></li>
+            // <li>- Fixed calendars & dates</li>
+            // <li>- Adjusted width of some columns</li>
+            // <li>- Fixed calculating Follow ups upon applying filters</li>
+            // <li>- Fixed matching cron</li></ul>`
             // <li><strong>1.0.9</strong></li>
           
             // <li>- Added Exclude Tags functionality</li>

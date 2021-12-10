@@ -2,7 +2,6 @@
 
 namespace WHMCS\Module\Addon\ChatManager\app\Classes;
 
-
 class DateTimeHelper
 {
     //moment().format('Z')

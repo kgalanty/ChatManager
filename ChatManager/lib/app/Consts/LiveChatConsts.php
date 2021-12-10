@@ -1,5 +1,5 @@
 <?php
-namespace WHMCS\Module\Addon\ChatManager\app\Classes;
+namespace WHMCS\Module\Addon\ChatManager\app\Consts;
 class LiveChatConsts
 {
     const LIVECHAT_LOGIN = '0fce32f4-5759-4609-b155-4ec9435ed7b1';

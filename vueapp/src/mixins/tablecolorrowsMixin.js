@@ -21,7 +21,7 @@ export default {
         if ((e.tag == "directsale" && e.approved == 1) || (e.tag == "convertedsale" && e.approved == 1)) {
           return true;
         }
-      }) && !row?.orderid && row.agent != 0
+      }) && !row?.orderid && row.agent != 0 && !row.invoiceid
     },
     colorDuplicate(tags) {
       return tags.find((e) => {

@@ -11,7 +11,7 @@ use WHMCS\Module\Addon\ChatManager\app\Models\Tags;
 use WHMCS\Module\Addon\ChatManager\app\Classes\TagsHelper;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 use WHMCS\Module\Addon\ChatManager\app\Models\ReviewOrder;
-
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 class OrderCron
 {
     public $timezone;
@@ -58,7 +58,7 @@ class OrderCron
             Threads::where('id', $thread->id)
                 ->update(['domain' => $potentiallyCompletedOrder->domain, 'orderid' => $potentiallyCompletedOrder->orderid]);
             if (Tags::thread($thread->id)->tag('wcb')->count() > 0) {
-                TagsHelper::addTag('convertedsale', $thread->id, true, 1);
+                TagsHelper::addTag('convertedsale', $thread->id, true, AdminGroupsConsts::CRON_ADMIN);
                 TagsLog::AddedByCron($thread->id, 'convertedsale');
             }
 
@@ -165,7 +165,7 @@ class OrderCron
            
             Logs::AddOrderInCron($order->orderid, $thread->id);
             if (Tags::thread($thread->id)->tag('wcb')->count() > 0) {
-                TagsHelper::addTag('convertedsale', $thread->id, true, 1);
+                TagsHelper::addTag('convertedsale', $thread->id, true, AdminGroupsConsts::CRON_ADMIN);
                 TagsLog::AddedByCron($thread->id, 'convertedsale');
             }
         }

@@ -25,9 +25,7 @@
             v-model="filters.dateFrom"
             placeholder="Click to select..."
             icon="calendar-today"
-            :icon-right="'close-circle'"
-            icon-right-clickable
-            @icon-right-click="filters.dateFrom = null"
+         
             @input="loadStats"
             :date-formatter="dateFieldFormatter"
           >
@@ -41,10 +39,8 @@
             v-model="filters.dateTo"
             placeholder="Click to select..."
             icon="calendar-today"
-            :icon-right="'close-circle'"
-            icon-right-clickable
+       
             @input="loadStats"
-            @icon-right-click="filters.dateTo = null"
             :date-formatter="dateFieldFormatter"
            
           >
@@ -66,8 +62,12 @@
       detail-transition="fade"
     >
       <template #empty >
-        <div  style="background: white !important; color:black;">
-        No entries yet.</div>
+        <div>
+       <b-message type="is-warning" has-icon>
+           No results for given criteria.
+        </b-message>
+       
+        </div>
         </template>
       <template #detail="props" >
         <article style="text-align: left" v-if="props.row.data.agent_id">

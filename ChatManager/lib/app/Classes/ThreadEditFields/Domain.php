@@ -6,11 +6,12 @@ class Domain implements IThreadEditField
 {
     public static function handle($field, $threaddata)
     {
-        if($field == null) return;
+       // if($field == null) return;
 
         if($field != $threaddata->domain)
         {
-            $olddomain = strlen($field) == 0 ? '""' : $field;
+            $olddomain = strlen($threaddata->domain) == 0 ? '""' : $threaddata->domain;
+            $field = strlen($field) == 0 ? '""' : $field;
             return 'Domain: '. $olddomain.'=>'.$field;
         }
 

@@ -135,6 +135,9 @@
         <b-tag v-if="isPendingTag(props.row.tags)" type="is-warning"
           >Pending Tags</b-tag
         >
+       <b-tag v-if="props.row.pending_reviews && props.row.pending_reviews.length > 0" type="is-primary"
+          >Pending Reviews</b-tag
+        >
       </b-table-column>
       <!-- <b-table-column label="Extra Points" width="160" v-slot="props" > <TablePoints v-if="props.row.agent != 0"
           :tags="props.row.tags"

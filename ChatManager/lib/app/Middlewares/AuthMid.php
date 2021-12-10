@@ -2,7 +2,7 @@
 namespace WHMCS\Module\Addon\ChatManager\app\Middlewares;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\Classes\AuthControl;
-use WHMCS\Module\Addon\ChatManager\app\Classes\AdminGroupsConsts;
+use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 //use WHMCS\Module\Addon\ChatManager\app\Classes\StatsRoleHelper; StatsRoleHelper::getPermID()
 trait AuthMid
 {
