@@ -53,9 +53,13 @@
             <b-field label="Domain">
               <b-input v-model="domain" placeholder="Fill domain"></b-input>
             </b-field>
+            
+            <b-field><b-tag  type="is-warning" v-if="!invoiceid && !selectedOrder && item.tags.findIndex(i=>i.tag=='upgrade') > -1">
+              <strong>`Upgrade`</strong> tag detected. Consider filling invoice id instead of order id if possible.
+              </b-tag></b-field>
             <span style="color: #c3c3c3"
               >Order <b-switch v-model="takeInvoice"></b-switch> Invoice</span
-            >
+            > 
             <b-field label="Invoice ID" v-if="takeInvoice">
               <b-input
                 v-model="invoiceid"
@@ -81,6 +85,7 @@
                 @click="checkOrder(false)"
               />
             </b-field>
+            
             <span v-if="orderwaschanged && isAgent()" style="color: purple">
               Your change will be reviewed by supervisor and accepted or
               rejected.

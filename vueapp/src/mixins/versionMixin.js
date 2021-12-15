@@ -1,10 +1,14 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.17",
-            build: "2021-12-14 11:44 UTC",
+            packageversion: "1.0.19",
+            build: "2021-12-15 12:38 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.19</strong></li>
+            <li>- Added info in chat edit modal when it has 'upgrade' tag and no order/invoice id, advising to add invoice id</li>
+            <li>- Added filtering in logs tab</li>
+            <li>- Added support for multiple emails in email field - separated by comma - to be matched with possible order</li>
             <li><strong>1.0.18</strong></li>
             <li>- Fixed calculating points in chat table when in certain cases was failing</li>
             <li>- Fixed showing order/invoice id when accepting suggestion going to correct field</li>
@@ -16,14 +20,14 @@ export default {
             <li>- Orders Tab: Added showing domain renewals & registers within orders</li>
             <li>- Fixed setting incorrect page when coming back to Chats tab from another tab, when filtering was enabled before</li>
             <li>- Added showing invoice status when it's different than 'Paid' in Chats tab</li>
-            <li>- Added info about pending reviews in red 'pending' table</li>
-            <li><strong>1.0.16</strong></li>
-            <li>- Fixed chats not refreshing after using 'follow up' button</li>
-            <li>- Fixed calculating points for 'upgrade' tags</li>
-            <li>- Reorganized constant classes on backend</li>
-            <li>- Fixed logs for tags not showing in main chat log</li>
-            <li>- Message about empty result is now centered</li>
-            </ul>`
+            <li>- Added info about pending reviews in red 'pending' table</li></ul>`
+            // <li><strong>1.0.16</strong></li>
+            // <li>- Fixed chats not refreshing after using 'follow up' button</li>
+            // <li>- Fixed calculating points for 'upgrade' tags</li>
+            // <li>- Reorganized constant classes on backend</li>
+            // <li>- Fixed logs for tags not showing in main chat log</li>
+            // <li>- Message about empty result is now centered</li>
+            // </ul>`
             // <li><strong>1.0.15</strong></li>
             // <li>- Fixed x-mark in order id field showing when invoice id is set</li>
             // <li>- Fixed logging changes in chats and saving when certain fields were cleared</li>

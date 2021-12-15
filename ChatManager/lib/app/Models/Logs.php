@@ -23,6 +23,10 @@ class Logs extends Model
     {
         return $this->belongsTo('\WHMCS\Module\Addon\ChatManager\app\Models\Admin', 'doer', 'id');
     }
+    public function thread()
+    {
+        return $this->belongsTo(Threads::class, 'itemid')->where('itemclass', 'Thread');
+    }
     public function relateditem()
     {
         Relation::morphMap([

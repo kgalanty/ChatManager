@@ -6,10 +6,15 @@ const SystemLogs =
   state: () => ({
     logs: { data: [], total: 0 },
     loading: false,
-    page:1
+    page: 1,
+    filters: { dateFrom: null, dateTo: null, operator: null },
+    query: ''
   }),
   mutations:
   {
+    setQuery(state, query) {
+      state.query = query
+    },
     setLogs(state, logs) {
       state.logs = logs
     },
@@ -17,18 +22,29 @@ const SystemLogs =
     setLoading(state, loading) {
       state.loading = loading
     },
-    setPage(state, page)
-    {
+    setPage(state, page) {
       state.page = page
-    }
+    },
+    setFilter(state, filterItem) {
+      state.filters = { ...state.filters, ...filterItem }
+    },
+    
   },
   actions:
   {
-
+    setOperatorFilter(context, payload) {
+      context.commit("setFilter", { operator: payload });
+      context.commit("setPage", 1);
+    },
     loadLogs(context) {
       context.commit('setLoading', true)
       return new Promise((resolve, reject) => {
-        const Params = requestsMixin.methods.generateParamsForRequest('SystemLogs', [`page=${context.state.page}`])
+        const Params = requestsMixin.methods.generateParamsForRequest('SystemLogs', [`page=${context.state.page}`,
+        `datefrom=${context.state.filters.dateFrom ?? ''}`,
+        `dateto=${context.state.filters.dateTo ?? ''}`,
+        `operator=${context.state.filters.operator ? context.state.filters.operator : ''}`,
+        `q=${context.state.query}`
+        ])
         axios
           .get('addonmodules.php?' + Params)
           .then(response => {
