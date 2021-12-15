@@ -39,7 +39,7 @@ class Orders extends API
                     if ($reviewOrder) {
                         $fieldToUpdate = $reviewOrder->invoice == 1 ? 'invoiceid' : 'orderid';
                         $fieldToRemove = $reviewOrder->invoice == 1 ? 'orderid' :  'invoiceid';
-                        if (Threads::where('id', $reviewOrder->threadid)->update([$fieldToUpdate => $reviewOrder->orderid, $fieldToRemove => ''])) {
+                        if (Threads::where('id', $reviewOrder->threadid)->update([$fieldToUpdate => $reviewOrder->orderid, $fieldToRemove => null])) {
                             ReviewOrder::where('threadid', $reviewOrder->threadid)->delete();
                             if ($reviewOrder->invoice == 1) {
                                 Logs::ApproveInvoiceReview($reviewOrder, $_SESSION['adminid']);

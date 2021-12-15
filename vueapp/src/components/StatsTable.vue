@@ -2,7 +2,11 @@
   <article id="statstable">
     <div class="tile statsfilters">
       <div class="tile is-2 is-child">
-        <b-field label="Operator" style="width: 95%; padding: 9px" v-if="isAdmin()">
+        <b-field
+          label="Operator"
+          style="width: 95%; padding: 9px"
+          v-if="isAdmin()"
+        >
           <b-select
             placeholder="Select an operator"
             :loading="loading.operators"
@@ -21,11 +25,10 @@
       <div class="tile is-2 is-child">
         <b-field label="Date [From]" style="width: 95%; padding: 9px">
           <b-datepicker
-           :max-date="filters.dateTo"
+            :max-date="filters.dateTo"
             v-model="filters.dateFrom"
             placeholder="Click to select..."
             icon="calendar-today"
-         
             @input="loadStats"
             :date-formatter="dateFieldFormatter"
           >
@@ -35,14 +38,12 @@
       <div class="tile is-2 is-child">
         <b-field label="Date [to]" style="width: 95%; padding: 9px">
           <b-datepicker
-           :min-date="filters.dateFrom"
+            :min-date="filters.dateFrom"
             v-model="filters.dateTo"
             placeholder="Click to select..."
             icon="calendar-today"
-       
             @input="loadStats"
             :date-formatter="dateFieldFormatter"
-           
           >
           </b-datepicker>
         </b-field>
@@ -53,23 +54,26 @@
       class="btable"
       :data="stats.data"
       bordered
-       :row-class="colorSum"
+      :row-class="colorSum"
       narrowed
       :total="stats.total"
-      :loading="this.loading.stats"
+      :loading="loading.stats"
       pagination-position="top"
       detailed
       detail-transition="fade"
     >
-      <template #empty >
+      <template #empty>
         <div>
-       <b-message type="is-warning" has-icon>
-           No results for given criteria.
-        </b-message>
-       
+          <b-message type="is-warning" has-icon v-if="loading && !loading.stats">
+              No results for given criteria.
+          </b-message>
+           <b-message type="is-info" has-icon v-if="loading && loading.stats">
+              Loading data...
+          </b-message>
         </div>
-        </template>
-      <template #detail="props" >
+      </template>
+
+      <template #detail="props">
         <article style="text-align: left" v-if="props.row.data.agent_id">
           <StatsDetails :row="props.row" :filters="filters" />
         </article>
@@ -149,7 +153,7 @@
       <b-table-column field="vps/ds" label="VPS/DS" v-slot="props" width="100">
         {{ props.row["vps/ds"] ? props.row["vps/ds"] : 0 }}
       </b-table-column>
-     <b-table-column
+      <b-table-column
         field="date"
         label="Total Points"
         v-slot="props"
@@ -179,13 +183,16 @@
         {{
           props.row.directsale + props.row.wcb > 0
             ? returnPercents(
-                ((props.row.directsale + props.row.convertedsale + props.row.upgrade) * 100) /
+                ((props.row.directsale +
+                  props.row.convertedsale +
+                  props.row.upgrade) *
+                  100) /
                   (props.row.directsale + props.row.wcb)
               )
             : "0 %"
         }}
       </b-table-column>
-  
+
       <b-table-column
         header-class="stats-sticky-column"
         cell-class="stats-sticky-column"
@@ -216,7 +223,7 @@
 <style>
 .stats-sticky-column {
   background: #ffebb8;
-  color: rgb(0, 0, 0) ;
+  color: rgb(0, 0, 0);
 }
 
 .btable {
@@ -232,11 +239,10 @@
   margin: 0 auto;
   text-align: center;
 }
-.is-sum td
-{
-  background:rgb(79, 63, 107) !important;
-  color:white !important;
-  z-index:3;
+.is-sum td {
+  background: rgb(79, 63, 107) !important;
+  color: white !important;
+  z-index: 3;
 }
 </style>
 <script>
@@ -249,8 +255,8 @@ import { dateMixin } from "@/mixins/dateMixin.js";
 import axios from "axios";
 import requestsMixin from "../mixins/requestsMixin";
 import StatsDetails from "@/components/StatsDetails";
-import notificationsMixin from '../mixins/notificationsMixin';
-import memberMixin from '../mixins/memberMixin';
+import notificationsMixin from "../mixins/notificationsMixin";
+import memberMixin from "../mixins/memberMixin";
 export default {
   name: "StatsTable",
   mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin],
@@ -258,7 +264,7 @@ export default {
   methods: {
     colorSum(row) {
       //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
-      if(!row.data.agent_id && this.stats.total > 0) return 'is-sum'
+      if (!row.data.agent_id && this.stats.total > 0) return "is-sum";
     },
     // ...mapActions("chat", ["loadPendingChats", "loadChats"]),
     // isEditActive(row) {
@@ -284,11 +290,12 @@ export default {
     loadOperators() {
       if (this.operators.length == 0) {
         this.loading.operators = true;
-         const params = this.generateParamsForRequest("Agents", ['a=GetAgentsList', 'q=']);
+        const params = this.generateParamsForRequest("Agents", [
+          "a=GetAgentsList",
+          "q=",
+        ]);
         this.$api
-          .get(
-           `addonmodules.php?${params}`
-          )
+          .get(`addonmodules.php?${params}`)
           .then(({ data }) => {
             this.operators = data.data;
           })
@@ -323,7 +330,7 @@ export default {
       const dateTo = this.filters.dateTo
         ? this.createUTCDateTimeAndAdd(this.filters.dateTo, "1", "d")
         : this.createUTCDatetime(
-            this.moment().endOf('month').format("YYYY-MM-DD")
+            this.moment().endOf("month").format("YYYY-MM-DD")
           );
       this.setDateFilters(dateFrom, dateTo);
       const params = this.generateParamsForRequest("Stats", [
@@ -354,12 +361,14 @@ export default {
     dateFrom(n, o) {
       if (!this.isDateAfter(n, this.filters.dateTo)) {
         this.filters.dateFrom = new Date(o);
-        this.notifyWarning('Date is after "Date To". Restored previous date.')
+        this.notifyWarning('Date is after "Date To". Restored previous date.');
       }
     },
     dateTo(n, o) {
-      if (!this.isDateAfter(this.filters.dateFrom,n)) {
-        this.notifyWarning('Date is before "Date From". Restored previous date.')
+      if (!this.isDateAfter(this.filters.dateFrom, n)) {
+        this.notifyWarning(
+          'Date is before "Date From". Restored previous date.'
+        );
         this.filters.dateTo = new Date(o);
       }
     },

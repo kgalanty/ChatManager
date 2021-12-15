@@ -95,7 +95,7 @@ export default {
         if (i.tag == "vps/ds") n++
         if (i.tag == "upgrade") upgradeMarker = true
       }
-      if(upgradeMarker && invoice.status == 'Paid') return 1
+      if(upgradeMarker &&  invoiceStatus == 'Paid') return 1
       return n > 0 ? n : ''
     }
   }

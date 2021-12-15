@@ -17,6 +17,10 @@ class Order extends Model
     {
         return $this->hasMany(Service::class, 'orderid', 'id');
     }
+    public function domain()
+    {
+        return $this->hasMany(Domain::class, 'orderid', 'id');
+    }
     public function client()
     {
         return $this->belongsTo(Client::class, 'userid', 'id');

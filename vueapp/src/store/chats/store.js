@@ -46,18 +46,23 @@ const chatsStore = {
   actions: {
     setTagsFilter(context, payload) {
       context.commit("setFilter", { tags: payload });
+      context.commit("setChatsPage", 1);
     },
     setExTagsFilter(context, payload) {
       context.commit("setFilter", { extags: payload });
+      context.commit("setChatsPage", 1);
     },
     setDateFromFilter(context, payload) {
       context.commit("setFilter", { dateFrom: payload });
+      context.commit("setChatsPage", 1);
     },
     setDateToFilter(context, payload) {
       context.commit("setFilter", { dateTo: payload });
+      context.commit("setChatsPage", 1);
     },
     setOperatorFilter(context, payload) {
       context.commit("setFilter", { operator: payload });
+      context.commit("setChatsPage", 1);
     },
     loadPendingChats(context) {
         context.commit('setPendingChatsLoading', true)
@@ -87,8 +92,9 @@ const chatsStore = {
     },
     loadChats(context) {
       return new Promise((resolve, reject) => {
-        context.commit('setChatsLoading', true)
-        context.commit('setChats', {'total': context.state.chats.total})
+        context.commit('setChatsLoading', true) //run loading
+        //set total chats to previous value to make it visible during loading
+        
         let replaceChars = encodeURIComponent('#')
         let tags = context.state.filters.tags ? context.state.filters.tags.join(',') : ''
         let extags = context.state.filters.extags ? context.state.filters.extags.join(',') : ''
@@ -105,6 +111,7 @@ const chatsStore = {
         axios
           .get('addonmodules.php?' + params)
           .then((response) => {
+            context.commit('setChats', {'total': 0})
             if (response) {
               for (let item of response.data.data) {
                 item.tags.sort(function (a, b) {

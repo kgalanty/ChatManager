@@ -42,9 +42,15 @@
       :row-class="colorRows"
       scrollable
     >
-      <template #empty v-if="chatsLoading === false" style="text-align:center"
-        ><p>No entries for given criteria. Try to loosen the filters.</p>
+      <template #empty style="text-align:center"
+        >
+        <span v-if="chatsLoading === false" >
+        <p>No entries for given criteria. Try to loosen the filters.</p>
         <p><b-button type="is-link" @click="clearTagsDates">Clear Tags & Dates</b-button></p>
+        </span>
+         <b-message type="is-info" has-icon v-if="chatsLoading">
+              Loading data...
+          </b-message>
         </template
       >
       <template #detail="props" v-if="isAdmin()">
@@ -220,7 +226,7 @@
       >
       <b-taglist attached v-if="props.row.invoiceid" style="display:block;margin-bottom:0 ;">
         <b-tag type="is-danger">I</b-tag>
-        <b-tag :type="props.row.invoice && props.row.invoice.status=='Paid' ? 'is-success' : 'is-link'">
+        <b-tag :type="props.row.invoice != null && props.row.invoice.status=='Paid' ? 'is-success' : 'is-link'">
           <b-tooltip label="This is invoice ID. Green means Paid.">
             {{props.row.invoiceid}}
             </b-tooltip>
@@ -233,7 +239,8 @@
           v-if="colorDirectConvertedSaleLackOrder(props.row)"
         >
         </b-icon>
-       <b-tag type="is-info" v-if="props.row.orderid">{{ props.row.orderid }}</b-tag>
+       <b-tag :type="tagTypeBasedOnInvoiceStatus(props.row)" v-if="props.row.orderid">{{ props.row.orderid }}</b-tag>
+       <b-tag type="is-primary" v-if="ShowTagBasedOnInvoiceOrderStatus(props.row)" >{{ props.row.order && props.row.order.invoice && props.row.order.invoice.status ? props.row.order.invoice.status : '' }}</b-tag>
       </b-table-column>
       <b-table-column
         field="tags"
@@ -246,7 +253,7 @@
           v-if="props.row.agent != 0"
           :tags="props.row.tags"
           :invoice="props.row.invoice"
-          :invoiceStatus="props.row.order ? props.row.order.invoice.status : (props.row.invoice ? props.row.invoice.status : '')"
+          :invoiceStatus="props.row.order && props.row.order.invoice ? props.row.order.invoice.status : (props.row.invoice ? props.row.invoice.status : '')"
         />
       </b-table-column>
       <b-table-column
@@ -343,6 +350,14 @@ export default {
       getPermissions: "getPermissions",
       setTagsFilter: "chat/setTagsFilter",
     }),
+    tagTypeBasedOnInvoiceStatus(row)
+    {
+      return row.order?.invoice?.status == 'Paid' ? 'is-success' : 'is-info'
+    },
+        ShowTagBasedOnInvoiceOrderStatus(row)
+    {
+      return row?.order?.invoice && row?.order?.invoice?.status != 'Paid'
+    },
     clearTagsDates()
     {
       this.$store.commit("chat/setFilter", { dateFrom: null, dateTo: null,  });

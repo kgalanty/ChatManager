@@ -36,7 +36,7 @@ class Stats extends API
         // even among other pointgiving tags.
         //This is returned and substracted on frontend. Raw query for speed gain
         $threads_upgrade_points = StatsHelper::getDecrementPoints( ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
-        $o = StatsHelper::CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests);
+        $o = StatsHelper::CreateResult($threads, $threads_upgrade_points , $cm_stayed_requests);
         
         if(count($o) > 0)
         {

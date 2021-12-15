@@ -13,7 +13,15 @@
       backend-sorting
       @page-change="onPageChange"
     >
-      <template #empty>No entries yet.</template>
+      <template #empty>
+        
+          <b-message type="is-warning" has-icon v-if="!loading">
+              No data here yet.
+          </b-message>
+           <b-message type="is-info" has-icon v-if="loading">
+              Loading data...
+          </b-message>
+        </template>
       <!-- <template #detail="props">
         <article style="text-align: left">
           <StatsDetails :row="props.row" :filters="filters" />
@@ -43,7 +51,7 @@
         label="Item"
         v-slot="props"
       >
-       <b-tag v-if="props.row.relateditem.chatid" type="is-link">{{ props.row.relateditem.chatid }}</b-tag>
+       <b-tag v-if="props.row.relateditem.threadid" type="is-link">{{ props.row.relateditem.threadid }}</b-tag>
       </b-table-column>
 
      

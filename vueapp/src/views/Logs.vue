@@ -6,6 +6,12 @@
     ><p
         class="panel-heading"
       >
+       Filters
+      </p>
+    <LogFilters />
+       <p
+        class="panel-heading"
+      >
        Recent System Logs
       </p>
       <SystemLogs></SystemLogs>
@@ -17,12 +23,14 @@
 </style>
 <script>
  import SystemLogs from '@/components/SystemLogs.vue'
+ import LogFilters from '@/components/LogFilters.vue'
  import { mapActions } from "vuex";
 export default {
   
   name: "Logs",
   components: {
-    SystemLogs
+    SystemLogs,
+    LogFilters 
   },
   methods: {
    ...mapActions({
