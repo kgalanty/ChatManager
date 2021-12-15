@@ -98,9 +98,9 @@ export default {
     //HelloWorld
   },
   methods: {
-     ...mapActions("systemlogs", ["loadLogs"]),
+     ...mapActions("systemlogs", ["loadLogs", 'setOperatorFilter']),
     doSearch() {
-      this.$store.commit("chat/setQuery", this.searchtext);
+      this.$store.commit("systemlogs/setQuery", this.searchtext);
 
       this.loadLogs().catch((e) => {
         this.showError(e);
@@ -130,24 +130,12 @@ export default {
         resolve();
       });
     },
-    ...mapActions({
-      loadChats: "chat/loadChats",
-      setTagsFilter: "chat/setTagsFilter",
-      setExTagsFilter: 'chat/setExTagsFilter',
-      setOperatorFilter: "chat/setOperatorFilter",
-    }),
+   ...mapActions("systemlogs", ["loadLogs"]),
     clearField(field) {
       this[field] = null;
-      this.$store.commit("chat/setFilter", { [field]: null });
+      this.$store.commit("systemlogs/setFilter", { [field]: null });
     },
-    constructParams() {
-      const params = {
-        perPage: this.perPage,
-        Datefrom: this.dateFrom,
-        Dateto: this.dateTo,
-      };
-      return params;
-    },
+
     createUTCDatetime(datetime) {
       return (
         this.moment(datetime).utc().format("YYYY-MM-DDTHH:mm:SS") + ".000000Z"
@@ -161,24 +149,40 @@ export default {
         return this.moment(date).subtract(1, 'd').format("YYYY-MM-DD")
     }
   },
-  mounted() {
-    if (this.filters.tags) {
-      this.tags = this.filters.tags;
-    }
+
+  computed: {
+    ...mapState("systemlogs", ["filters"]),
+
+    dateFrom: {
+      get() {
+        return this.$store.state.systemlogs.filters.dateFrom
+          ? new Date(this.$store.state.systemlogs.filters.dateFrom)
+          : null;
+      },
+      set(v) {
+        let datefromparsed = v !== null ? this.createUTCDatetime(v) : null;
+        this.$store.commit("systemlogs/setFilter", { dateFrom: datefromparsed });
+        this.loadLogs()
+      },
+    },
+    dateTo: {
+      get() {
+        return this.$store.state.systemlogs.filters.dateTo
+          ? new Date(this.subOneDay(this.$store.state.systemlogs.filters.dateTo))
+          : null;
+      },
+      set(v) {
+        let datefromparsed =
+          v !== null ? this.createUTCDateTimeAndAdd(v, 24, "h") : null;
+        this.$store.commit("systemlogs/setFilter", { dateTo: datefromparsed });
+        this.loadLogs()
+      },
+    },
+  },
+    mounted() {
     if (this.filters.dateFrom) {
       this.dateFrom = new Date(this.filters.dateFrom);
-    } else {
-      // let dayToday = this.moment().utc().format('DD')
-      // if(dayToday < 16)
-      //{
-      let dateGeneral = new Date();
-      this.dateFrom = new Date(
-        dateGeneral.getUTCFullYear(),
-        dateGeneral.getUTCMonth(),
-        dateGeneral.getUTCDate()
-      );
-      //}
-    }
+    } 
     if (this.filters.dateTo) {
       this.dateTo = new Date(this.filters.dateTo);
     }
@@ -188,71 +192,8 @@ export default {
       });
     }
   },
-  computed: {
-    ...mapState("chat", ["filters"]),
-    tags: {
-      get() {
-        return this.$store.state.chat.filters.tags
-          ? this.$store.state.chat.filters.tags
-          : [];
-      },
-      set(v) {
-        this.setTagsFilter(v);
-        this.loadChats().catch((e) => {
-          this.showError(e);
-        });
-      },
-    },
-      extags: {
-      get() {
-        return this.$store.state.chat.filters.extags
-          ? this.$store.state.chat.filters.extags
-          : [];
-      },
-      set(v) {
-        this.setExTagsFilter(v);
-        this.loadChats().catch((e) => {
-          this.showError(e);
-        });
-      },
-    },
-    dateFrom: {
-      get() {
-        return this.$store.state.chat.filters.dateFrom
-          ? new Date(this.$store.state.chat.filters.dateFrom)
-          : null;
-      },
-      set(v) {
-        let datefromparsed = v !== null ? this.createUTCDatetime(v) : null;
-        this.$store.commit("chat/setFilter", { dateFrom: datefromparsed });
-        this.loadChats().catch((e) => {
-          this.showError(e);
-        });
-      },
-    },
-    dateTo: {
-      get() {
-        return this.$store.state.chat.filters.dateTo
-          ? new Date(this.subOneDay(this.$store.state.chat.filters.dateTo))
-          : null;
-      },
-      set(v) {
-        let datefromparsed =
-          v !== null ? this.createUTCDateTimeAndAdd(v, 24, "h") : null;
-        this.$store.commit("chat/setFilter", { dateTo: datefromparsed });
-        this.loadChats().catch((e) => {
-          this.showError(e);
-        });
-      },
-    },
-  },
   data() {
     return {
-      // dateFrom: null,
-      // dateTo: null,
-      tagsinput: [],
-      filteredTags: [],
-      // tags: [],
       loadingOperator: false,
       operators: [],
       operator: "",
@@ -261,10 +202,8 @@ export default {
   },
   watch: {
     operator(val) {
-      this.setOperatorFilter(val);
-      this.loadChats().catch((e) => {
-        this.showError(e);
-      });
+     this.setOperatorFilter(val);
+     this.loadLogs()
     },
   },
 };
