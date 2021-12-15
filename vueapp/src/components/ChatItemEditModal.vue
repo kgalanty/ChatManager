@@ -599,6 +599,7 @@ export default {
         });
     }, 500),
     acceptOrderSuggestion(suggestionid, isInvoice) {
+     
       this.loading.orderSuggestionTable = true;
       const params = this.generateParamsForRequest("Orders");
       this.$api
@@ -609,7 +610,7 @@ export default {
         .then((response) => {
           this.loading.orderSuggestionTable = false;
           if (response.data.result == "success") {
-            if (isInvoice) {
+            if (isInvoice == 1) {
               this.invoiceid = response.data.orderid;
               this.takeInvoice = true;
             } else {

@@ -15,7 +15,7 @@ class OrdersChats extends API
     public function get()
     {
         if (AuthControl::isAdmin()) {
-            $reviews = OrdersChatsModel::with(['order.service', 'order.service.product', 'lccustomer'])
+            $reviews = OrdersChatsModel::with(['order.service', 'order.domain', 'order.service.product','lccustomer'])
             ->whereDoesntHave('chat')
             ->orderBy('id', 'DESC')
             ->get();

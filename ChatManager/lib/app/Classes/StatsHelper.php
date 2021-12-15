@@ -42,13 +42,18 @@ class StatsHelper
             ->leftJoin('tblinvoices as inv', 'inv.id', '=', 'o.invoiceid')
             ->leftJoin('tblinvoices as inv2', 'inv2.id', '=', 't.orderid')
             ->whereBetween('t.date', [$params['datefrom'], $params['dateto']])
+            ->where(function($q2)
+                    {
+                        $q2->where('inv.status', 'Paid')->orWhere('inv2.status', 'Paid');
+            })
             ->where(function ($q)
             {
-            
+                    
                $q->where(function ($query) {
                     $query->whereIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])
-                    ->where('tg.approved', 1)
-                    ->where('inv.status', 'Paid');
+                    ->whereNotIn('tg.tag', ['upgrade'])
+                    ->where('tg.approved', 1);
+                   
                 });
                 $q->orWhere(function ($query) {
                     $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale', 'upgrade'])
@@ -58,7 +63,9 @@ class StatsHelper
                 $q->orWhere(function ($query) {
                     $query->whereIn('tg.tag', ['upgrade'])
                     ->where('tg.approved', 1)
-                    ->where('inv2.status', 'Paid')
+                    ->where('t.orderid', '')
+                    ->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale']); 
+                   // ->where('inv2.status', 'Paid')
                     ;
                 });
             });
@@ -120,6 +127,10 @@ class StatsHelper
             group by agent';
 
         $threads_upgrade_points = collect(DB::select($q, [$params['datefrom'], $params['dateto']]))->keyBy('agent');
+              if($_SESSION['adminid'] == 230)
+        {
+           // var_dump($q);die;
+        }
         return $threads_upgrade_points;
     }
     public static function CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests)
@@ -139,7 +150,10 @@ class StatsHelper
             "vps/ds" => 0,
             'upgrade' => 0
         ];
-
+if($_SESSION['adminid'] == 230)
+{
+    //echo('<pre>'); var_dump($threads); die;
+}
         //rearrange data from query to one unified array as query returns scattered data across rows
         foreach ($threads as $t) {
             $r[$t->agent] = array_merge($tags, $r[$t->agent]);

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
-
+import store from '../store/index'
 Vue.use(VueRouter)
 
 const routes = [
@@ -39,5 +39,11 @@ const routes = [
 const router = new VueRouter({
   routes
 })
-
+router.beforeEach((to, from, next) => {
+  if(to.name==='Home')
+  {
+    store.commit("chat/setChatsPage", 1)
+  }
+  next()
+})
 export default router

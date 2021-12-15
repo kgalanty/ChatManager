@@ -18,7 +18,14 @@
       :loading="loading"
       paginated
     >
-      <template #empty>No entries yet.</template>
+      <template #empty>
+          <b-message type="is-warning" has-icon v-if="!loading">
+              No data here yet.
+          </b-message>
+           <b-message type="is-info" has-icon v-if="loading">
+              Loading data...
+          </b-message>
+        </template>
       <!-- <template #detail="props">
         <article style="text-align: left">
           <StatsDetails :row="props.row" :filters="filters" />
@@ -61,11 +68,31 @@
             <b-tag type="is-info">{{ service.product.name }}</b-tag>
             <b-tag type="is-dark">{{ service.domain }}</b-tag>
             <b-button
-              type="is-link is-light"
+              type="is-info"
               @click="OpenAA(`clientsservices.php?id=${service.id}`)"
               icon-right="open-in-new"
               size="is-small"
             />
+          </b-taglist>
+        </span>
+        <span v-if="props.row.order && props.row.order.domain">
+          <b-taglist
+            attached
+            v-for="domain in props.row.order.domain"
+            :key="domain.id"
+          >
+          <b-tag type="is-warning">Domain Registered</b-tag>
+            <b-tag type="is-primary">{{ domain.domain }}</b-tag>
+            
+          </b-taglist>
+        </span>
+        <span v-if="props.row.order && props.row.order.renewals != ''">
+          <b-taglist
+            attached
+          >
+          <b-tag type="is-success">Domain Renewals Count</b-tag>
+            <b-tag type="is-primary">{{ props.row.order.renewals.split(",").length }}</b-tag>
+            
           </b-taglist>
         </span>
       </b-table-column>

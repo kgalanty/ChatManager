@@ -1,31 +1,44 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.16",
-            build: "2021-12-10 10:39 UTC",
+            packageversion: "1.0.17",
+            build: "2021-12-14 11:44 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.18</strong></li>
+            <li>- Fixed calculating points in chat table when in certain cases was failing</li>
+            <li>- Fixed showing order/invoice id when accepting suggestion going to correct field</li>
+            <li>- Added info about loading on all tables</li>
+            <li><strong>1.0.17</strong></li>
+            <li>- Fixed calculating points for upgrade chats with order and paid invoice in it</li>
+            <li>- Applied new cron looking for 'wcb' tags and adding 'convertedsale' when related order is paid (removing 'pending')</li>
+            <li>- Logs tab: Changed showing thread id instead of chat id not showing anywhere else</li>
+            <li>- Orders Tab: Added showing domain renewals & registers within orders</li>
+            <li>- Fixed setting incorrect page when coming back to Chats tab from another tab, when filtering was enabled before</li>
+            <li>- Added showing invoice status when it's different than 'Paid' in Chats tab</li>
+            <li>- Added info about pending reviews in red 'pending' table</li>
             <li><strong>1.0.16</strong></li>
             <li>- Fixed chats not refreshing after using 'follow up' button</li>
             <li>- Fixed calculating points for 'upgrade' tags</li>
             <li>- Reorganized constant classes on backend</li>
             <li>- Fixed logs for tags not showing in main chat log</li>
             <li>- Message about empty result is now centered</li>
-            <li><strong>1.0.15</strong></li>
-            <li>- Fixed x-mark in order id field showing when invoice id is set</li>
-            <li>- Fixed logging changes in chats and saving when certain fields were cleared</li>
-            <li><strong>1.0.14</strong></li>
-            <li>- Added Logs tab for admins which aggregates all logs across the module and display in one place</li>
-            <li>- Adjusted some text labels</li>
-            <li>- Deleting unassigned orders now works</li>
-            <li><strong>1.0.13</strong></li>
-            <li>- Fixed showing Country and IP in main table</li>
-            <li>- Added functionality to inform when new version is published. When new version is detected on the server, you will see a notification asking to refresh page</li>
-            <li><strong>1.0.12</strong></li>
-            <li>- Removed checkpoint for duplicated order id when saving chat in modal</li>
-            <li>- Adjusted tags margins and filter fields width</li>
-            <li>- Added invoice id switch in the modal. Now you can explicitly set invoice id instead of order id</li>
-            <li>- Above is still in testing phase, let me know if there's any bug :)</li></ul>`
+            </ul>`
+            // <li><strong>1.0.15</strong></li>
+            // <li>- Fixed x-mark in order id field showing when invoice id is set</li>
+            // <li>- Fixed logging changes in chats and saving when certain fields were cleared</li>
+            // <li><strong>1.0.14</strong></li>
+            // <li>- Added Logs tab for admins which aggregates all logs across the module and display in one place</li>
+            // <li>- Adjusted some text labels</li>
+            // <li>- Deleting unassigned orders now works</li>
+            // <li><strong>1.0.13</strong></li>
+            // <li>- Fixed showing Country and IP in main table</li>
+            // <li>- Added functionality to inform when new version is published. When new version is detected on the server, you will see a notification asking to refresh page</li>
+            // <li><strong>1.0.12</strong></li>
+            // <li>- Removed checkpoint for duplicated order id when saving chat in modal</li>
+            // <li>- Adjusted tags margins and filter fields width</li>
+            // <li>- Added invoice id switch in the modal. Now you can explicitly set invoice id instead of order id</li>
+            // <li>- Above is still in testing phase, let me know if there's any bug :)</li></ul>`
             // <li><strong>1.0.11</strong></li>
             
             // <li>- Aligned Follow up buttons to middle</li>
