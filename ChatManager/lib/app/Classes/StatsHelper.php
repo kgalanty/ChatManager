@@ -22,16 +22,14 @@ class StatsHelper
             ->selectRaw('t.agent, tg.tag, count(tg.id) as count')
             ->get();
         $data = [];
-       
+
         if (is_array($threads)) {
             foreach ($threads as $t) {
                 $data[$t->agent][] = $t;
             }
             return $data[$params['op']];
-      
         }
         return $data;
-        
     }
     public static function getStats($params)
     {
@@ -40,55 +38,49 @@ class StatsHelper
             ->join('tbladmins as a', 'a.id', '=', 't.agent')
             ->leftJoin('tblorders as o', 'o.id', '=', 't.orderid')
             ->leftJoin('tblinvoices as inv', 'inv.id', '=', 'o.invoiceid')
-            ->leftJoin('tblinvoices as inv2', 'inv2.id', '=', 't.orderid')
+            ->leftJoin('tblinvoices as inv2', 'inv2.id', '=', 't.invoiceid')
             ->whereBetween('t.date', [$params['datefrom'], $params['dateto']])
-            ->where(function($q2)
-                    {
-                        $q2->where('inv.status', 'Paid')->orWhere('inv2.status', 'Paid');
-            })
-            ->where(function ($q)
-            {
-                    
-               $q->where(function ($query) {
+            ->where('tg.approved', 1)
+            ->where(function ($q) {
+                $q->where(function ($query) {
                     $query->whereIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale'])
-                    ->whereNotIn('tg.tag', ['upgrade'])
-                    ->where('tg.approved', 1);
-                   
+                        ->whereNotExists(function ($q2) {
+                            $q2->select(DB::raw(1))
+                                ->from(DBTables::Tags)
+                                ->whereRaw('t_id=t.id')
+                                ->whereRaw('tag="upgrade"');
+                        })
+                        ->where(function ($q2) {
+                            $q2->where('inv.status', '=', 'Paid')->orWhere('inv2.status', '=', 'Paid');
+                        });
                 });
                 $q->orWhere(function ($query) {
-                    $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale', 'upgrade'])
-                    ->where('tg.approved', 1)
-                    ;
+                    $query->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale', 'upgrade']);
                 });
                 $q->orWhere(function ($query) {
-                    $query->whereIn('tg.tag', ['upgrade'])
-                    ->where('tg.approved', 1)
-                    ->where('t.orderid', '')
-                    ->whereNotIn('tg.tag', ['directsale', 'upsell', 'cycle', 'vps/ds', 'convertedsale']); 
-                   // ->where('inv2.status', 'Paid')
-                    ;
+                    $query->where('tg.tag', 'upgrade')
+                        ->where(function ($q2) {
+                            $q2->where('inv.status', 'Paid')->orWhere('inv2.status', 'Paid');
+                        });
                 });
             });
-            
+
         if (AuthControl::isAgent()) {
             $threads = $threads->where('t.agent', $_SESSION['adminid']);
         } elseif (AuthControl::isAdmin() && $params['op'] != '') {
             $threads = $threads->where('t.agent', intval(trim($params['op'])));
         }
-        if(AuthControl::isAdmin())
-        {
+        if (AuthControl::isAdmin()) {
             $threads = $threads->whereNotIn('t.agent', AdminGroupsConsts::AGENT_DISALLOWED);
         }
         $threads = $threads
             ->groupBy('t.agent')
             ->groupBy('tg.tag')
-            ->selectRaw('t.agent, a.firstname, a.lastname, a.id as adminid, tg.tag, count(t.id) as count')
-            ->get();
-        if($_SESSION['adminid'] == 230)
-        {
-            //var_dump($threads);die;
+            ->selectRaw('t.agent, a.firstname, a.lastname, a.id as adminid, tg.tag, count(t.id) as count');
+        if ($_SESSION['adminid'] == 230) {
+            //var_dump($threads->toSql());die;
         }
-        return $threads;
+        return $threads->get();
     }
     public static function getPointsFromCancellations(?array $params)
     {
@@ -106,16 +98,30 @@ class StatsHelper
     }
     public static function getDecrementPoints($params)
     {
-        $q = 'select sum(x.c) as s, agent FROM ( select
+        $q2 = ' select t.id,
+        t.agent, count(t.id) as c from `' . DBTables::Threads . '` t 
+        join `' . DBTables::Tags . '` as tg ON tg.t_id = t.id
+        join `tbladmins` as ad ON ad.id = t.agent
+        left join tblorders as o ON o.id = t.orderid
+        left join tblinvoices as inv ON inv.id = o.invoiceid
+        left join tblinvoices as inv2 ON inv.id = t.invoiceid
+        where 
+        (inv2.status = "Paid" or inv.status = "Paid") and 
+        tg.tag in ("upgrade", "cycle", "upsell", "directsale", "convertedsale", "vps/ds")
+        and exists (select id from ' . DBTables::Tags . ' as tg2 where tg2.tag = "upgrade" and tg2.t_id = t.id and tg2.approved = 1)
+        and t.date between ? and ?
+        ';
+        $q = 'select sum(x.c) as s, agent FROM ( select t.id,
             t.agent, count(t.id) as c from `' . DBTables::Threads . '` t 
             join `' . DBTables::Tags . '` as tg ON tg.t_id = t.id
             join `tbladmins` as ad ON ad.id = t.agent
-            join tblorders as o ON o.id = t.orderid
-            join tblinvoices as inv ON inv.id = o.invoiceid
+            left join tblorders as o ON o.id = t.orderid
+            left join tblinvoices as inv ON inv.id = o.invoiceid
+            left join tblinvoices as inv2 ON inv.id = t.invoiceid
             where 
-            inv.status = "Paid" and 
-            tg.tag in ("upgrade", "cycle", "upsell")
-            and exists (select id from ' . DBTables::Tags . ' as tg where tg.tag = "upgrade" and tg.t_id = t.id and tg.approved = 1)
+            (inv2.status = "Paid" or inv.status = "Paid") and 
+            tg.tag = "upgrade"
+            and exists (select id from ' . DBTables::Tags . ' as tg2 where tg2.tag IN ("cycle", "upsell", "directsale", "convertedsale", "vps/ds") and tg2.t_id = t.id and tg2.approved = 1)
             and t.date between ? and ?
             ';
         if (AuthControl::isAgent()) {
@@ -127,9 +133,8 @@ class StatsHelper
             group by agent';
 
         $threads_upgrade_points = collect(DB::select($q, [$params['datefrom'], $params['dateto']]))->keyBy('agent');
-              if($_SESSION['adminid'] == 230)
-        {
-           // var_dump($q);die;
+        if ($_SESSION['adminid'] == 230) {
+            //  var_dump(DB::select($q2, [$params['datefrom'], $params['dateto']]));die;
         }
         return $threads_upgrade_points;
     }
@@ -150,10 +155,9 @@ class StatsHelper
             "vps/ds" => 0,
             'upgrade' => 0
         ];
-if($_SESSION['adminid'] == 230)
-{
-    //echo('<pre>'); var_dump($threads); die;
-}
+        if ($_SESSION['adminid'] == 230) {
+            //echo('<pre>'); var_dump($threads); die;
+        }
         //rearrange data from query to one unified array as query returns scattered data across rows
         foreach ($threads as $t) {
             $r[$t->agent] = array_merge($tags, $r[$t->agent]);
@@ -179,11 +183,36 @@ if($_SESSION['adminid'] == 230)
         //add points to decrement to final array
         foreach ($r as $agent_email => $rr) {
 
-            $rr['decrementpoints'] = $threads_upgrade_points[$agent_email] ? (int)$threads_upgrade_points[$agent_email]->s - 1 : 0;
+            //$rr['decrementpoints'] = $threads_upgrade_points[$agent_email] ? (int)$threads_upgrade_points[$agent_email]->s - 1 : 0;
+            $rr['decrementpoints'] = 0;
             $rr['cm_points'] = $cm_points[$agent_email] ? $cm_points[$agent_email]->stayed : 0;
             $o[] = $rr;
         }
         return $o;
+    }
+    public static function AsColumns(array $result)
+    {
+        $rows = [];
+        foreach ($result as $item) {
+            $rows[] = [
+                $item['data']['agent_name'],
+                $item['directsale'] + $item['wcb'],
+                $item['cannotoffer'] . ' (' . ($item['directsale'] + $item['wcb'] + $item['cannotoffer'] == 0 ? 0 : round($item['cannotoffer'] / ($item['directsale'] + $item['wcb'] + $item['cannotoffer']) * 100)) . '%)',
+                $item['directsale'] + $item['wcb'] + $item['cannotoffer'],
+                $item['directsale'],
+                $item['convertedsale'],
+                $item['upgrade'],
+                $item['directsale'] + $item['convertedsale'] + $item['upgrade'],
+                $item['upsell'],
+                $item['cycle'],
+                $item['data']['cm_points'],
+                $item['vps/ds'] ?? 0,
+                $item['directsale'] + $item['convertedsale'] + $item['upsell'] + $item['cycle'] + $item['vps/ds'] + $item['data']['cm_points'] + $item['upgrade'],
+                ($item['directsale'] + $item['wcb'] > 0 ? round(($item['directsale'] + $item['convertedsale'] + $item['upgrade']) * 100 / ($item['directsale'] + $item['wcb']), 2) : 0) . '%',
+                ($item['directsale'] + $item['wcb'] > 0 ? round(($item['directsale'] + $item['convertedsale'] + $item['upgrade'] + $item['upsell'] + $item['cycle'] + $item['data']['cm_points'] + $item['vps/ds']) * 100 / ($item['directsale'] + $item['wcb']), 2) : 0) . '%',
+            ];
+        }
+        return $rows;
     }
     public static function Details(array $params): array
     {

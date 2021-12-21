@@ -110,7 +110,45 @@ class OrderCron
         }
         $this->GetThreadsWithPendingOrderAsCurrentlySet();
         $this->FindOrdersWithNoClientData();
+       // $this->FindConvertedSalesWithPossibleInvoice();
         //$unpaidThreads = $this->getUnpaidThreads();
+    }
+    public function FindConvertedSalesWithPossibleInvoice()
+    {
+        // $q1 = DB::table(DBTables::Threads.' as t')
+        // ->join('tblhosting as h', 'h.domain', '=', 't.domain')
+        // ->whereNull('t.orderid')->whereNull('t.invoiceid')
+        // ->whereExists(function($query)
+        // {
+        //     $query->select(DB::raw(1))->from(DBTables::Tags.' as tags')->whereColumn('tags.t_id', '=', 't.id')->whereRaw('tags.tag = "convertedsale"');
+        // })
+        // ->whereExists(function($query)
+        // {
+        //     $query->select(DB::raw(1))->from('tblclients as c')->whereColumn('c.email', '=', 't.email');
+        // })
+        // ->where('h.domainstatus', 'Active')
+        // ->where('t.date', '>', date('Y-m-d\T00:00:00.000000\Z', strtotime("-45 days")))
+        // ->get(['t.id', 'h.id as hid', 'h.userid']);
+        
+        // foreach($q1 as $thread)
+        // {
+        //     $q2 = DB::table('tblinvoiceitems as invitem')
+        //     ->join('tblinvoices as inv', 'inv.id','=','invitem.invoiceid')
+        //     ->where('invitem.type', 'Hosting')
+        //     ->where('invitem.relid', $thread->hid)
+        //     ->where('invitem.userid', $thread->userid)
+        //     ->orderBy('inv.id', 'DESC')
+        //     ->first(['invitem.invoiceid', 'inv.status']);
+        //     echo('<pre>');var_dump($q2);die;
+        //     if($q2->status == 'Paid')
+        //     {
+        //         ReviewOrder::where('threadid', $thread->id)->where('invoice', '1')->where('orderid', $q2->invoiceid)
+
+        //        // Threads::where('id', $thread->id)->update(['invoiceid' => $q2->invoiceid]);
+
+        //     }
+        // }
+       
     }
     public function FindOrdersWithNoClientData()
     {

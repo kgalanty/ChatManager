@@ -512,7 +512,14 @@ import { cannotofferMixin } from "../mixins/cannotofferMixin";
 
 export default {
   name: "ChatItemEditModal",
-  props: ["item"],
+  // props: ["item"],
+  props: {
+    item:
+    {
+      type: Object,
+      required:true
+    }
+  },
   mixins: [
     dateMixin,
     tagsMixin,

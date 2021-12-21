@@ -17,17 +17,17 @@ class DateTimeHelper
         $now = new \DateTime($timezone);
         return $now->sub($interval);
     }
-    public static function convertDateToUTC(string $currentTz, string $datetime)
+    public static function convertDateToUTC(string $currentTz, string $datetime, string $format = "Y-m-d H:i:s")
     {
         return (new \DateTime($datetime, new \DateTimeZone($currentTz)))
             ->setTimezone(new \DateTimeZone('UTC'))
-            ->format("Y-m-d H:i:s");
+            ->format($format);
     }
-    public static function convertFromUTCToTZ(string $timezone, string $datetime)
+    public static function convertFromUTCToTZ(string $timezone, string $datetime, string $format = 'Y-m-d H:i:s')
     {
         return (new \DateTime($datetime, new \DateTimeZone('UTC')))
             ->setTimezone(new \DateTimeZone($timezone))
-            ->format('Y-m-d H:i:s');
+            ->format($format);
     }
     public static function setFormat($datetime, $format)
     {

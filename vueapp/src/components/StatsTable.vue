@@ -1,11 +1,11 @@
 <template>
   <article id="statstable">
     <div class="tile statsfilters">
-      <div class="tile is-2 is-child">
+      <div class="tile is-2 is-child" v-if="isAdmin()">
         <b-field
           label="Operator"
           style="width: 95%; padding: 9px"
-          v-if="isAdmin()"
+          
         >
           <b-select
             placeholder="Select an operator"
@@ -48,6 +48,11 @@
           </b-datepicker>
         </b-field>
       </div>
+      <div class="tile is-1 is-child">
+        <b-field label="Save as PDF" style="width: 95%; padding: 9px">
+          <b-button type="is-primary" @click="openExport" expanded>Download</b-button>
+        </b-field>
+      </div>
     </div>
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
     <b-table
@@ -64,11 +69,15 @@
     >
       <template #empty>
         <div>
-          <b-message type="is-warning" has-icon v-if="loading && !loading.stats">
-              No results for given criteria.
+          <b-message
+            type="is-warning"
+            has-icon
+            v-if="loading && !loading.stats"
+          >
+            No results for given criteria.
           </b-message>
-           <b-message type="is-info" has-icon v-if="loading && loading.stats">
-              Loading data...
+          <b-message type="is-info" has-icon v-if="loading && loading.stats">
+            Loading data...
           </b-message>
         </div>
       </template>
@@ -78,7 +87,7 @@
           <StatsDetails :row="props.row" :filters="filters" />
         </article>
       </template>
-      <b-table-column field="date" label="Agent" v-slot="props" width="100">
+      <b-table-column field="date" label="Agent" v-slot="props" width="100" centered>
         {{ props.row.data.agent_name }}
       </b-table-column>
       <b-table-column
@@ -87,7 +96,7 @@
         v-slot="props"
         width="100"
         header-class="stats-sticky-column"
-        cell-class="stats-sticky-column"
+        cell-class="stats-sticky-column" centered
       >
         {{ props.row.directsale + props.row.wcb }}
       </b-table-column>
@@ -95,7 +104,7 @@
         field="date"
         label="Cannot Offer"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{ props.row.cannotoffer }} ({{ cannotofferPercent(props.row) }} %)
       </b-table-column>
@@ -103,7 +112,7 @@
         field="date"
         label="Total Sales Chats"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{ props.row.directsale + props.row.wcb + props.row.cannotoffer }}
       </b-table-column>
@@ -111,7 +120,7 @@
         field="date"
         label="Direct Sales"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{ props.row.directsale }}
       </b-table-column>
@@ -119,7 +128,7 @@
         field="date"
         label="Converted Sales"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{ props.row.convertedsale }}
       </b-table-column>
@@ -127,7 +136,7 @@
         field="uupgrade"
         label="Upgrades"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{ props.row.upgrade }}
       </b-table-column>
@@ -137,20 +146,20 @@
         v-slot="props"
         width="100"
         header-class="stats-sticky-column"
-        cell-class="stats-sticky-column"
+        cell-class="stats-sticky-column" centered
       >
         {{ props.row.directsale + props.row.convertedsale + props.row.upgrade }}
       </b-table-column>
-      <b-table-column field="date" label="Upsell" v-slot="props" width="100">
+      <b-table-column field="date" label="Upsell" v-slot="props" width="100" centered>
         {{ props.row.upsell }}
       </b-table-column>
-      <b-table-column field="date" label="Cycle" v-slot="props" width="100">
+      <b-table-column field="date" label="Cycle" v-slot="props" width="100" centered>
         {{ props.row.cycle }}
       </b-table-column>
-      <b-table-column field="date" label="Stayed" v-slot="props" width="100">
+      <b-table-column field="date" label="Stayed" v-slot="props" width="100" centered>
         {{ props.row.data.cm_points ? props.row.data.cm_points : 0 }}
       </b-table-column>
-      <b-table-column field="vps/ds" label="VPS/DS" v-slot="props" width="100">
+      <b-table-column field="vps/ds" label="VPS/DS" v-slot="props" width="100" centered>
         {{ props.row["vps/ds"] ? props.row["vps/ds"] : 0 }}
       </b-table-column>
       <b-table-column
@@ -159,7 +168,7 @@
         v-slot="props"
         width="100"
         header-class="stats-sticky-column"
-        cell-class="stats-sticky-column"
+        cell-class="stats-sticky-column" centered
       >
         {{
           props.row.directsale +
@@ -178,7 +187,7 @@
         field="date"
         label="Conversion without points"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{
           props.row.directsale + props.row.wcb > 0
@@ -199,7 +208,7 @@
         field="date"
         label="Conversion with points"
         v-slot="props"
-        width="100"
+        width="100" centered
       >
         {{
           props.row.directsale + props.row.wcb > 0
@@ -222,7 +231,7 @@
 </template>
 <style>
 .stats-sticky-column {
-  background: #ffebb8;
+  background: #ffebb8 !important;
   color: rgb(0, 0, 0);
 }
 
@@ -231,9 +240,9 @@
 }
 .btable th {
   font-size: 14px;
-  color: rgb(139, 140, 145) !important;
+  background: rgb(228, 228, 228);
+  color: rgb(0, 0, 0) !important;
   text-transform: uppercase;
-  text-align: center !important;
 }
 #pendingchatlisttable th span {
   margin: 0 auto;
@@ -262,6 +271,34 @@ export default {
   mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin],
   components: { StatsDetails },
   methods: {
+    openExport() {
+       let {dateFrom, dateTo} = this.getDateFilters()
+      const params = this.generateParamsForRequest("Export",  [
+        `datefrom=${dateFrom}`,
+        `dateto=${dateTo}`,
+        `op=${this.filters.operator}`,
+        `tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+      ]);
+      this.$api
+        .get(`addonmodules.php?${params}`, {
+                    method: 'GET',
+                    responseType: 'blob'})
+        .then((response) => {
+          console.log(response)
+           const type = response.headers['content-type']
+            const blob = new Blob([response.data], { type: type, encoding: 'UTF-8' })
+            const link = document.createElement('a')
+            link.href = window.URL.createObjectURL(blob)
+            link.download = 'report-stats.pdf'
+            link.click()
+            link.remove()
+        })
+        .catch((error) => {
+          throw error;
+        })
+        .finally(() => {
+        });
+    },
     colorSum(row) {
       //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
       if (!row.data.agent_id && this.stats.total > 0) return "is-sum";
@@ -316,13 +353,9 @@ export default {
         this.filters.dateTo = new Date(dateTo);
       }
     },
-    loadStats() {
+    getDateFilters()
+    {
       const startDay = this.moment().format("DD") < 16 ? 1 : 16;
-      this.loading.stats = true;
-      // const endDay = this.moment().daysInMonth()
-      // console.log(startDay)
-      // console.log(endDay)
-      //console.log(this.isDateAfter(this.filters.dateFrom, this.filters.dateTo))
       const dateFrom = this.filters.dateFrom
         ? this.createUTCDatetime(this.filters.dateFrom)
         : this.createUTCDatetime(this.moment().format("YYYY-MM-" + startDay));
@@ -332,6 +365,16 @@ export default {
         : this.createUTCDatetime(
             this.moment().endOf("month").format("YYYY-MM-DD")
           );
+          return {dateFrom, dateTo}
+    },
+    loadStats() {
+      
+      this.loading.stats = true;
+      // const endDay = this.moment().daysInMonth()
+      // console.log(startDay)
+      // console.log(endDay)
+      //console.log(this.isDateAfter(this.filters.dateFrom, this.filters.dateTo))
+      let {dateFrom, dateTo} = this.getDateFilters()
       this.setDateFilters(dateFrom, dateTo);
       const params = this.generateParamsForRequest("Stats", [
         `datefrom=${dateFrom}`,
