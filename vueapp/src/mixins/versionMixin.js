@@ -1,10 +1,13 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.19",
-            build: "2021-12-15 12:38 UTC",
+            packageversion: "1.0.20",
+            build: "2021-12-20 13:17 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.20</strong></li>
+            <li>- Added export statistics to pdf</li>
+            <li>- Some small styling adjustments</li>
             <li><strong>1.0.19</strong></li>
             <li>- Added info in chat edit modal when it has 'upgrade' tag and no order/invoice id, advising to add invoice id</li>
             <li>- Added filtering in logs tab</li>
@@ -12,15 +15,15 @@ export default {
             <li><strong>1.0.18</strong></li>
             <li>- Fixed calculating points in chat table when in certain cases was failing</li>
             <li>- Fixed showing order/invoice id when accepting suggestion going to correct field</li>
-            <li>- Added info about loading on all tables</li>
-            <li><strong>1.0.17</strong></li>
-            <li>- Fixed calculating points for upgrade chats with order and paid invoice in it</li>
-            <li>- Applied new cron looking for 'wcb' tags and adding 'convertedsale' when related order is paid (removing 'pending')</li>
-            <li>- Logs tab: Changed showing thread id instead of chat id not showing anywhere else</li>
-            <li>- Orders Tab: Added showing domain renewals & registers within orders</li>
-            <li>- Fixed setting incorrect page when coming back to Chats tab from another tab, when filtering was enabled before</li>
-            <li>- Added showing invoice status when it's different than 'Paid' in Chats tab</li>
-            <li>- Added info about pending reviews in red 'pending' table</li></ul>`
+            <li>- Added info about loading on all tables</li></ul>`
+            // <li><strong>1.0.17</strong></li>
+            // <li>- Fixed calculating points for upgrade chats with order and paid invoice in it</li>
+            // <li>- Applied new cron looking for 'wcb' tags and adding 'convertedsale' when related order is paid (removing 'pending')</li>
+            // <li>- Logs tab: Changed showing thread id instead of chat id not showing anywhere else</li>
+            // <li>- Orders Tab: Added showing domain renewals & registers within orders</li>
+            // <li>- Fixed setting incorrect page when coming back to Chats tab from another tab, when filtering was enabled before</li>
+            // <li>- Added showing invoice status when it's different than 'Paid' in Chats tab</li>
+            // <li>- Added info about pending reviews in red 'pending' table</li>`
             // <li><strong>1.0.16</strong></li>
             // <li>- Fixed chats not refreshing after using 'follow up' button</li>
             // <li>- Fixed calculating points for 'upgrade' tags</li>

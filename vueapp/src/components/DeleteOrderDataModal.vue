@@ -46,7 +46,14 @@ export default {
   name: "DeleteOrderDataModal",
   mixins: [memberMixin, requestsMixin, notificationsMixin],
   components: {},
-  props: ["id"],
+  props:
+  {
+    id:
+    {
+      type: Number,
+      required: true
+    }
+  },
   computed: {},
   methods: {
     ...mapActions("orderschats", ["loadOrders"]),
