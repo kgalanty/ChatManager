@@ -58,7 +58,9 @@ Some functionalities are limited to admins only. The module requires to configur
 
 ### `lib/app/Consts/moduleVersion.php` 
 
-- This file contains current version of the module. It must be in sync with currently used front-end. Value is stored in `versionMixin.js` - `packageversion`.
+- This file contains current version of the module. It must be in sync with currently used set in front-end. 
+
+Value is stored in `versionMixin.js` - `packageversion`.
 
 ### `lib/app/Consts/LiveChatConsts.php` 
 
@@ -77,9 +79,28 @@ Statistics are calculated based on tags. The following list of tags counts as on
 
 They count only if associated invoice is assigned. Also, when `upgrade` tag is present, entire chat counts for 1 no matter what other tags are there.
 
-Also, if there's cancellation request with `stayed` result, it counts for 1 point.
+Also, if there's cancellation request with `stayed` result, it counts for additional 1 point.
 
 Admins (from `AdminGroupsConsts`) can see stats of everyone, while non-Admins (`AGENT`) can see only their own stats.
+
+# How are statistics columns calculated?
+
+This is explained below using format `[column name]`: [formula]
+
+- `Can Offer`: direct sale + wcb
+- `Cannot Offer`: cannot offer ( cannot offer / (direct sale + wcb + cannot offer) * 100%)
+- `Total Sales Chats`: direct sale + wcb + cannot offer
+- `Direct Sales`: direct sale
+- `Converted Sales`: converted sale
+- `Upgrades`: upgrade
+- `Total Sales`: direct sale + converted sale + upgrade
+- `Upsell`: upsell
+- `Cycle`: cycle
+- `Stayed`: Cancellation Manager points
+- `VPS/DS`: VPS/DS
+- `Total Points`: direct sale + convertedsale + upsell + cycle + VPS/DS + Cancellation points + upgrade
+- `Conversion without Points`: (Direct sale+converted sale + upgrade)*100% / (direct sale + wcb)
+- `Conversion with Points`: (Direct sale+converted sale + upgrade + upsell + cycle + Cancellation points + VPS/DS)*100% / (direct sale + wcb)
 
 ## Orders
 
@@ -88,6 +109,14 @@ This tab lists completed orders. These records are stored after a cookie is set 
 It makes sense only if the chat is made before ordering a product, otherwise it might not work as expected.
 
 In other edge cases, there are other mechanisms of matching chats with customers.
+
+## Logs
+
+Logs are located in `Logs` tab (Available for admins) when matched to `ADMIN` const.
+
+It logs every action done in the system, with its author and date. You can filter by dates, operators and by chat id it belongs to.
+
+When Agent is set to 'Admin Nickola', it means it's done by cron.
  
 ## Other development commands for front-end app
 
