@@ -138,7 +138,20 @@ class StatsHelper
         }
         return $threads_upgrade_points;
     }
-    public static function CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests)
+    private static function getManualPoints(array $filters)
+    {
+        $external = DB::table(DBTables::ManualPoints)
+            ->whereBetween('date', [$filters['datefrom'], $filters['dateto']]);
+            if($filters['op'] != '')
+            {
+                $external = $external->where('userid', (int)$filters['op']);
+            }
+            $external=$external->join('tbladmins as a', 'a.id', '=', 'userid')->selectRaw('SUM(points) as points, userid, a.firstname, a.lastname')
+            ->groupBy('userid')
+            ->get();
+            return $external;
+    }
+    public static function CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests, array $filters)
     {
         $r = [];
         $tags = [
@@ -153,13 +166,19 @@ class StatsHelper
             'sales' => 0,
             'stayed' => 0,
             "vps/ds" => 0,
-            'upgrade' => 0
+            'upgrade' => 0,
+            'manualpoints'=>0
         ];
         if ($_SESSION['adminid'] == 230) {
             //echo('<pre>'); var_dump($threads); die;
         }
+
+       // $agents = [];
         //rearrange data from query to one unified array as query returns scattered data across rows
         foreach ($threads as $t) {
+            // if (!in_array($t->adminid, $agents)) {
+            //     $agents[] = $t->adminid;
+            // }
             $r[$t->agent] = array_merge($tags, $r[$t->agent]);
             $r[$t->agent]['data']['agent'] = $t->agent;
             $r[$t->agent]['data']['agent_name'] = $t->firstname . ' ' . $t->lastname;
@@ -167,7 +186,23 @@ class StatsHelper
             $r[$t->agent][str_replace([' '], [''], $t->tag)] = $t->count;
             $r[$t->agent]['data']['cm_points'] = 0;
         }
-
+        $external = self::getManualPoints($filters);
+        foreach($external as $extItem)
+        {
+            if(!$r[$extItem->userid])
+            {
+                $r[$extItem->userid] = array_merge($tags, [
+                    'manualpoints'=>(int)$extItem->points, 'data' => 
+                    ['cm_points' => 0,   
+                        'agent' => $extItem->userid,
+                    'agent_name' => $extItem->firstname.' '.$extItem->lastname,
+                    'agent_id' => $extItem->userid]]);
+            }
+            else
+            {
+                $r[$extItem->userid]['manualpoints'] = (int)$extItem->points ?? 0;
+            }
+        }
         $o = [];
         $cm_points = collect($cm_stayed_requests)->keyBy('agent');
         foreach ($cm_points as $agent_id => $points) {
@@ -180,14 +215,19 @@ class StatsHelper
             }
             $r[$agent_id]['data']['cm_points'] = $points->stayed;
         }
+        //external points handling
+       
+     
         //add points to decrement to final array
         foreach ($r as $agent_email => $rr) {
-
+            $searchForManualPoints = array_search($rr['data']['agent'], array_column($external, 'userid'));
             //$rr['decrementpoints'] = $threads_upgrade_points[$agent_email] ? (int)$threads_upgrade_points[$agent_email]->s - 1 : 0;
+            //$rr['manualpoints'] = $searchForManualPoints !== false ? (int)$external[$searchForManualPoints]->points : 0;
             $rr['decrementpoints'] = 0;
             $rr['cm_points'] = $cm_points[$agent_email] ? $cm_points[$agent_email]->stayed : 0;
             $o[] = $rr;
         }
+        
         return $o;
     }
     public static function AsColumns(array $result)

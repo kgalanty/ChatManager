@@ -12,6 +12,7 @@ import StaffOnline from './staffonline/store'
 import SystemLogs from './systemlogs/store'
 
 import requestsMixin from '@/mixins/requestsMixin'
+import OperatorsStore from './operators/store'
 Vue.use(Vuex)
 Vue.use(Buefy)
 
@@ -77,6 +78,7 @@ export default new Vuex.Store({
     tags: tagsStore,
     orderschats: OrdersStore,
     systemlogs: SystemLogs,
-    staffonline: StaffOnline
+    staffonline: StaffOnline,
+    operators: OperatorsStore
   }
 })

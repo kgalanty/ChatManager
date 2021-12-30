@@ -71,7 +71,6 @@ export default {
       let identifier = setInterval(this.retrieveStaff, 30000);
       this.$store.commit("staffonline/setidentifier", identifier);
     }
-    // this.retrieveStaff()
   },
   computed: {
     ...mapState("staffonline", ["intervalIdentifier"]),

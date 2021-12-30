@@ -2,11 +2,7 @@
   <article id="statstable">
     <div class="tile statsfilters">
       <div class="tile is-2 is-child" v-if="isAdmin()">
-        <b-field
-          label="Operator"
-          style="width: 95%; padding: 9px"
-          
-        >
+        <b-field label="Operator" style="width: 95%; padding: 9px">
           <b-select
             placeholder="Select an operator"
             :loading="loading.operators"
@@ -50,13 +46,22 @@
       </div>
       <div class="tile is-1 is-child">
         <b-field label="Save as PDF" style="width: 95%; padding: 9px">
-          <b-button type="is-primary" @click="openExport" expanded>Download</b-button>
+          <b-button type="is-primary" @click="openExport" expanded
+            >Download</b-button
+          >
+        </b-field>
+      </div>
+      <div class="tile is-1 is-child">
+        <b-field label="Add Manual Points" style="width: 95%; padding: 9px">
+          <b-button type="is-primary" @click="openAddPointsModal" expanded
+            >Add</b-button
+          >
         </b-field>
       </div>
     </div>
     <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
     <b-table
-      class="btable"
+      class="btable statstable"
       :data="stats.data"
       bordered
       :row-class="colorSum"
@@ -65,6 +70,7 @@
       :loading="loading.stats"
       pagination-position="top"
       detailed
+      striped
       detail-transition="fade"
     >
       <template #empty>
@@ -87,7 +93,13 @@
           <StatsDetails :row="props.row" :filters="filters" />
         </article>
       </template>
-      <b-table-column field="date" label="Agent" v-slot="props" width="100" centered>
+      <b-table-column
+        field="date"
+        label="Agent"
+        v-slot="props"
+        width="100"
+        centered
+      >
         {{ props.row.data.agent_name }}
       </b-table-column>
       <b-table-column
@@ -96,15 +108,17 @@
         v-slot="props"
         width="100"
         header-class="stats-sticky-column"
-        cell-class="stats-sticky-column" centered
+        cell-class="stats-sticky-column"
+        centered
       >
-        {{ props.row.directsale + props.row.wcb }}
+        {{ props.row.directsale + props.row.wcb + props.row.manualpoints }}
       </b-table-column>
       <b-table-column
         field="date"
         label="Cannot Offer"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{ props.row.cannotoffer }} ({{ cannotofferPercent(props.row) }} %)
       </b-table-column>
@@ -112,7 +126,8 @@
         field="date"
         label="Total Sales Chats"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{ props.row.directsale + props.row.wcb + props.row.cannotoffer }}
       </b-table-column>
@@ -120,7 +135,8 @@
         field="date"
         label="Direct Sales"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{ props.row.directsale }}
       </b-table-column>
@@ -128,15 +144,17 @@
         field="date"
         label="Converted Sales"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{ props.row.convertedsale }}
       </b-table-column>
       <b-table-column
-        field="uupgrade"
+        field="upgrade"
         label="Upgrades"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{ props.row.upgrade }}
       </b-table-column>
@@ -146,21 +164,58 @@
         v-slot="props"
         width="100"
         header-class="stats-sticky-column"
-        cell-class="stats-sticky-column" centered
+        cell-class="stats-sticky-column"
+        centered
       >
         {{ props.row.directsale + props.row.convertedsale + props.row.upgrade }}
       </b-table-column>
-      <b-table-column field="date" label="Upsell" v-slot="props" width="100" centered>
+      <b-table-column
+        field="date"
+        label="Upsell"
+        v-slot="props"
+        width="100"
+        centered
+      >
         {{ props.row.upsell }}
       </b-table-column>
-      <b-table-column field="date" label="Cycle" v-slot="props" width="100" centered>
+      <b-table-column
+        field="date"
+        label="Cycle"
+        v-slot="props"
+        width="100"
+        centered
+      >
         {{ props.row.cycle }}
       </b-table-column>
-      <b-table-column field="date" label="Stayed" v-slot="props" width="100" centered>
+      <b-table-column
+        field="date"
+        label="Stayed"
+        v-slot="props"
+        width="100"
+        centered
+      >
         {{ props.row.data.cm_points ? props.row.data.cm_points : 0 }}
       </b-table-column>
-      <b-table-column field="vps/ds" label="VPS/DS" v-slot="props" width="100" centered>
+      <b-table-column
+        field="vps/ds"
+        label="VPS/DS"
+        v-slot="props"
+        width="100"
+        centered
+      >
         {{ props.row["vps/ds"] ? props.row["vps/ds"] : 0 }}
+      </b-table-column>
+      <b-table-column
+        field="date"
+        label="External Points"
+        v-slot="props"
+        width="100"
+        centered
+      >
+      <a v-if="props.row.data.agent_name != 'TEAM' && props.row.manualpoints && props.row.manualpoints > 0" @click="OpenManualPointsModal(props.row.data)">{{props.row.manualpoints}}</a>
+      <span v-else-if="props.row.data.agent_name == 'TEAM'">{{props.row.manualpoints}}</span>
+      <span v-else>0</span>
+
       </b-table-column>
       <b-table-column
         field="date"
@@ -168,7 +223,8 @@
         v-slot="props"
         width="100"
         header-class="stats-sticky-column"
-        cell-class="stats-sticky-column" centered
+        cell-class="stats-sticky-column"
+        centered
       >
         {{
           props.row.directsale +
@@ -178,7 +234,8 @@
           props.row["vps/ds"] -
           props.row.decrementpoints +
           props.row.data.cm_points +
-          props.row.upgrade
+          props.row.upgrade +
+          props.row.manualpoints
         }}
       </b-table-column>
       <b-table-column
@@ -187,16 +244,17 @@
         field="date"
         label="Conversion without points"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{
-          props.row.directsale + props.row.wcb > 0
+          props.row.directsale + props.row.wcb + props.row.manualpoints > 0
             ? returnPercents(
                 ((props.row.directsale +
                   props.row.convertedsale +
-                  props.row.upgrade) *
+                  props.row.upgrade + props.row.manualpoints) *
                   100) /
-                  (props.row.directsale + props.row.wcb)
+                  (props.row.directsale + props.row.wcb + props.row.manualpoints)
               )
             : "0 %"
         }}
@@ -208,7 +266,8 @@
         field="date"
         label="Conversion with points"
         v-slot="props"
-        width="100" centered
+        width="100"
+        centered
       >
         {{
           props.row.directsale + props.row.wcb > 0
@@ -230,6 +289,9 @@
   </article>
 </template>
 <style>
+#statstable .table.is-striped tbody tr:not(.is-selected):nth-child(even) {
+  background: #efefef;
+}
 .stats-sticky-column {
   background: #ffebb8 !important;
   color: rgb(0, 0, 0);
@@ -266,38 +328,68 @@ import requestsMixin from "../mixins/requestsMixin";
 import StatsDetails from "@/components/StatsDetails";
 import notificationsMixin from "../mixins/notificationsMixin";
 import memberMixin from "../mixins/memberMixin";
+import AddManualPointsModal from "./AddManualPointsModal.vue";
+import ShowManualPointsModal from './ShowManualPointsModal.vue';
+import errorsMixin from '../../../chat-nuxt/mixins/errorsMixin';
 export default {
   name: "StatsTable",
-  mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin],
+  mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin, errorsMixin],
   components: { StatsDetails },
   methods: {
+    OpenManualPointsModal(agentdata)
+    {
+      let dates = {datefrom: this.createUTCDatetime(this.filters.dateFrom), dateto: this.createUTCDatetime(this.filters.dateTo)}
+      this.$buefy.modal.open({
+        parent: this,
+        component: ShowManualPointsModal,
+        hasModalCard: true,
+        props: {agent: agentdata, dates},
+        // customClass: this.darkstyle ? 'darktheme' : 'lighttheme',
+        trapFocus: true,
+        width: "auto",
+      });
+    },
+    openAddPointsModal() {
+      this.$buefy.modal.open({
+        parent: this,
+        component: AddManualPointsModal,
+        hasModalCard: true,
+        props: {},
+        // customClass: this.darkstyle ? 'darktheme' : 'lighttheme',
+        trapFocus: true,
+        width: "auto",
+      });
+    },
     openExport() {
-       let {dateFrom, dateTo} = this.getDateFilters()
-      const params = this.generateParamsForRequest("Export",  [
+      let { dateFrom, dateTo } = this.getDateFilters();
+      const params = this.generateParamsForRequest("Export", [
         `datefrom=${dateFrom}`,
         `dateto=${dateTo}`,
         `op=${this.filters.operator}`,
-        `tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+        `tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
       ]);
       this.$api
         .get(`addonmodules.php?${params}`, {
-                    method: 'GET',
-                    responseType: 'blob'})
+          method: "GET",
+          responseType: "blob",
+        })
         .then((response) => {
-          console.log(response)
-           const type = response.headers['content-type']
-            const blob = new Blob([response.data], { type: type, encoding: 'UTF-8' })
-            const link = document.createElement('a')
-            link.href = window.URL.createObjectURL(blob)
-            link.download = 'report-stats.pdf'
-            link.click()
-            link.remove()
+          console.log(response);
+          const type = response.headers["content-type"];
+          const blob = new Blob([response.data], {
+            type: type,
+            encoding: "UTF-8",
+          });
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = "report-stats.pdf";
+          link.click();
+          link.remove();
         })
         .catch((error) => {
-          throw error;
+          this.showError(error)
         })
-        .finally(() => {
-        });
+        .finally(() => {});
     },
     colorSum(row) {
       //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
@@ -353,8 +445,7 @@ export default {
         this.filters.dateTo = new Date(dateTo);
       }
     },
-    getDateFilters()
-    {
+    getDateFilters() {
       const startDay = this.moment().format("DD") < 16 ? 1 : 16;
       const dateFrom = this.filters.dateFrom
         ? this.createUTCDatetime(this.filters.dateFrom)
@@ -365,16 +456,15 @@ export default {
         : this.createUTCDatetime(
             this.moment().endOf("month").format("YYYY-MM-DD")
           );
-          return {dateFrom, dateTo}
+      return { dateFrom, dateTo };
     },
     loadStats() {
-      
       this.loading.stats = true;
       // const endDay = this.moment().daysInMonth()
       // console.log(startDay)
       // console.log(endDay)
       //console.log(this.isDateAfter(this.filters.dateFrom, this.filters.dateTo))
-      let {dateFrom, dateTo} = this.getDateFilters()
+      let { dateFrom, dateTo } = this.getDateFilters();
       this.setDateFilters(dateFrom, dateTo);
       const params = this.generateParamsForRequest("Stats", [
         `datefrom=${dateFrom}`,
@@ -393,6 +483,7 @@ export default {
         })
         .catch((e) => {
           console.log(e);
+          throw 'Failed to download data. Check if you are logged in and have permission.'
           //window.location = 'login.php'
         })
         .finally(() => {

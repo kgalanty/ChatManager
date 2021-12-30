@@ -42,7 +42,19 @@ export default {
   name: "TableFollowUp",
   components: {},
   mixins: [tableHelper],
-  props: ["row", "afterClickAction"],
+  props:
+  {
+    row:
+    {
+      type: Object,
+      required: true
+    },
+    afterClickAction:
+    {
+      type: String,
+      required: true
+    }
+  },
   methods: {
     ...mapActions({
       loadChats: "chat/loadChats",
@@ -50,15 +62,16 @@ export default {
     click() {
       this.loading = true;
       this.disabled = true;
-      this.followup(this.row).then(() => {
-        {
-          this.loading = false;
-          this.disabled = false;
-          if (this.afterClickAction) {
-            this[this.afterClickAction]();
-          }
-        }
-      });
+      console.log(this.afterClickAction)
+      // this.followup(this.row).then(() => {
+      //   {
+      //     this.loading = false;
+      //     this.disabled = false;
+      //     if (this.afterClickAction) {
+      //       this[this.afterClickAction]();
+      //     }
+      //   }
+      // });
     },
     updateTimers() {
       var that = this;
