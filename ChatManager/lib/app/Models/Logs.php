@@ -32,6 +32,7 @@ class Logs extends Model
         Relation::morphMap([
             'Thread' => 'WHMCS\Module\Addon\ChatManager\app\Models\Threads',
             'Tag' => 'WHMCS\Module\Addon\ChatManager\app\Models\Tags',
+            'Operator' =>  'WHMCS\Module\Addon\ChatManager\app\Models\Admin',
         ]);
         //return  $this->belongsTo(Threads::class, 'itemid', 'id')->where('itemclass', 'Thread');
         return $this->morphTo(null, 'itemclass', 'itemid');

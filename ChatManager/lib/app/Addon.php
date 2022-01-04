@@ -20,6 +20,20 @@ class Addon
     public static function activate()
     {
       DB::statement('
+      	
+        CREATE TABLE `chat_manualpoints` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `userid` int(11) NOT NULL,
+          `author` int(11) NOT NULL,
+          `points` int(11) NOT NULL,
+          `comment` text COLLATE utf8mb4_unicode_ci,
+          `date` date NOT NULL,
+          `created_at` datetime NOT NULL,
+          PRIMARY KEY (`id`),
+          KEY `userid` (`userid`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      ');
+      DB::statement('
       CREATE TABLE IF NOT EXISTS `chat_completedorders` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `lcvisitorid` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,

@@ -2,7 +2,7 @@
   <form action="">
     <div class="modal-card" style="width: 95vw">
       <header class="modal-card-head">
-        <p class="modal-card-title">Add Manual Points</p>
+        <p class="modal-card-title">Add Points</p>
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
       <section class="modal-card-body">
@@ -14,7 +14,7 @@
         </b-message>
 
         <b-field label="Points">
-          <b-input v-model="points" placeholder="Fill points number"></b-input>
+          <b-numberinput step="1" :controls="false" v-model="points" placeholder="Fill points number"></b-numberinput>
         </b-field>
 
         <b-field label="Agent">
@@ -27,6 +27,7 @@
             :custom-formatter="
               (option) => option.firstname + ' ' + option.lastname
             "
+             placeholder="Start typing for operator lookup"
           >
             <template slot-scope="props">
               <div class="media">
@@ -51,7 +52,7 @@
           </b-datepicker>
         </b-field>
         <b-field label="Notes">
-          <b-input type="textarea" v-model="comment"></b-input>
+          <b-input type="textarea" v-model="comment" placeholder="Optional comment"></b-input>
         </b-field>
       </section>
       <footer class="modal-card-foot">
@@ -122,7 +123,6 @@ export default {
 
       const params = this.generateParamsForRequest("Points");
       this.loading.loadingSaveBtn = true;
-
       this.$api
         .post(`addonmodules.php?${params}`, {
           a: "Add",
@@ -133,12 +133,15 @@ export default {
         })
         .then((response) => {
           if (response.data.result == "success") {
-            this.$emit("close");
+            
             //this.loadChats();
             this.$buefy.toast.open({
               message: "Changes saved",
               type: "is-success",
             });
+            this.$emit('refreshstats')
+            this.$emit("close")
+
           } else {
             this.$buefy.toast.open({
               container: ".modal-card",
@@ -175,4 +178,7 @@ export default {
 };
 </script>
 <style>
+.b-numberinput input[type=number] {
+  text-align:left;
+}
 </style>

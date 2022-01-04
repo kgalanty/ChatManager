@@ -51,8 +51,8 @@
           >
         </b-field>
       </div>
-      <div class="tile is-1 is-child">
-        <b-field label="Add Manual Points" style="width: 95%; padding: 9px">
+      <div class="tile is-1 is-child" v-if="isAdmin()">
+        <b-field label="Add Points" style="width: 95%; padding: 9px">
           <b-button type="is-primary" @click="openAddPointsModal" expanded
             >Add</b-button
           >
@@ -212,10 +212,18 @@
         width="100"
         centered
       >
-      <a v-if="props.row.data.agent_name != 'TEAM' && props.row.manualpoints && props.row.manualpoints > 0" @click="OpenManualPointsModal(props.row.data)">{{props.row.manualpoints}}</a>
-      <span v-else-if="props.row.data.agent_name == 'TEAM'">{{props.row.manualpoints}}</span>
-      <span v-else>0</span>
-
+        <a
+          v-if="
+            props.row.data.agent_name != 'TEAM' &&
+           !isNaN(props.row.manualpoints)
+          "
+          @click="OpenManualPointsModal(props.row.data)"
+          ><b-tooltip label="Click for more info" >{{ props.row.manualpoints }}</b-tooltip></a
+        >
+        <span v-else-if="props.row.data.agent_name == 'TEAM'">{{
+          props.row.manualpoints
+        }}</span>
+        <span v-else>0</span>
       </b-table-column>
       <b-table-column
         field="date"
@@ -252,9 +260,12 @@
             ? returnPercents(
                 ((props.row.directsale +
                   props.row.convertedsale +
-                  props.row.upgrade + props.row.manualpoints) *
+                  props.row.upgrade +
+                  props.row.manualpoints) *
                   100) /
-                  (props.row.directsale + props.row.wcb + props.row.manualpoints)
+                  (props.row.directsale +
+                    props.row.wcb +
+                    props.row.manualpoints)
               )
             : "0 %"
         }}
@@ -329,28 +340,36 @@ import StatsDetails from "@/components/StatsDetails";
 import notificationsMixin from "../mixins/notificationsMixin";
 import memberMixin from "../mixins/memberMixin";
 import AddManualPointsModal from "./AddManualPointsModal.vue";
-import ShowManualPointsModal from './ShowManualPointsModal.vue';
-import errorsMixin from '../../../chat-nuxt/mixins/errorsMixin';
+import ShowManualPointsModal from "./ShowManualPointsModal.vue";
+import errorsMixin from "../../../chat-nuxt/mixins/errorsMixin";
 export default {
   name: "StatsTable",
-  mixins: [dateMixin, requestsMixin, notificationsMixin, memberMixin, errorsMixin],
+  mixins: [
+    dateMixin,
+    requestsMixin,
+    notificationsMixin,
+    memberMixin,
+    errorsMixin,
+  ],
   components: { StatsDetails },
   methods: {
-    OpenManualPointsModal(agentdata)
-    {
-      let dates = {datefrom: this.createUTCDatetime(this.filters.dateFrom), dateto: this.createUTCDatetime(this.filters.dateTo)}
+    OpenManualPointsModal(agentdata) {
+      let dates = {
+        datefrom: this.createUTCDatetime(this.filters.dateFrom),
+        dateto: this.createUTCDatetime(this.filters.dateTo),
+      };
       this.$buefy.modal.open({
         parent: this,
         component: ShowManualPointsModal,
         hasModalCard: true,
-        props: {agent: agentdata, dates},
+        props: { agent: agentdata, dates },
         // customClass: this.darkstyle ? 'darktheme' : 'lighttheme',
         trapFocus: true,
         width: "auto",
       });
     },
     openAddPointsModal() {
-      this.$buefy.modal.open({
+    this.$buefy.modal.open({
         parent: this,
         component: AddManualPointsModal,
         hasModalCard: true,
@@ -358,6 +377,11 @@ export default {
         // customClass: this.darkstyle ? 'darktheme' : 'lighttheme',
         trapFocus: true,
         width: "auto",
+        events: {
+          refreshstats: () => {
+            this.loadStats()
+          },
+        },
       });
     },
     openExport() {
@@ -374,7 +398,6 @@ export default {
           responseType: "blob",
         })
         .then((response) => {
-          console.log(response);
           const type = response.headers["content-type"];
           const blob = new Blob([response.data], {
             type: type,
@@ -387,7 +410,7 @@ export default {
           link.remove();
         })
         .catch((error) => {
-          this.showError(error)
+          this.showError(error);
         })
         .finally(() => {});
     },
@@ -470,6 +493,7 @@ export default {
         `datefrom=${dateFrom}`,
         `dateto=${dateTo}`,
         `op=${this.filters.operator}`,
+        `tz=${Intl.DateTimeFormat().resolvedOptions().timeZone}`,
       ]);
 
       //context.commit('setChatsPage', payload.chatsPage)
@@ -482,8 +506,10 @@ export default {
           }
         })
         .catch((e) => {
-          console.log(e);
-          throw 'Failed to download data. Check if you are logged in and have permission.'
+          this.showError(
+            "Failed to download data. Check if you are logged in and have permission. Details: " +
+              e
+          );
           //window.location = 'login.php'
         })
         .finally(() => {

@@ -118,7 +118,7 @@ class RestRequest
     {
         if (in_array($this->method, array('POST'))) {
             //$this->requestBody = http_build_query($data, '', '&');
-            $this->requestBody = json_encode($data,JSON_FORCE_OBJECT);
+            $this->requestBody = json_encode($data);
         }
     }
 

@@ -8,6 +8,7 @@ use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
+use WHMCS\Module\Addon\ChatManager\app\Classes\DateTimeHelper;
 
 class StatsHelper
 {
@@ -141,17 +142,21 @@ class StatsHelper
     private static function getManualPoints(array $filters)
     {
         $external = DB::table(DBTables::ManualPoints)
-            ->whereBetween('date', [$filters['datefrom'], $filters['dateto']]);
-            if($filters['op'] != '')
-            {
-                $external = $external->where('userid', (int)$filters['op']);
-            }
-            $external=$external->join('tbladmins as a', 'a.id', '=', 'userid')->selectRaw('SUM(points) as points, userid, a.firstname, a.lastname')
+            ->whereBetween('date', [DateTimeHelper::convertFromUTCToTZ($filters['tz'], $filters['datefrom'], 'Y-m-d'), DateTimeHelper::convertFromUTCToTZ($filters['tz'], $filters['dateto'], 'Y-m-d')]);
+        if ($filters['op'] != '' && AuthControl::isAdmin()) {
+            $external = $external->where('userid', (int)$filters['op']);
+        }
+        if(AuthControl::isAgent())
+        {
+            $external = $external->where('userid', (int)$_SESSION['adminid']);
+        }
+        $external = $external->join('tbladmins as a', 'a.id', '=', 'userid')
+            ->selectRaw('SUM(points) as points, userid, a.firstname, a.lastname')
             ->groupBy('userid')
             ->get();
-            return $external;
+        return $external;
     }
-    public static function CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests, array $filters)
+    public static function CreateResult($threads, $cm_stayed_requests, array $filters)
     {
         $r = [];
         $tags = [
@@ -167,13 +172,13 @@ class StatsHelper
             'stayed' => 0,
             "vps/ds" => 0,
             'upgrade' => 0,
-            'manualpoints'=>0
+            'manualpoints' => 0
         ];
         if ($_SESSION['adminid'] == 230) {
             //echo('<pre>'); var_dump($threads); die;
         }
 
-       // $agents = [];
+        // $agents = [];
         //rearrange data from query to one unified array as query returns scattered data across rows
         foreach ($threads as $t) {
             // if (!in_array($t->adminid, $agents)) {
@@ -187,20 +192,20 @@ class StatsHelper
             $r[$t->agent]['data']['cm_points'] = 0;
         }
         $external = self::getManualPoints($filters);
-        foreach($external as $extItem)
-        {
-            if(!$r[$extItem->userid])
-            {
+
+        foreach ($external as $extItem) {
+            if (!$r[$extItem->userid]) {
                 $r[$extItem->userid] = array_merge($tags, [
-                    'manualpoints'=>(int)$extItem->points, 'data' => 
-                    ['cm_points' => 0,   
+                    'manualpoints' => (int)$extItem->points, 'data' =>
+                    [
+                        'cm_points' => 0,
                         'agent' => $extItem->userid,
-                    'agent_name' => $extItem->firstname.' '.$extItem->lastname,
-                    'agent_id' => $extItem->userid]]);
-            }
-            else
-            {
-                $r[$extItem->userid]['manualpoints'] = (int)$extItem->points ?? 0;
+                        'agent_name' => $extItem->firstname . ' ' . $extItem->lastname,
+                        'agent_id' => $extItem->userid
+                    ]
+                ]);
+            } else {
+                $r[$extItem->userid]['manualpoints'] = (int)$extItem->points ? $r[$extItem->userid]['manualpoints']+$extItem->points : 0;
             }
         }
         $o = [];
@@ -215,19 +220,17 @@ class StatsHelper
             }
             $r[$agent_id]['data']['cm_points'] = $points->stayed;
         }
-        //external points handling
-       
-     
+
         //add points to decrement to final array
         foreach ($r as $agent_email => $rr) {
-            $searchForManualPoints = array_search($rr['data']['agent'], array_column($external, 'userid'));
+           // $searchForManualPoints = array_search($rr['data']['agent'], array_column($external, 'userid'));
             //$rr['decrementpoints'] = $threads_upgrade_points[$agent_email] ? (int)$threads_upgrade_points[$agent_email]->s - 1 : 0;
             //$rr['manualpoints'] = $searchForManualPoints !== false ? (int)$external[$searchForManualPoints]->points : 0;
             $rr['decrementpoints'] = 0;
             $rr['cm_points'] = $cm_points[$agent_email] ? $cm_points[$agent_email]->stayed : 0;
             $o[] = $rr;
         }
-        
+
         return $o;
     }
     public static function AsColumns(array $result)
@@ -236,7 +239,7 @@ class StatsHelper
         foreach ($result as $item) {
             $rows[] = [
                 $item['data']['agent_name'],
-                $item['directsale'] + $item['wcb'],
+                $item['directsale'] + $item['wcb'] + $item['manualpoints'],
                 $item['cannotoffer'] . ' (' . ($item['directsale'] + $item['wcb'] + $item['cannotoffer'] == 0 ? 0 : round($item['cannotoffer'] / ($item['directsale'] + $item['wcb'] + $item['cannotoffer']) * 100)) . '%)',
                 $item['directsale'] + $item['wcb'] + $item['cannotoffer'],
                 $item['directsale'],
@@ -247,8 +250,9 @@ class StatsHelper
                 $item['cycle'],
                 $item['data']['cm_points'],
                 $item['vps/ds'] ?? 0,
-                $item['directsale'] + $item['convertedsale'] + $item['upsell'] + $item['cycle'] + $item['vps/ds'] + $item['data']['cm_points'] + $item['upgrade'],
-                ($item['directsale'] + $item['wcb'] > 0 ? round(($item['directsale'] + $item['convertedsale'] + $item['upgrade']) * 100 / ($item['directsale'] + $item['wcb']), 2) : 0) . '%',
+                $item['manualpoints'] ?? 0,
+                $item['directsale'] + $item['convertedsale'] + $item['upsell'] + $item['cycle'] + $item['vps/ds'] + $item['data']['cm_points'] + $item['upgrade'] + $item['manualpoints'],
+                ($item['directsale'] + $item['wcb'] + $item['manualpoints'] > 0 ? round((($item['directsale'] + $item['convertedsale'] + $item['upgrade'] + $item['manualpoints']) * 100) / ($item['directsale'] + $item['wcb'] + $item['manualpoints']), 2) : 0) . '%',
                 ($item['directsale'] + $item['wcb'] > 0 ? round(($item['directsale'] + $item['convertedsale'] + $item['upgrade'] + $item['upsell'] + $item['cycle'] + $item['data']['cm_points'] + $item['vps/ds']) * 100 / ($item['directsale'] + $item['wcb']), 2) : 0) . '%',
             ];
         }
