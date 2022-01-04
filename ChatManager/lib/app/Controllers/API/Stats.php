@@ -35,8 +35,8 @@ class Stats extends API
         //calculate how many points per agent have to be substracted, as 'upgrade' tag should count as 1 in one thread 
         // even among other pointgiving tags.
         //This is returned and substracted on frontend. Raw query for speed gain
-        $threads_upgrade_points = StatsHelper::getDecrementPoints(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
-        $o = StatsHelper::CreateResult($threads, $threads_upgrade_points, $cm_stayed_requests, ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
+      //  $threads_upgrade_points = StatsHelper::getDecrementPoints(['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op']]);
+        $o = StatsHelper::CreateResult($threads, $cm_stayed_requests, ['datefrom' => $dateFrom, 'dateto' => $dateTo, 'op' => $_GET['op'], 'tz'=>$_GET['tz']]);
         if (count($o) > 0) {
             $sum = [];
            

@@ -2,7 +2,7 @@
   <form action="">
     <div class="modal-card" style="width: 95vw">
       <header class="modal-card-head">
-        <p class="modal-card-title">External Points Review - {{agent.agent_name}} {{ dateFromUTC }} - {{ dateToUTC}}</p>
+        <p class="modal-card-title">External Points Review - {{agent.agent_name}} {{ dateFrom }} - {{ dateTo }}</p>
         <button type="button" class="delete" @click="$emit('close')" />
       </header>
       <section class="modal-card-body">
@@ -88,11 +88,11 @@ export default {
   },
   components: {},
   computed: {
-    dateFromUTC()
+    dateFrom()
     {
       return this.parseDate(this.dates.datefrom)
     },
-    dateToUTC()
+    dateTo()
     {
       return this.parseDate(this.dates.dateto)
     },
@@ -116,13 +116,13 @@ export default {
       //   return;
       // }
       // this.loading.saveLoadingBtn = true;
-    let dateFromUTC = this.createUTCDatetime(this.dates.datefrom)
-    let dateToUTC = this.createUTCDatetime(this.dates.dateto)
+   // let dateFromUTC = this.createUTCDatetime(this.dates.datefrom)
+   // let dateToUTC = this.createUTCDatetime(this.dates.dateto)
       const params = this.generateParamsForRequest("Points", [
         "a=GetSingleAgentPoints",
         `agentid=${this.agent.agent_id}`,
-        `datefrom=${dateFromUTC}`,
-        `dateto=${dateToUTC}`,
+        `datefrom=${this.dateFrom}`,
+        `dateto=${this.dateTo}`,
         `page=${this.page}`,
         `perpage=${this.perpage}`
       ]);

@@ -58,6 +58,7 @@ class Points extends API
                     'date' => $date,
                     'created_at' => new \DateTime('now', new \DateTimeZone('UTC')),
                 ]);
+                Logs::AddManualPoints($author, $operator, $points, $comment, $date);
                 return ['result' => 'success', 'data' => $model];
             }
         }

@@ -52,6 +52,7 @@
         v-slot="props"
       >
        <b-tag v-if="props.row.relateditem.threadid" type="is-link">{{ props.row.relateditem.threadid }}</b-tag>
+        <b-tag v-if="props.row.itemclass=='Operator'" type="is-link">{{ props.row.relateditem.username }}</b-tag>
       </b-table-column>
 
      

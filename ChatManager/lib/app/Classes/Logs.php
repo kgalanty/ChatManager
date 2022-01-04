@@ -174,4 +174,11 @@ class Logs
         $desc = 'Set client name and email based on the profile of related order';
         self::log($threadid, 'Thread', AdminGroupsConsts::CRON_ADMIN, $desc);
     }
+    public static function AddManualPoints($author, $operator, $points, $comment, $date)
+    {
+        $operatorAdmin = Admin::find($operator);
+        $authorAdmin = Admin::find($author);
+        $desc = $authorAdmin->firstname.' '.$authorAdmin->lastname .' applied '. $points.' points to '.$operatorAdmin->firstname.' '.$operatorAdmin->lastname.'`s account with date '. $date.' and comment: '.$comment ;
+        self::log($operator, 'Operator', $author, $desc);
+    }
 }
