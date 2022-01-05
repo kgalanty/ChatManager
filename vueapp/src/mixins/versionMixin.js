@@ -1,10 +1,12 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.21",
-            build: "2022-01-04 12:18 UTC",
+            packageversion: "1.0.22",
+            build: "2022-01-05 12:42 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.22</strong></li>
+            <li>- Fixed follow up button</li>
             <li><strong>1.0.21</strong></li>
             <li>- Added new functionality for supervisors to manually add external points:</li>
             <li>- Now you can add (or remove) points by inserting them manually for given date and operator</li>
