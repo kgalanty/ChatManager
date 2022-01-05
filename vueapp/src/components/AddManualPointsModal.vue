@@ -179,6 +179,6 @@ export default {
 </script>
 <style>
 .b-numberinput input[type=number] {
-  text-align:left;
+  text-align:left !important;
 }
 </style>

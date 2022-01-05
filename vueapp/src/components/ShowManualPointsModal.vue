@@ -51,7 +51,7 @@
             {{ props.row.comment }}
           </b-table-column>
           <b-table-column field="date" label="Date added" width="250" v-slot="props">
-            {{ props.row.created_at }}
+            {{ parseDateTimeFromUTCtoLocal(props.row.created_at) }}
           </b-table-column>
         </b-table>
       </section>

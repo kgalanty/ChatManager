@@ -1,10 +1,13 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.20",
-            build: "2021-12-20 13:17 UTC",
+            packageversion: "1.0.21",
+            build: "2022-01-04 12:18 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.21</strong></li>
+            <li>- Added new functionality for supervisors to manually add external points:</li>
+            <li>- Now you can add (or remove) points by inserting them manually for given date and operator</li>
             <li><strong>1.0.20</strong></li>
             <li>- Added export statistics to pdf</li>
             <li>- Some small styling adjustments</li>
