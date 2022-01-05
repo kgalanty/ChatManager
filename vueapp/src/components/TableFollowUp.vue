@@ -62,16 +62,16 @@ export default {
     click() {
       this.loading = true;
       this.disabled = true;
-      console.log(this.afterClickAction)
-      // this.followup(this.row).then(() => {
-      //   {
-      //     this.loading = false;
-      //     this.disabled = false;
-      //     if (this.afterClickAction) {
-      //       this[this.afterClickAction]();
-      //     }
-      //   }
-      // });
+//      console.log(this.afterClickAction)
+      this.followup(this.row).then(() => {
+        {
+          this.loading = false;
+          this.disabled = false;
+          if (this.afterClickAction) {
+            this[this.afterClickAction]();
+          }
+        }
+      });
     },
     updateTimers() {
       var that = this;
