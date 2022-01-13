@@ -46,6 +46,7 @@ import { mapActions } from 'vuex';
 export default {
   name: "StatsDetails",
   props: ["row", "filters"],
+  
   mixins: [dateMixin, requestsMixin],
   components: {
     //HelloWorld

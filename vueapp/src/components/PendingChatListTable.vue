@@ -1,7 +1,13 @@
 <template>
   <article
     id="pendingchatlisttable"
-    style="background: #f14668; color: white; padding: 5px; border-radius: 5px;margin-bottom:10px;"
+    style="
+      background: #f14668;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    "
     v-if="pendingchats && pendingchats.data && pendingchats.data.length > 0"
   >
     <span
@@ -13,7 +19,6 @@
     <b-table
       class="btable"
       :data="pendingchats.data"
-      
       narrowed
       :total="pendingchats.total"
       paginated
@@ -46,7 +51,7 @@
           >
         </b-tooltip>
       </b-table-column>
-      <b-table-column field="tags" label="Tags" v-slot="props"  width="260">
+      <b-table-column field="tags" label="Tags" v-slot="props" width="260">
         <b-taglist>
           <span
             :key="index"
@@ -60,7 +65,7 @@
           >
         </b-taglist>
       </b-table-column>
-      <b-table-column field="date" label="All Chats" v-slot="props"  width="100">
+      <b-table-column field="date" label="All Chats" v-slot="props" width="100">
         <b-button
           type="is-primary"
           size="is-small"
@@ -84,16 +89,6 @@
       <b-table-column field="domain" label="Domain" v-slot="props" width="160">
         {{ props.row.domain }}
       </b-table-column>
-      <!-- <b-table-column field="date" label="Location" v-slot="props" width="30">
-        {{
-          props.row.customer.geolocation
-            ? JSON.parse(props.row.customer.geolocation).country_code
-            : ""
-        }}
-      </b-table-column>
-      <b-table-column field="date" label="IP" v-slot="props" width="160">
-        {{ props.row.customer.ip }}
-      </b-table-column> -->
       <b-table-column label="Follow up" width="100" v-slot="props">
         <TableFollowUp
           :row="props.row"
@@ -108,16 +103,41 @@
         v-slot="props"
         centered
       >
-      <b-taglist attached v-if="props.row.invoiceid" style="display:block;margin-bottom:0 ;">
-        <b-tag type="is-danger">I</b-tag>
-        <b-tag :type="props.row.invoice.status=='Paid' ? 'is-success' : 'is-link'"><b-tooltip label="This is invoice ID. Green means Paid.">{{props.row.invoiceid}}</b-tooltip></b-tag>
-      </b-taglist>
-         <b-tag type="is-info" v-if="props.row.orderid">{{ props.row.orderid }}</b-tag>
-        <span v-if="Array.isArray(props.row.revieworder) 
-        && props.row.revieworder.length > 0" >
-          <b-taglist attached style="display:block" >
-            <b-tag type="is-danger">+</b-tag> 
-          <b-tag v-for="item in props.row.revieworder" :key="item.id" ><span style="display:inline-block;font-weight:bold" v-if="item.invoice==1">I</span> {{ item.orderid }}</b-tag>
+        <b-taglist
+          attached
+          v-if="props.row.invoiceid"
+          style="display: block; margin-bottom: 0"
+        >
+          <b-tag type="is-danger">I</b-tag>
+          <b-tag
+            :type="
+              props.row.invoice.status == 'Paid' ? 'is-success' : 'is-link'
+            "
+            ><b-tooltip label="This is invoice ID. Green means Paid.">{{
+              props.row.invoiceid
+            }}</b-tooltip></b-tag
+          >
+        </b-taglist>
+        <b-tag type="is-info" v-if="props.row.orderid">{{
+          props.row.orderid
+        }}</b-tag>
+        <span
+          v-if="
+            Array.isArray(props.row.revieworder) &&
+            props.row.revieworder.length > 0
+          "
+         
+        >
+          <b-taglist attached style="display: block">
+            <b-tag type="is-danger">+</b-tag>
+            <b-tag v-for="item in props.row.revieworder" :key="item.id"
+              ><span
+                style="display: inline-block; font-weight: bold"
+                v-if="item.invoice == 1"
+                >I</span
+              >
+              {{ item.orderid }}</b-tag
+            >
           </b-taglist>
         </span>
       </b-table-column>
@@ -135,7 +155,11 @@
         <b-tag v-if="isPendingTag(props.row.tags)" type="is-warning"
           >Pending Tags</b-tag
         >
-       <b-tag v-if="props.row.pending_reviews && props.row.pending_reviews.length > 0" type="is-primary"
+        <b-tag
+          v-if="
+            props.row.pending_reviews && props.row.pending_reviews.length > 0
+          "
+          type="is-primary"
           >Pending Reviews</b-tag
         >
       </b-table-column>
@@ -191,7 +215,7 @@ export default {
   components: { TableFollowUp },
   methods: {
     ...mapActions("chat", ["loadPendingChats", "loadChats"]),
-     ...mapState(["darkstyle"]),
+    ...mapState(["darkstyle"]),
     isEditActive(row) {
       row.tags.find((e) => {
         if (e.tag == "duplicate" && e.approved == 1) {
