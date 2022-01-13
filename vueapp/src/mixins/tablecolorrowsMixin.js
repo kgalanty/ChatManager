@@ -1,6 +1,7 @@
 
 export default {
   methods: {
+    //row: Object with current thread
     colorRows(row) {
       //if(this.colorDirectConvertedSaleLackOrder(row)) return 'is-lackorder'
       if(this.colorPendingReviews(row)) return 'is-reviewpending'

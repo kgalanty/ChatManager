@@ -19,19 +19,10 @@ const OrdersStore =
   },
   actions:
   {
-
     loadOrders(context) {
       context.commit('setLoading', true)
       return new Promise((resolve, reject) => {
         const Params = requestsMixin.methods.generateParamsForRequest('OrdersChats')
-        // context.commit('setLoading', true)
-        // const params = [
-        //   `module=ChatManager`,
-        //   `c=OrdersChats`,
-        //   `json=1`,
-        // ].join("&");
-
-        //context.commit('setChatsPage', payload.chatsPage)
         axios
           .get('addonmodules.php?' + Params)
           .then(response => {
@@ -51,9 +42,6 @@ const OrdersStore =
             context.commit('setLoading', false)
           })
       })
-
-
-
     }
   }
 }

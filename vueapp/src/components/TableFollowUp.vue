@@ -27,14 +27,13 @@
   </span>
 </template>
 <style scoped>
-.button
-{
-  display:block;
-      margin: 0 auto;
+.button {
+  display: block;
+  margin: 0 auto;
 }
 </style>
 <script>
-import { mapActions } from 'vuex';
+import { mapActions } from "vuex";
 // @ is an alias to /src
 //import HelloWorld from '@/components/HelloWorld.vue'
 import tableHelper from "../mixins/tableHelper";
@@ -42,18 +41,15 @@ export default {
   name: "TableFollowUp",
   components: {},
   mixins: [tableHelper],
-  props:
-  {
-    row:
-    {
+  props: {
+    row: {
       type: Object,
-      required: true
+      required: true,
     },
-    afterClickAction:
-    {
+    afterClickAction: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
   methods: {
     ...mapActions({
@@ -62,7 +58,7 @@ export default {
     click() {
       this.loading = true;
       this.disabled = true;
-//      console.log(this.afterClickAction)
+      //      console.log(this.afterClickAction)
       this.followup(this.row).then(() => {
         {
           this.loading = false;
@@ -81,7 +77,7 @@ export default {
         } else {
           if (this.interval) {
             clearInterval(this.interval);
-            this.interval = null
+            this.interval = null;
           }
         }
       }, 60000);

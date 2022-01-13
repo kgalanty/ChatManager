@@ -28,7 +28,7 @@ const SystemLogs =
     setFilter(state, filterItem) {
       state.filters = { ...state.filters, ...filterItem }
     },
-    
+
   },
   actions:
   {
@@ -64,9 +64,6 @@ const SystemLogs =
             context.commit('setLoading', false)
           })
       })
-
-
-
     }
   }
 }

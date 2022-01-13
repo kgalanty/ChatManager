@@ -1,4 +1,4 @@
-
+import requestMixin from "@/mixins/requestsMixin";
 export default {
   data() {
     return {
@@ -25,15 +25,13 @@ export default {
     },
     showAllChats(customerid) {
       this.OpenExternalPage("https://my.livechatinc.com/archives/?query=" + customerid)
-      
+
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
     },
-    OpenAA(link)
-    {
-      this.OpenExternalPage('https://my.tmdhosting.com/admin/'+link)
+    OpenAA(link) {
+      this.OpenExternalPage('https://my.tmdhosting.com/admin/' + link)
     },
-    OpenExternalPage(link)
-    {
+    OpenExternalPage(link) {
       window.open(link)
     },
     showfollowup(row) {
@@ -50,13 +48,13 @@ export default {
         );
         // var dur = this.moment(now).utc().fromNow()
         // var duration = this.moment.duration(now.diff(end))
-        var result = this.moment.utc(now).fromNow();
+        const result = this.moment.utc(now).fromNow();
         return result;
       }
       return "None";
     },
     followup(row) {
-      const params = [`module=ChatManager`, `c=FollowUp`, `json=1`].join("&");
+      const params = requestMixin.methods.generateParamsForRequest("FollowUp")      
       return new Promise((resolve) => {
         this.$api
           .post(`addonmodules.php?${params}`, {
@@ -81,13 +79,17 @@ export default {
           });
       })
     },
+    //Tags: Array of objects containing tags connected with given thread
+    //InvoiceStatus: String , empty string or status, f.ex. 'Paid'
+    //invoice: null|Object describing related invoice
+
     calculatePointsFromTags(tags, invoiceStatus, invoice) {
       let n = 0
-      var upgradeMarker = false
-      if(invoiceStatus != 'Paid' && !invoice) return ''
+      let upgradeMarker = false
+      if (invoiceStatus != 'Paid' && !invoice) return ''
       for (let i of tags) {
-        if(parseInt(i.approved) !== 1) continue
-       
+        if (parseInt(i.approved) !== 1) continue
+
         if (i.tag == "directsale") n++
         if (i.tag == "convertedsale") n++
         if (i.tag == "upsell") n++
@@ -95,7 +97,7 @@ export default {
         if (i.tag == "vps/ds") n++
         if (i.tag == "upgrade") upgradeMarker = true
       }
-      if(upgradeMarker &&  invoiceStatus == 'Paid') return 1
+      if (upgradeMarker && invoiceStatus == 'Paid') return 1
       return n > 0 ? n : ''
     }
   }
