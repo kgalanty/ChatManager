@@ -48,6 +48,11 @@ const chatsStore = {
       context.commit("setFilter", { tags: payload });
       context.commit("setChatsPage", 1);
     },
+    setQueryFilter(context, payload)
+    {
+      context.commit('setQuery', payload)
+      context.commit("setChatsPage", 1);
+    },
     setExTagsFilter(context, payload) {
       context.commit("setFilter", { extags: payload });
       context.commit("setChatsPage", 1);

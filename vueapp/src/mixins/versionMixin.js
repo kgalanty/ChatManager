@@ -1,10 +1,13 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.22",
-            build: "2022-01-05 12:42 UTC",
+            packageversion: "1.0.23",
+            build: "2022-01-17 17:49 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.23</strong></li>
+            <li>- Fixed filtering when moving to stats and back to chat list</li>
+            <li>- Fixed incorrect order id becoming 0 when accepting invoice id suggestion</li>
             <li><strong>1.0.22</strong></li>
             <li>- Fixed follow up button</li>
             <li><strong>1.0.21</strong></li>
@@ -12,15 +15,15 @@ export default {
             <li>- Now you can add (or remove) points by inserting them manually for given date and operator</li>
             <li><strong>1.0.20</strong></li>
             <li>- Added export statistics to pdf</li>
-            <li>- Some small styling adjustments</li>
-            <li><strong>1.0.19</strong></li>
-            <li>- Added info in chat edit modal when it has 'upgrade' tag and no order/invoice id, advising to add invoice id</li>
-            <li>- Added filtering in logs tab</li>
-            <li>- Added support for multiple emails in email field - separated by comma - to be matched with possible order</li>
-            <li><strong>1.0.18</strong></li>
-            <li>- Fixed calculating points in chat table when in certain cases was failing</li>
-            <li>- Fixed showing order/invoice id when accepting suggestion going to correct field</li>
-            <li>- Added info about loading on all tables</li></ul>`
+            <li>- Some small styling adjustments</li></ul>`
+            // <li><strong>1.0.19</strong></li>
+            // <li>- Added info in chat edit modal when it has 'upgrade' tag and no order/invoice id, advising to add invoice id</li>
+            // <li>- Added filtering in logs tab</li>
+            // <li>- Added support for multiple emails in email field - separated by comma - to be matched with possible order</li>
+            // <li><strong>1.0.18</strong></li>
+            // <li>- Fixed calculating points in chat table when in certain cases was failing</li>
+            // <li>- Fixed showing order/invoice id when accepting suggestion going to correct field</li>
+            // <li>- Added info about loading on all tables</li></ul>`
             // <li><strong>1.0.17</strong></li>
             // <li>- Fixed calculating points for upgrade chats with order and paid invoice in it</li>
             // <li>- Applied new cron looking for 'wcb' tags and adding 'convertedsale' when related order is paid (removing 'pending')</li>

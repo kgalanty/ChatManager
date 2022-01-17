@@ -20,7 +20,7 @@ class StatsHelper
             ->where('tg.approved', 1)
             ->where('t.agent', intval(trim($params['op'])))
             ->groupBy('tg.tag')
-            ->selectRaw('t.agent, tg.tag, count(tg.id) as count')
+            ->selectRaw('t.agent, tg.tag, count(tg.id) as count, t.id')
             ->get();
         $data = [];
 
