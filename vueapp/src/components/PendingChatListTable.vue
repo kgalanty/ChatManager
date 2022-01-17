@@ -105,7 +105,7 @@
       >
         <b-taglist
           attached
-          v-if="props.row.invoiceid"
+          v-if="props.row.invoiceid && props.row.invoice"
           style="display: block; margin-bottom: 0"
         >
           <b-tag type="is-danger">I</b-tag>

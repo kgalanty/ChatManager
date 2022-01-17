@@ -27,7 +27,7 @@ module.exports = {
         withCredentials: true,
        cookieDomainRewrite: { "localhost": "my.tmdhosting.com" },
       // cookieDomainRewrite: { "localhost": "ticketing.stage.tmdhosting.com" },
-        headers: { Cookie: 'WHMCSBaCqM4Y33YVw=596a381076ea5f9ed92702fac102bd08'},
+        headers: { Cookie: 'WHMCSBaCqM4Y33YVw=b43a1c6b2f5265036086a7a28b7827be'},
       }
     }
   }

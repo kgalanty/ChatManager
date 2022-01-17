@@ -57,6 +57,7 @@ export default {
       setOperatorFilter: "chat/setOperatorFilter",
       setDateFromFilter: "chat/setDateFromFilter",
       setDateToFilter: "chat/setDateToFilter",
+      setQueryFilter: 'chat/setQueryFilter'
     }),
     navigateToFilteredChat(tag)
     {
@@ -64,6 +65,7 @@ export default {
       this.setOperatorFilter(this.row.data.agent)
       this.setDateFromFilter(this.createUTCDatetime(this.filters.dateFrom))
       this.setDateToFilter(this.createUTCDatetime(this.filters.dateTo))
+      this.setQueryFilter('')
       router.push({ path: '/' })
     },
     getStatsDetails( agentid) {

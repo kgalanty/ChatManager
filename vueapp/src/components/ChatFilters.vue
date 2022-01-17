@@ -132,8 +132,10 @@ export default {
     //HelloWorld
   },
   methods: {
+
     doSearch() {
-      this.$store.commit("chat/setQuery", this.searchtext);
+
+      this.setQueryFilter(this.searchtext);
 
       this.loadChats().catch((e) => {
         this.showError(e);
@@ -172,6 +174,7 @@ export default {
       setTagsFilter: "chat/setTagsFilter",
       setExTagsFilter: 'chat/setExTagsFilter',
       setOperatorFilter: "chat/setOperatorFilter",
+      setQueryFilter: 'chat/setQueryFilter'
     }),
     clearField(field) {
       this[field] = null;
