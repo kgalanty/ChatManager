@@ -30,12 +30,13 @@ class LiveChatParsers
                 //echo('<pre>'); var_dump($chatitem->thread->user_ids, $admins); die;
                 $agent = LiveChatHelper::getAgentByPersonalTags($chatitem, $admins);
                 // && isset($admins[$chatitem->thread->user_ids[0]])
+                $customer = $chatitem->users[0]->type == 'customer' ? $chatitem->users[0] : [];
                 $insertRow = [
                     'chatid' => $chatitem->id,
                     'threadid' => $chatitem->thread->id,
                     'users' => $user,
-                    'name' => '',
-                    'email' => '',
+                    'name' => $customer ? $customer->name : '',
+                    'email' => $customer ? $customer->email : '',
                     'domain' => '',
                     'orderid' => null,
                     'agent' => $agent,

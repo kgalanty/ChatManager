@@ -67,7 +67,7 @@ import { dateMixin } from "../mixins/dateMixin.js";
 import memberMixin from "../mixins/memberMixin";
 import requestMixin from "../mixins/requestsMixin";
 import notificationsMixin from "../mixins/notificationsMixin";
-import errorsMixin from "../../../chat-nuxt/mixins/errorsMixin.js";
+import errorsMixin from "../mixins/errorsMixin.js";
 
 export default {
   name: "ShowManualPointsModal",

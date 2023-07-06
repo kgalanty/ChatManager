@@ -207,7 +207,14 @@ class OrderCron
                 $orderchangesPending = ReviewOrder::where('threadid', $thread->id)->where('orderid', $thread->orderid)->get();
                 if ($orderchangesPending) {
                     ReviewOrder::where('threadid', $thread->id)->where('orderid', $thread->orderid)->delete();
-                    Logs::duplicatedPendingOrder($thread->id, $thread->orderid);
+                    if($thread->orderid)
+                    {
+                        Logs::duplicatedPendingOrder($thread->id, $thread->orderid);
+                    }
+                    elseif($thread->invoiceid)
+                    {
+                        
+                    }
                 }
 
                 Logs::AddOrderInCron($order->orderid, $thread->id);

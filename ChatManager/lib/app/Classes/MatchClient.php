@@ -15,7 +15,10 @@ class MatchClient
             if ($orderid && $orderid != 0) {
                 $domain = FindOrderHelper::findDomainByOrder($orderid);
             }
+            return ['name' => $client ? $client->firstname . ' ' . $client->lastname : '', 'email' => $client ? $client->email : '', 'domain' => $domain];
+        } elseif ($params['chatitem']->users[0]->type == 'customer') {
+            return ['name' => $params['chatitem']->users[0]->name, 'email' => $params['chatitem']->users[0]->email];
         }
-        return ['name' => $client ? $client->firstname.' '.$client->lastname:'', 'email' => $client ? $client->email : '', 'domain' => $domain];
+        return;
     }
 }
