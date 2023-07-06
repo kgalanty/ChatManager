@@ -341,7 +341,7 @@ import notificationsMixin from "../mixins/notificationsMixin";
 import memberMixin from "../mixins/memberMixin";
 import AddManualPointsModal from "./AddManualPointsModal.vue";
 import ShowManualPointsModal from "./ShowManualPointsModal.vue";
-import errorsMixin from "../../../chat-nuxt/mixins/errorsMixin";
+import errorsMixin from "../mixins/errorsMixin";
 export default {
   name: "StatsTable",
   mixins: [
