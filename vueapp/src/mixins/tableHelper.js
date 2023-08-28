@@ -24,7 +24,7 @@ export default {
       return email;
     },
     showAllChats(customerid) {
-      this.OpenExternalPage("https://my.livechatinc.com/archives/?query=" + customerid)
+      this.OpenExternalPage("https://my.livechatinc.com/archives/"+customerid+"?query=" + customerid)
 
       //https://my.livechatinc.com/archives/?query=93380b5f-2561-4286-76dd-57a457fe8b5b
     },
