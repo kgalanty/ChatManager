@@ -6,10 +6,9 @@ if(file_exists(__DIR__.'/vendor/autoload.php') === true)
 }
 
 use WHMCS\Module\Addon\ChatManager\app\Classes\LiveChatHelper;
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+
 $livechat = new LiveChatHelper();
 $livechat->readRecentChats(['tags' => ['values'=> ['sales']]]);
+$cmcount = $_SESSION['cmcount'] ? $_SESSION['cmcount'] : 0;
 logActivity('Chat manager inserted '.$_SESSION['cmcount'].' rows');
 unset($_SESSION['cmcount']);
