@@ -45,7 +45,7 @@ class LiveChatHelper
             $filters['from'] = $this->datefrom;
         } else {
             //2021-08-30T00:00:00.000000-02:00
-            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT80M'))->format('Y-m-d\TH:i:s.000000P');
+            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT180M'))->format('Y-m-d\TH:i:s.000000P');
         }
         if ($pageid !== null) {
             $filters['pageid'] = $pageid;
@@ -58,7 +58,7 @@ class LiveChatHelper
         }
 
         $this->results = $this->api->agents->getArchives($params);
-        // echo('<pre>');var_dump($this->results); die;
+         echo('<pre>');var_dump($this->results); die;
         $this->runParseStore();
         if ($this->results->next_page_id) {
             $this->readRecentChats([], $this->results->next_page_id);
