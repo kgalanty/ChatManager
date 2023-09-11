@@ -11,7 +11,7 @@
 </style>
 <div style="
 display: block;
-height: 60px;
+height: 30px;
 background: linear-gradient(45deg, rgb(21,45,160), transparent);
 display: flex;
 align-items: center;
@@ -23,4 +23,4 @@ font-weight: bold;
 font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
 ">{$moduleName}</div>
 
-<div style="margin: 5px;background: white;border-radius: 5px;padding: 10px;">
+<div style="background: white;border-radius: 5px;">
