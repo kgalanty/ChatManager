@@ -58,7 +58,7 @@ class LiveChatHelper
         }
 
         $this->results = $this->api->agents->getArchives($params);
-         echo('<pre>');var_dump($this->results); die;
+        // echo('<pre>');var_dump($this->results); die;
         $this->runParseStore();
         if ($this->results->next_page_id) {
             $this->readRecentChats([], $this->results->next_page_id);
