@@ -1,18 +1,20 @@
 <?php
 
 namespace WHMCS\Module\Addon\ChatManager\app\Classes;
+
 use WHMCS\Module\Addon\ChatManager\app\Models\Threads;
 use WHMCS\Database\Capsule as DB;
 use WHMCS\Module\Addon\ChatManager\app\DBTables\DBTables;
 use WHMCS\Module\Addon\ChatManager\app\Models\Admin;
 use WHMCS\Module\Addon\ChatManager\app\Consts\AdminGroupsConsts;
 use WHMCS\Module\Addon\ChatManager\app\Classes\Logs;
+
 class LiveChatParsers
 {
     public static function findCloseChatDate($eventsList)
     {
         foreach ($eventsList as $event) {
-            if ($event->system_message_type == 'manual_archived_agent' || $event->system_message_type == 'manual_archived_customer') {
+            if (in_array($event->system_message_type, ['manual_archived_agent', 'manual_archived_customer', 'archived_customer_disconnected'])) {
                 return $event->created_at;
             }
         }
@@ -21,15 +23,15 @@ class LiveChatParsers
     public static function parseArchiveList($list)
     {
         $admins = Admin::whereIn('roleid', array_merge(AdminGroupsConsts::AGENT, AdminGroupsConsts::ADMIN))
-        ->whereNotIn('id', AdminGroupsConsts::AGENT_DISALLOWED)->get(['id', 'email'])->keyBy('email');
+            ->whereNotIn('id', AdminGroupsConsts::AGENT_DISALLOWED)->get(['id', 'email'])->keyBy('email');
         foreach ($list as $chatitem) {
             $user = $chatitem->thread->user_ids[count($chatitem->thread->user_ids) - 1];
-            
+
             if (DB::table(DBTables::Threads)->where('threadid', $chatitem->thread->id)->count() == 0) {
                 $agent = 0;
-                //echo('<pre>'); var_dump($chatitem->thread->user_ids, $admins); die;
+
                 $agent = LiveChatHelper::getAgentByPersonalTags($chatitem, $admins);
-                // && isset($admins[$chatitem->thread->user_ids[0]])
+
                 $customer = $chatitem->users[0]->type == 'customer' ? $chatitem->users[0] : [];
                 $insertRow = [
                     'chatid' => $chatitem->id,
@@ -51,9 +53,11 @@ class LiveChatParsers
 
                 $_SESSION['cmcount'] += 1;
                 $id = DB::table(DBTables::Threads)->insertGetId($insertRow);
-                //echo('<pre>'); var_dump($insertRow, $id, $chatitem, count($list)); die;
+
                 Logs::AddThreadByCron($id);
-                self::parseTags($id, $chatitem->thread->tags);
+                if ($chatitem->thread->tags) {
+                    self::parseTags($id, $chatitem->thread->tags);
+                }
             }
 
             self::parseCustomer($user, $chatitem->users);
@@ -74,7 +78,7 @@ class LiveChatParsers
     }
     public static function parseCustomer(string $userid, array $users)
     {
-        $customer = LiveChatHelper::getUserById($userid,  $users);
+        $customer = LiveChatHelper::getUserById($userid, $users);
         if ($customer) {
             DB::table(DBTables::Customers)
                 ->updateOrInsert(
