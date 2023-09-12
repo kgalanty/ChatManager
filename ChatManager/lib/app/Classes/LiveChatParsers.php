@@ -46,7 +46,14 @@ class LiveChatParsers
                     'created_at' => DB::raw('NOW()')
 
                 ];
+                echo('<pre>'); var_dump($insertRow);
+
                 $customer = LiveChatHelper::getUserById($user, $chatitem->users);
+
+                echo('<pre>'); var_dump(MatchClient::execute(
+                    ['chatitem' => $chatitem, 'customer' => $customer]
+                ));
+
                 $insertRow = array_merge($insertRow, MatchClient::execute(
                     ['chatitem' => $chatitem, 'customer' => $customer]
                 ));
