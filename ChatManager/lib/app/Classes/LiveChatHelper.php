@@ -26,8 +26,7 @@ class LiveChatHelper
         } else {
             $this->timezone = $timezone;
         }
-        $this->datefrom = $datefrom;
-        //$agents = $LiveChatAPI->agents->getArchives(['filters' => []]);
+        $this->dateFrom = $datefrom ? $datefrom : DateTimeHelper::subDate($this->timezone, new \DateInterval('PT12H'))->format('Y-m-d\TH:i:s.000000P');
     }
     public function findChatByID(string $tid): array
     {
@@ -41,15 +40,12 @@ class LiveChatHelper
     }
     public function readRecentChats(array $filtersSet = [], string $pageid = null)
     {
-        if ($this->datefrom !== null) {
-            $filters['from'] = $this->datefrom;
-        } else {
-            //2021-08-30T00:00:00.000000-02:00
-            $filters['from'] = DateTimeHelper::subDate($this->timezone, new \DateInterval('PT180M'))->format('Y-m-d\TH:i:s.000000P');
-        }
+        $filters['from'] = $this->dateFrom;
+
         if ($pageid !== null) {
             $filters['pageid'] = $pageid;
         }
+
         $params['filters'] = array_merge($filters, $filtersSet);
         if ($pageid !== null) {
             $params['page_id'] = $pageid;
@@ -58,8 +54,9 @@ class LiveChatHelper
         }
 
         $this->results = $this->api->agents->getArchives($params);
-        // echo('<pre>');var_dump($this->results); die;
+        logActivity('Chat manager running. Date From: '.$filters['from'] .'. Chats count: '.$_SESSION['cmcount'].'/'.$this->results->found_chats);
         $this->runParseStore();
+
         if ($this->results->next_page_id) {
             $this->readRecentChats([], $this->results->next_page_id);
         }
