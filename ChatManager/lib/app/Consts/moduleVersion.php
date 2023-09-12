@@ -4,5 +4,5 @@ namespace WHMCS\Module\Addon\ChatManager\app\Consts;
 
 class moduleVersion
 {
-    const VERSION = '1.0.23';
+    const VERSION = '1.0.26';
 }

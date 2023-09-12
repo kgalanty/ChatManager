@@ -1,10 +1,12 @@
 export default {
     data() {
         return {
-            packageversion: "1.0.23",
-            build: "2022-01-17 17:49 UTC",
+            packageversion: "1.0.26",
+            build: "2023-09-12 12:22 UTC",
             logmessage: `
             <ul>
+            <li><strong>1.0.24 & 1.0.25 & 1.0.26</strong></li>
+            <li>- Cron & parser adjustments & fixes</li>
             <li><strong>1.0.23</strong></li>
             <li>- Fixed filtering when moving to stats and back to chat list</li>
             <li>- Fixed incorrect order id becoming 0 when accepting invoice id suggestion</li>
