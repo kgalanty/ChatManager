@@ -50,14 +50,14 @@ class LiveChatParsers
 
                 $customer = LiveChatHelper::getUserById($user, $chatitem->users);
 
-                echo('<pre>'); var_dump(MatchClient::execute(
+                var_dump(MatchClient::execute(
                     ['chatitem' => $chatitem, 'customer' => $customer]
                 ));
 
                 $insertRow = array_merge($insertRow, MatchClient::execute(
                     ['chatitem' => $chatitem, 'customer' => $customer]
                 ));
-                echo('<pre>'); var_dump($insertRow); die;
+                var_dump($insertRow); die;
                 $_SESSION['cmcount'] += 1;
                 $id = DB::table(DBTables::Threads)->insertGetId($insertRow);
 

@@ -19,6 +19,6 @@ class MatchClient
         } elseif ($params['chatitem']->users[0]->type == 'customer') {
             return ['name' => $params['chatitem']->users[0]->name, 'email' => $params['chatitem']->users[0]->email];
         }
-        return;
+        return [];
     }
 }
